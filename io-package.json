@@ -1,0 +1,187 @@
+{
+    "common": {
+        "name": "synology",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial adapter",
+                "de": "Initiale Version",
+                "ru": "Первоначальный адаптер",
+                "pt": "Versão inicial",
+                "fr": "Version initiale",
+                "nl": "Eerste release"
+            }
+        },
+        "title": "Synology NAS adapter",
+        "desc": {
+            "en": "Synology NAS adapter",
+            "de": "Synology NAS adapter",
+            "ru": "Synology NAS драйвер",
+            "pt": "Synology NAS adapter",
+            "fr": "Synology NAS adapter",
+            "nl": "Synology NAS adapter"
+        },
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "synology.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
+        "keywords": ["synology NAS control"],
+        "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
+        "loglevel": "info",
+        "type": "hardware"
+    },
+    "native": {
+        "host":     "localhost",
+        "port":     "5000",
+        "login":    "admin",
+        "password": "",
+        "https":    false,
+        "version":  "6.0.2"
+    },
+    "objects": [
+
+    ],
+    "instanceObjects": [
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "If connected to Synology",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "reboot",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Reboot NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "shutdown",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Shutdown NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "DiskStationManager.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DiskStationManager",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "FileStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "FileStation",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "DownloadStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DownloadStation",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "VideoStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "VideoStation",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "VideoStation_DTV.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "VideoStation_DTV",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "SurveillanceStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "SurveillanceStation",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        }
+    ]
+}

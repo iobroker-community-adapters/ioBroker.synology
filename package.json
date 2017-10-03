@@ -1,0 +1,46 @@
+{
+  "name": "iobroker.synology",
+  "version": "0.0.1",
+  "description": "ioBroker synology Adapter",
+  "author": {
+    "name": "instalator",
+    "email": "vvvalt@mail.ru"
+  },
+  "contributors": [
+    {
+      "name": "instalator",
+      "email": "vvvalt@mail.ru"
+    }
+  ],
+  "homepage": "https://github.com/instalator/ioBroker.synology",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "synology",
+    "NAS"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/instalator/ioBroker.synology"
+  },
+  "dependencies": {
+    "syno": "*"
+  },
+  "devDependencies": {
+      "grunt": "^0.4.5",
+      "grunt-replace": "^0.9.3",
+      "grunt-contrib-jshint": "^0.11.2",
+      "grunt-jscs": "^2.0.0",
+      "grunt-http": "^1.6.0",
+      "mocha": "^2.3.4",
+      "chai": "^3.4.1"
+  },
+  "main": "main.js",
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha"
+  },
+  "bugs": {
+    "url": "https://github.com/instalator/ioBroker.synology/issues"
+  },
+  "readmeFilename": "README.md"
+}

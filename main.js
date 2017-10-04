@@ -41,12 +41,12 @@ var api = {
 };
 var params, poll_time = 5000, _poll;
 var syno = new Syno({
-    host: /*adapter.config.host ? adapter.config.host: */'192.168.1.19',
-    port: /*adapter.config.port ? adapter.config.port: */'5000',
-    account: /*adapter.config.login ? adapter.config.login: */'admin2',
-    passwd: /*adapter.config.password ? adapter.config.password: */'qwerty',
-    protocol: /*adapter.config.https ? 'https' : */'http',
-    apiVersion: /*adapter.config.version ? adapter.config.version: */'6.0.2'
+    host: adapter.config.host ? adapter.config.host: '192.168.1.19',
+    port: adapter.config.port ? adapter.config.port: '5000',
+    account: adapter.config.login ? adapter.config.login: 'admin2',
+    passwd: adapter.config.password ? adapter.config.password: 'qwerty',
+    protocol: adapter.config.https ? 'https' : 'http',
+    apiVersion: adapter.config.version ? adapter.config.version: '6.0.2'
 });
 
 adapter.on('unload', function (callback) {

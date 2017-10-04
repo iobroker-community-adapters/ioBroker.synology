@@ -3,12 +3,10 @@
 var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 var adapter = utils.adapter('synology');
 var Syno = require('syno');
+const assert = require('assert');
 var states = {
     'DiskStationManager':    {
-        'info': {},
-        'resources':{},
-        'system_status':{}
-
+        'info': {}
     },
     'FileStation':           {
         'info': {}
@@ -20,8 +18,17 @@ var states = {
     'SurveillanceStation':   {}
 };
 var old_states = {
-    'dsm_info': {},
-    'fs_info': {}
+    'DiskStationManager':    {
+        'info': {}
+    },
+    'FileStation':           {
+        'info': {}
+    },
+    'DownloadStation':       {},
+    'AudioStation':          {},
+    'VideoStation':          {},
+    'VideoStation_DTV':      {},
+    'SurveillanceStation':   {}
 };
 var api = {
    'DiskStationManager':  { name: 'dsm',  installed: true  },
@@ -107,6 +114,7 @@ function main() {
     getPollingData(function (){
         adapter.setState('info.connection', true, true);
         getDSMInfo();
+
         if(api.FileStation.installed){
             getFSInfo();
         }
@@ -121,6 +129,7 @@ function polling(){
         function (){
             getSystemUtilization(function (){
                 polling();
+                setStates();
                 /*if(count > 5){
                     count = 0;
                     getPollingData();
@@ -130,11 +139,19 @@ function polling(){
 }
 
 function getSystemUtilization(cb){
-    send('dsm', 'getSystemUtilization', function (res){
-        states.DiskStationManager.resources = res;
-        send('dsm', 'getSystemStatus', function (res){
-            states.DiskStationManager.system_status = res;
-            if(cb){cb();}
+    getDSMInfo(function (){
+        send('dsm', 'getSystemUtilization', function (res){
+            //states.DiskStationManager.resources = res;
+            states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
+            states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
+            states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
+            send('dsm', 'getSystemStatus', function (res){
+                //states.DiskStationManager.system_status = res;
+                states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
+                states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
+                states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
+                if(cb){cb();}
+            });
         });
     });
 }
@@ -155,11 +172,12 @@ function getFSInfo(){
         });
     });
 }
-function getDSMInfo(){
+function getDSMInfo(cb){
     send('dsm', 'getInfo', function (res){
         Object.keys(res).forEach(function(k) {
             states.DiskStationManager.info[k] = res[k];
         });
+        if(cb){cb();}
     });
 }
 
@@ -177,6 +195,44 @@ function send(api, method, params, cb){
         }
         if(cb && !err){
             cb(data);
+        }
+    });
+}
+
+function setStates(){
+    var ids = '';
+    Object.keys(states).forEach(function(_api) {
+        Object.keys(states[_api]).forEach(function(_type) {
+            Object.keys(states[_api][_type]).forEach(function(key) {
+                if (states[_api][_type][key] !== old_states[_api][_type][key]){
+                    old_states[_api][_type][key] = states[_api][_type][key];
+                    ids = _api + '.' + _type + '.' + key;
+                    setObject(ids, states[_api][_type][key]);
+                }
+            });
+        });
+    });
+}
+
+function setObject(name, val){
+    var type = 'string';
+    var role = 'state';
+    adapter.log.debug('setObject ' + JSON.stringify(name));
+    adapter.getState(name, function (err, state){
+        if ((err || !state)){
+            adapter.setObject(name, {
+                type:   'state',
+                common: {
+                    name: name,
+                    desc: name,
+                    type: type,
+                    role: role
+                },
+                native: {}
+            });
+            adapter.setState(name, {val: val, ack: true});
+        } else {
+            adapter.setState(name, {val: val, ack: true});
         }
     });
 }

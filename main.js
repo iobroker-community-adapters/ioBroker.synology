@@ -3,7 +3,7 @@
 var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 var adapter = utils.adapter('synology');
 var Syno = require('syno');
-const assert = require('assert');
+
 var states = {
     'DiskStationManager':    {
         'info': {}
@@ -40,14 +40,7 @@ var api = {
    'SurveillanceStation': { name: 'ss',   installed: false }
 };
 var params, poll_time = 5000, _poll;
-var syno = new Syno({
-    host: adapter.config.host ? adapter.config.host: '192.168.1.19',
-    port: adapter.config.port ? adapter.config.port: '5000',
-    account: adapter.config.login ? adapter.config.login: 'admin2',
-    passwd: adapter.config.password ? adapter.config.password: 'qwerty',
-    protocol: adapter.config.https ? 'https' : 'http',
-    apiVersion: adapter.config.version ? adapter.config.version: '6.0.2'
-});
+var syno;
 
 adapter.on('unload', function (callback) {
     try {
@@ -106,6 +99,14 @@ adapter.on('message', function (obj) {
 
 adapter.on('ready', function () {
     adapter.subscribeStates('*');
+    syno = new Syno({
+        host: adapter.config.host ? adapter.config.host: '192.168.1.19',
+        port: adapter.config.port ? adapter.config.port: '5000',
+        account: adapter.config.login ? adapter.config.login: 'admin2',
+        passwd: adapter.config.password ? adapter.config.password: 'qwerty',
+        protocol: adapter.config.https ? 'https' : 'http',
+        apiVersion: adapter.config.version ? adapter.config.version: '6.0.2'
+    });
     main();
 });
 var count = 0;

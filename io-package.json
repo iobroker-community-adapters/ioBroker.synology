@@ -24,7 +24,7 @@
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "synology.png",
-        "enabled": true,
+        "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
         "keywords": ["synology NAS control"],
         "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",

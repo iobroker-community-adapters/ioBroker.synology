@@ -1,7 +1,7 @@
 {
   "name": "iobroker.synology",
-  "version": "0.0.1",
-  "description": "ioBroker synology Adapter",
+  "version": "0.0.2",
+  "description": "Info and control your NAS Synology",
   "author": {
     "name": "instalator",
     "email": "vvvalt@mail.ru"

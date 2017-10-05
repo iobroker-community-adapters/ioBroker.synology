@@ -7,6 +7,7 @@ ioBroker Synology adapter
 
 [![NPM](https://nodei.co/npm/iobroker.synology.png?downloads=true)](https://nodei.co/npm/iobroker.synology/)
 
+Драйвер позваляет получать данные и управлять вашим NAS сервером фирмы Synology.
 
 ## Changelog
 

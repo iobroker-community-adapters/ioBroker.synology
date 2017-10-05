@@ -5,39 +5,31 @@ var adapter = utils.adapter('synology');
 var Syno = require('syno');
 
 var states = {
-    'DiskStationManager':    {
-        'info': {}
-    },
-    'FileStation':           {
-        'info': {}
-    },
-    'DownloadStation':       {},
-    'AudioStation':          {},
-    'VideoStation':          {},
-    'VideoStation_DTV':      {},
-    'SurveillanceStation':   {}
+    'DiskStationManager':    {'info': {}  },
+    'FileStation':           {'info': {}  },
+    'DownloadStation':       {'info': {}  },
+    'AudioStation':          {'info': {}  },
+    'VideoStation':          {'info': {}  },
+    'VideoStation_DTV':      {'info': {}  },
+    'SurveillanceStation':   {'info': {}  }
 };
 var old_states = {
-    'DiskStationManager':    {
-        'info': {}
-    },
-    'FileStation':           {
-        'info': {}
-    },
-    'DownloadStation':       {},
-    'AudioStation':          {},
-    'VideoStation':          {},
-    'VideoStation_DTV':      {},
-    'SurveillanceStation':   {}
+    'DiskStationManager':    {'info': {}  },
+    'FileStation':           {'info': {}  },
+    'DownloadStation':       {'info': {}  },
+    'AudioStation':          {'info': {}  },
+    'VideoStation':          {'info': {}  },
+    'VideoStation_DTV':      {'info': {}  },
+    'SurveillanceStation':   {'info': {}  }
 };
 var api = {
-   'DiskStationManager':  { name: 'dsm',  installed: true  },
-   'FileStation':         { name: 'fs',   installed: false },
-   'DownloadStation':     { name: 'dl',   installed: false },
-   'AudioStation':        { name: 'as',   installed: false },
-   'VideoStation':        { name: 'vs',   installed: false },
-   'VideoStation_DTV':    { name: 'dt',   installed: false },
-   'SurveillanceStation': { name: 'ss',   installed: false }
+   'DiskStationManager':  { name: 'dsm',  polldata: [],  installed: true  },
+   'FileStation':         { name: 'fs',   polldata: [],  installed: false },
+   'DownloadStation':     { name: 'dl',   polldata: [],  installed: false },
+   'AudioStation':        { name: 'as',   polldata: [],  installed: false },
+   'VideoStation':        { name: 'vs',   polldata: [],  installed: false },
+   'VideoStation_DTV':    { name: 'dt',   polldata: [],  installed: false },
+   'SurveillanceStation': { name: 'ss',   polldata: [],  installed: false }
 };
 var params, poll_time = 5000, _poll;
 var syno;
@@ -50,11 +42,9 @@ adapter.on('unload', function (callback) {
         callback();
     }
 });
-
 adapter.on('objectChange', function (id, obj) {
     adapter.log.info('objectChange ' + id + ' ' + JSON.stringify(obj));
 });
-
 adapter.on('stateChange', function (id, state) {
     if (state && !state.ack){
         adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
@@ -87,7 +77,6 @@ adapter.on('stateChange', function (id, state) {
         }
     }
 });
-
 adapter.on('message', function (obj) {
     if (typeof obj == 'object' && obj.message) {
         if (obj.command == 'send') {
@@ -96,7 +85,6 @@ adapter.on('message', function (obj) {
         }
     }
 });
-
 adapter.on('ready', function () {
     adapter.subscribeStates('*');
     syno = new Syno({
@@ -109,38 +97,26 @@ adapter.on('ready', function () {
     });
     main();
 });
-var count = 0;
+
 function main() {
     clearTimeout(_poll);
-    getPollingData(function (){
+    getInstallingPackets(function (){
         adapter.setState('info.connection', true, true);
-        getDSMInfo();
-
-        if(api.FileStation.installed){
-            getFSInfo();
-        }
+        Object.keys(api).forEach(function(k) {
+            if(api[k].installed){
+                getInfo(k);
+            }
+        });
         polling();
     });
 }
 
-function polling(){
-    clearTimeout(_poll);
-    //count++;
-    _poll = setTimeout(
-        function (){
-            getSystemUtilization(function (){
-                polling();
-                setStates();
-                /*if(count > 5){
-                    count = 0;
-                    getPollingData();
-                }*/
-            });
-        }, poll_time);
-}
-
-function getSystemUtilization(cb){
-    getDSMInfo(function (){
+/////////////////* DiskStationManager */////////////////////////
+function getDSMInfo(cb){
+    send('dsm', 'getInfo', function (res){
+        Object.keys(res).forEach(function(k) {
+            states.DiskStationManager.info[k] = res[k];
+        });
         send('dsm', 'getSystemUtilization', function (res){
             //states.DiskStationManager.resources = res;
             states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
@@ -156,7 +132,31 @@ function getSystemUtilization(cb){
         });
     });
 }
-function getPollingData(cb){
+
+///////////////////* FileStation */////////////////////////////
+
+///////////////////* AudioStation *////////////////////////////
+
+///////////////////* DownloadStation */////////////////////////
+
+///////////////////* VideoStation *////////////////////////////
+
+///////////////////* VideoStation_DTV *////////////////////////
+
+///////////////////* SurveillanceStation */////////////////////
+
+
+/*************************************************************/
+function polling(){
+    clearTimeout(_poll);
+    _poll = setTimeout(function (){
+        getDSMInfo(function (){
+            polling();
+            setStates();
+        });
+    }, poll_time);
+}
+function getInstallingPackets(cb){
     send('dsm', 'getPollingData', function (res){
         Object.keys(res.packages).forEach(function(k) {
             if(api[k]){
@@ -166,23 +166,13 @@ function getPollingData(cb){
         if(cb){cb();}
     });
 }
-function getFSInfo(){
-    send('fs', 'getInfo', function (res){
+function getInfo(key){
+    send(api[key].name, 'getInfo', function (res){
         Object.keys(res).forEach(function(k) {
-            states.FileStation.info[k] = res[k];
+            states[key].info[k] = res[k];
         });
     });
 }
-function getDSMInfo(cb){
-    send('dsm', 'getInfo', function (res){
-        Object.keys(res).forEach(function(k) {
-            states.DiskStationManager.info[k] = res[k];
-        });
-        if(cb){cb();}
-    });
-}
-
-//////////////////////////////////////////////////////////////////////////////////
 function send(api, method, params, cb){
     if(typeof params == 'function'){
         cb = params;
@@ -199,12 +189,14 @@ function send(api, method, params, cb){
         }
     });
 }
-
 function setStates(){
     var ids = '';
     Object.keys(states).forEach(function(_api) {
         Object.keys(states[_api]).forEach(function(_type) {
             Object.keys(states[_api][_type]).forEach(function(key) {
+                if(typeof states[_api][_type][key] == 'object'){
+                    states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
+                }
                 if (states[_api][_type][key] !== old_states[_api][_type][key]){
                     old_states[_api][_type][key] = states[_api][_type][key];
                     ids = _api + '.' + _type + '.' + key;
@@ -214,7 +206,6 @@ function setStates(){
         });
     });
 }
-
 function setObject(name, val){
     var type = 'string';
     var role = 'state';
@@ -261,6 +252,10 @@ function error(err){
                 err = '119';
             case 400:
                 err = 'Error connection';
+            case 450:
+                err = '450';
+            case 500:
+                err = '500'; //controlRemotePlayer
             /*default:
                 return 'Unknown error';*/
         }
@@ -270,8 +265,6 @@ function error(err){
         setTimeout(function (){
                 polling();
         }, poll_time);
-
     }
     adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
-    //
 }

@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "synology",
-        "version": "0.0.1",
+        "version": "0.0.2",
         "news": {
             "0.0.1": {
                 "en": "initial adapter",
@@ -14,12 +14,12 @@
         },
         "title": "Synology NAS adapter",
         "desc": {
-            "en": "Synology NAS adapter",
-            "de": "Synology NAS adapter",
-            "ru": "Synology NAS драйвер",
-            "pt": "Synology NAS adapter",
-            "fr": "Synology NAS adapter",
-            "nl": "Synology NAS adapter"
+            "en": "Info and control your NAS Synology",
+            "de": "Info and control your NAS Synology",
+            "ru": "Info and control your NAS Synology",
+            "pt": "Info and control your NAS Synology",
+            "fr": "Info and control your NAS Synology",
+            "nl": "Info and control your NAS Synology"
         },
         "platform": "Javascript/Node.js",
         "mode": "daemon",
@@ -58,7 +58,7 @@
             }
         },
         {
-            "_id": "reboot",
+            "_id": "commands.reboot",
             "type": "state",
             "common": {
                 "role": "button",
@@ -72,7 +72,7 @@
             }
         },
         {
-            "_id": "shutdown",
+            "_id": "commands.shutdown",
             "type": "state",
             "common": {
                 "role": "button",

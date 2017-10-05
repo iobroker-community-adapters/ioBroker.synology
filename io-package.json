@@ -3,7 +3,7 @@
         "name": "synology",
         "version": "0.0.2",
         "news": {
-            "0.0.1": {
+            "0.0.2": {
                 "en": "initial adapter",
                 "de": "Initiale Version",
                 "ru": "Первоначальный адаптер",

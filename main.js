@@ -31,7 +31,7 @@ var api = {
    'VideoStation_DTV':    { name: 'dt',   polldata: [],  installed: false },
    'SurveillanceStation': { name: 'ss',   polldata: [],  installed: false }
 };
-var /*params,*/ poll_time = 5000, _poll;
+var /*params,*/ poll_time = 5000, _poll, remote_players = [];
 var syno;
 
 adapter.on('unload', function (callback) {
@@ -67,7 +67,10 @@ adapter.on('stateChange', function (id, state) {
             var a = val.split(',');
             PlayFolder(a[0], a[1]);
         } else if (command == 'stop' || command == 'next' || command == 'prev'){
-            PlayControl(command);  /*  /AS  */
+            PlayControl(command);
+        }  else if (command == 'selected_player'){
+
+            current_player = val;  /*  /AS  */
         } else {
             if (api[name]){
                 if (api[name].installed){
@@ -144,14 +147,18 @@ function getDSMInfo(cb){
         });
         send('dsm', 'getSystemUtilization', function (res){
             //states.DiskStationManager.resources = res;
-            states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
-            states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
-            states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
+            if(res){
+                states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
+                states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
+                states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
+            }
             send('dsm', 'getSystemStatus', function (res){
                 //states.DiskStationManager.system_status = res;
-                states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
-                states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
-                states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
+                if(res){
+                    states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
+                    states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
+                    states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
+                }
                 if(cb){cb();}
             });
         });
@@ -166,6 +173,14 @@ function getAudio(cb){
     send('as', 'listRemotePlayers', function (res){
         if(res){
             states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
+            /*
+            arr.forEach(function (k, i){
+                remote_players[i] = {
+                    "id": arr[i].id,
+                    "name": ""
+                }
+            });
+            */
         }
         if(cb){cb();}
     });
@@ -404,33 +419,49 @@ function setObject(name, val){
     });
 }
 
-function error(err){
-    var code = err.code;
+function error(e){
+    var code = e.code;
+    var err;
         switch (code) {
             case 100:
                 err = '100';
+                break;
             case 101:
                 err = 'No parameter of API, method or version';
+                break;
             case 102:
                 err = 'The requested API does not exist';
+                break;
             case 103:
                 err = 'The requested method does not exist';
+                break;
             case 104:
                 err = 'The requested version does not support the functionality';
+                break;
             case 105:
                 err = 'The logged in session does not have permission';
+                break;
             case 106:
                 err = 'Session timeout';
+                break;
             case 107:
                 err = 'Session interrupted by duplicate login';
+                break;
             case 119:
                 err = '119';
+                break;
             case 400:
                 err = 'Error connection';
+                break;
+            case 405:
+                err = '{"error":{"code":405},"success":false}';
+                break;
             case 450:
                 err = '450';
+                break;
             case 500:
                 err = '500'; //controlRemotePlayer
+                break;
             /*default:
                 return 'Unknown error';*/
         }

@@ -8,7 +8,7 @@ var states = {
     'DiskStationManager':    {'info': {}  },
     'FileStation':           {'info': {}  },
     'DownloadStation':       {'info': {}  },
-    'AudioStation':          {'info': {}  },
+    'AudioStation':          {'info': {}, 'Browser': ''  },
     'VideoStation':          {'info': {}  },
     'VideoStation_DTV':      {'info': {}  },
     'SurveillanceStation':   {'info': {}  }
@@ -17,7 +17,7 @@ var old_states = {
     'DiskStationManager':    {'info': {}  },
     'FileStation':           {'info': {}  },
     'DownloadStation':       {'info': {}  },
-    'AudioStation':          {'info': {}  },
+    'AudioStation':          {'info': {}, 'Browser': ''  },
     'VideoStation':          {'info': {}  },
     'VideoStation_DTV':      {'info': {}  },
     'SurveillanceStation':   {'info': {}  }
@@ -31,7 +31,7 @@ var api = {
    'VideoStation_DTV':    { name: 'dt',   polldata: [],  installed: false },
    'SurveillanceStation': { name: 'ss',   polldata: [],  installed: false }
 };
-var params, poll_time = 5000, _poll;
+var /*params,*/ poll_time = 5000, _poll;
 var syno;
 
 adapter.on('unload', function (callback) {
@@ -61,19 +61,44 @@ adapter.on('stateChange', function (id, state) {
             val = 'shutdownSystem';
         }
 
-        if(api[name]){
-            //TODO params
-            if(~val.indexOf(',')){
-                var arr = val.split(',');
-                params = [arr[1]];
-                val = arr[0];
-            }
-            send(api[name]['name'], val, params ? params : null, function (res){
-                if(res){
-                    var id = name +'.sendMethod';
-                    adapter.setState(id, {val: JSON.stringify(res), ack: true});
+        if(command == 'Browser'){  /*  /AS  */
+            Browser(val);
+        } else if (command == 'play_folder'){
+            var a = val.split(',');
+            PlayFolder(a[0], a[1]);
+        } else if (command == 'stop'){
+            Playstop(val);  /*  /AS  */
+        } else {
+            if (api[name]){
+                if (api[name].installed){
+                    //{"method":"getStatusRemotePlayer", "params":{"id": "uuid:90290a7d-f6cf-f783-84d9-30f315a97db9"}}
+                    var json, param;
+                    try {
+                        json = JSON.parse(val);
+                        if (!json.method) {
+                            throw new SyntaxError("Error command");
+                        }
+                        else {
+                            val = json.method;
+                            if(typeof json.params === 'object'){
+                                param = json.params;
+                            } else {
+                                param = {};
+                            }
+                            send(api[name]['name'], val, param, function (res){
+                                if (res){
+                                    var id = name + '.sendMethod';
+                                    adapter.setState(id, {val: JSON.stringify(res), ack: true});
+                                }
+                            });
+                        }
+                    } catch (err) {
+                        adapter.log.error('Error JSON parse command ' + JSON.stringify(err));
+                    }
+                } else {
+                    adapter.log.error(name + ' Not installed!');
                 }
-            });
+            }
         }
     }
 });
@@ -136,6 +161,139 @@ function getDSMInfo(cb){
 ///////////////////* FileStation */////////////////////////////
 
 ///////////////////* AudioStation *////////////////////////////
+var current_player = '';
+function getAudio(cb){
+    send('as', 'listRemotePlayers', function (res){
+        states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
+        if(cb){cb();}
+    });
+}
+function Browser(id, cb){
+    var param = {};
+    if(id && id !== '/'){
+        param = {id: id};
+    }
+    send('as', 'listFolders', param, function (res){
+        var arr = [];
+        res.items.forEach(function(k, i) {
+            var filetype = 'file';
+            if(res.items[i].type == 'folder'){
+                filetype = 'directory';
+            }
+            arr.push({
+                "id":       res.items[i].id,
+                "file":     res.items[i].path,
+                "filetype": filetype,
+                "title":    res.items[i].title
+            });
+        });
+        states.AudioStation.Browser = JSON.stringify(arr);
+        if(cb){cb();}
+    });
+}
+function Playstop(id){
+    if (!id){
+        id = current_player;
+    }
+    var param = {};
+    if(id){
+        param = {
+            id: id, //uuid:3ab2b166-fcbe-4761-9b48-cb60beee73ca
+            action: 'stop'
+        };
+        send('as', 'controlRemotePlayer', param, function (res){
+            current_player = '';
+            if(cb){cb();}
+        });
+    }
+}
+function PlayFolder(id, folder, limit, cb){
+    current_player = id;
+    var param = {};
+    if(id){ //uuid:2eff7682-632d-6283-c2cc-29e985e5955c
+        param = {
+            id: id,
+            library:'shared',
+            offset:0,
+            limit:1,
+            play: true,
+            containers_json:[{"type":"folder", "id": folder, "recursive":true, "sort_by":"title", "sort_direction":"ASC"}]
+        };
+        send('as', 'updatePlayListRemotePlayer', param, function (res){
+        });
+        param = {
+            id: id,
+            action: 'play'
+        };
+        send('as', 'controlRemotePlayer', param, function (res){
+        });
+
+    }
+}
+function PlayTrack(id, track, cb){
+    current_player = id;
+    var param = {};
+    if(id){ //uuid:bab0037b-3c03-7bb9-4d0a-7b093cb9358c
+        param = {
+            id: id,
+            library:'shared',
+            offset:0,
+            limit:1,
+            play:true,
+            songs: track,
+            containers_json:[]
+        };
+        send('as', 'updatePlayListRemotePlayer', param, function (res){
+        });
+        param = {
+            id: id,
+            action: 'play'
+        };
+        send('as', 'controlRemotePlayer', param, function (res){
+        });
+    }
+}
+function getStatusRemotePlayer(id, cb){
+    var param = {};
+    if(id){
+        param = {
+            id: id
+        };
+        send('as', 'getStatusRemotePlayerStatus', param, function (res){
+            //states.AudioStation.StatusRemotePlayer = JSON.stringify(res);
+            states.AudioStation.info.state_playing = res.state;
+            states.AudioStation.info.position = res.position;
+            states.AudioStation.info.playlist_total = res.playlist_total;
+            states.AudioStation.info.volume = res.volume;
+            states.AudioStation.info.song = JSON.stringify(res.song);
+            if(res.state == 'playing' && res.song){
+                send('as', 'getPlayListRemotePlayer', param, function (res){
+                    var playlist = [];
+                    var arr = res.songs;
+                    arr.forEach(function (k, i){
+                        playlist[i] = {
+                            "id": arr[i].id,
+                            "artist": "",
+                            "album": "",
+                            "bitrate":0,
+                            "title": arr[i].title,
+                            "file": arr[i].path,
+                            "genre": "",
+                            "year": 0,
+                            "len": "00:00",
+                            "rating": "",
+                            "cover": ""
+                        }
+                    });
+                    states.AudioStation.info.playlist = JSON.stringify(playlist);
+                });
+            } else {
+                current_player = '';
+            }
+            if(cb){cb();}
+        });
+    }
+}
 
 ///////////////////* DownloadStation */////////////////////////
 
@@ -151,8 +309,15 @@ function polling(){
     clearTimeout(_poll);
     _poll = setTimeout(function (){
         getDSMInfo(function (){
-            polling();
-            setStates();
+            getAudio(function (){
+                polling();
+                setStates();
+            });
+            if(api.AudioStation.installed){
+                if(current_player){
+                    getStatusRemotePlayer(current_player);
+                }
+            }
         });
     }, poll_time);
 }
@@ -182,6 +347,7 @@ function send(api, method, params, cb){
         if(!err){
             adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
         } else{
+            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
             error(err)
         }
         if(cb && !err){
@@ -193,16 +359,24 @@ function setStates(){
     var ids = '';
     Object.keys(states).forEach(function(_api) {
         Object.keys(states[_api]).forEach(function(_type) {
-            Object.keys(states[_api][_type]).forEach(function(key) {
-                if(typeof states[_api][_type][key] == 'object'){
-                    states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
+            if(typeof states[_api][_type] == 'object'){
+                Object.keys(states[_api][_type]).forEach(function(key) {
+                    if(typeof states[_api][_type][key] == 'object'){
+                        states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
+                    }
+                    if (states[_api][_type][key] !== old_states[_api][_type][key]){
+                        old_states[_api][_type][key] = states[_api][_type][key];
+                        ids = _api + '.' + _type + '.' + key;
+                        setObject(ids, states[_api][_type][key]);
+                    }
+                });
+            } else {
+                if (states[_api][_type] !== old_states[_api][_type]){
+                    old_states[_api][_type] = states[_api][_type];
+                    ids = _api + '.' + _type;
+                    setObject(ids, states[_api][_type]);
                 }
-                if (states[_api][_type][key] !== old_states[_api][_type][key]){
-                    old_states[_api][_type][key] = states[_api][_type][key];
-                    ids = _api + '.' + _type + '.' + key;
-                    setObject(ids, states[_api][_type][key]);
-                }
-            });
+            }
         });
     });
 }

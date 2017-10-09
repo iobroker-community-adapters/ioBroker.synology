@@ -91,7 +91,7 @@
             "common": {
                 "role": "state",
                 "name": "DiskStationManager",
-                "type": "string",
+                "type": "object",
                 "read": true,
                 "write": true,
                 "def": false
@@ -105,7 +105,7 @@
             "common": {
                 "role": "state",
                 "name": "FileStation",
-                "type": "string",
+                "type": "object",
                 "read": true,
                 "write": true,
                 "def": false
@@ -119,7 +119,7 @@
             "common": {
                 "role": "state",
                 "name": "DownloadStation",
-                "type": "string",
+                "type": "object",
                 "read": true,
                 "write": true,
                 "def": false
@@ -133,7 +133,7 @@
             "common": {
                 "role": "state",
                 "name": "AudioStation",
-                "type": "string",
+                "type": "object",
                 "read": true,
                 "write": true,
                 "def": false
@@ -147,7 +147,7 @@
             "common": {
                 "role": "state",
                 "name": "VideoStation",
-                "type": "string",
+                "type": "object",
                 "read": true,
                 "write": true,
                 "def": false
@@ -161,7 +161,7 @@
             "common": {
                 "role": "state",
                 "name": "VideoStation_DTV",
-                "type": "string",
+                "type": "object",
                 "read": true,
                 "write": true,
                 "def": false
@@ -175,6 +175,62 @@
             "common": {
                 "role": "state",
                 "name": "SurveillanceStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.Browser",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation Browser Files",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.play_folder",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation play_folder",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.stop",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation stop",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.selected_player",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation selected player id",
                 "type": "string",
                 "read": true,
                 "write": true,

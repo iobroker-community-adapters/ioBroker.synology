@@ -212,6 +212,20 @@
             }
         },
         {
+            "_id": "AudioStation.play_track",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation play_track",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
             "_id": "AudioStation.stop",
             "type": "state",
             "common": {

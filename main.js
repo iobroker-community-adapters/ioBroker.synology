@@ -66,6 +66,9 @@ adapter.on('stateChange', function (id, state) {
         } else if (command == 'play_folder'){
             var a = val.split(',');
             PlayFolder(a[0], a[1]);
+        } else if (command == 'play_track'){
+                var s = val.split(',');
+                PlayTrack(s[0], s[1]);
         } else if (command == 'stop' || command == 'next' || command == 'prev'){
             PlayControl(command);
         }  else if (command == 'selected_player'){

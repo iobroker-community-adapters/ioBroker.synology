@@ -215,10 +215,38 @@
             "_id": "AudioStation.stop",
             "type": "state",
             "common": {
-                "role": "state",
+                "role": "button",
                 "name": "AudioStation stop",
-                "type": "string",
-                "read": true,
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.next",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "AudioStation next",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.prev",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "AudioStation prev",
+                "type": "boolean",
+                "read": false,
                 "write": true,
                 "def": false
             },

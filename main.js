@@ -66,8 +66,8 @@ adapter.on('stateChange', function (id, state) {
         } else if (command == 'play_folder'){
             var a = val.split(',');
             PlayFolder(a[0], a[1]);
-        } else if (command == 'stop'){
-            Playstop(val);  /*  /AS  */
+        } else if (command == 'stop' || command == 'next' || command == 'prev'){
+            PlayControl(command);  /*  /AS  */
         } else {
             if (api[name]){
                 if (api[name].installed){
@@ -164,7 +164,9 @@ function getDSMInfo(cb){
 var current_player = '';
 function getAudio(cb){
     send('as', 'listRemotePlayers', function (res){
-        states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
+        if(res){
+            states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
+        }
         if(cb){cb();}
     });
 }
@@ -191,15 +193,13 @@ function Browser(id, cb){
         if(cb){cb();}
     });
 }
-function Playstop(id){
-    if (!id){
-        id = current_player;
-    }
+function PlayControl(cmd){
+    var id = current_player; //TODO получить текущий плеер
     var param = {};
     if(id){
         param = {
             id: id, //uuid:3ab2b166-fcbe-4761-9b48-cb60beee73ca
-            action: 'stop'
+            action: cmd
         };
         send('as', 'controlRemotePlayer', param, function (res){
             current_player = '';
@@ -207,6 +207,7 @@ function Playstop(id){
         });
     }
 }
+
 function PlayFolder(id, folder, limit, cb){
     current_player = id;
     var param = {};
@@ -348,9 +349,9 @@ function send(api, method, params, cb){
             adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
         } else{
             adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
-            error(err)
+            error(err);
         }
-        if(cb && !err){
+        if(cb){
             cb(data);
         }
     });

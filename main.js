@@ -138,8 +138,30 @@ function main() {
                 getInfo(k);
             }
         });
+        if(api.SurveillanceStation.installed){
+            listCameras();
+        }
         polling();
     });
+}
+function polling(){
+    clearTimeout(_poll);
+    _poll = setTimeout(function (){
+        getDSMInfo(function (){
+            getAudio(function (){
+                polling();
+                setStates();
+            });
+            if(api.AudioStation.installed){
+                if(current_player){
+                    getStatusRemotePlayer(current_player);
+                }
+            }
+            if(api.SurveillanceStation.installed){
+                listEvents();
+            }
+        });
+    }, poll_time);
 }
 
 /////////////////* DiskStationManager */////////////////////////
@@ -321,40 +343,96 @@ function getStatusRemotePlayer(id, cb){
 ///////////////////* VideoStation_DTV *////////////////////////
 
 ///////////////////* SurveillanceStation */////////////////////
+function listEvents(cb){
+    //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
+    send('ss', 'listEvents', function (res){
+        if(res){
+            states.SurveillanceStation.events = JSON.stringify(res.events);
+        }
+        if(cb){cb();}
+    });
+}
+function listCameras(cb){
+    //{"cameras":[],"delcam":[],"existCamMntTypeMap":null,"keyTotalCnt":2,"keyUsedCnt":0,"timestamp":"1507648326","total":0}
+    send('ss', 'listCameras', function (res){
+        if(res){
+            states.SurveillanceStation.cameras = JSON.stringify(res.cameras);
+        }
+        if(cb){cb();}
+    });
+}
+function getSnapshotCamera(camid, cb){
+    //var decodedImage = new Buffer(encodedImage, 'base64').toString('binary');
+    if(camid){
+        var param = {
+            cameraId: camid
+        };
+        send('ss', 'getSnapshotCamera', param, function (res){
+                if (res){
+
+                }
+                if (cb){cb();}
+            });
+    }
+}
+function listSnapShots(cb){
+    //{"auInfo":{"cms":null,"deleteByRecordId":{"data":[]},"serverAction":{"0":null,"1":null,"2":null,"3":null,"4":null,"5":null},"timestamp":1507218967,"volumeAction":null},"data":[],"recCntData":{"recCnt":{"date":{"-1":0}},"total":0},"timestamp":"1507650252","total":0}
+    send('ss', 'listSnapShots', function (res){
+        if(res){
+            states.SurveillanceStation.snapshots_list = JSON.stringify(res.data);
+        }
+        if(cb){cb();}
+    });
+}
+function loadSnapShot(id, cb){
+    if(id){
+        var param = {
+            id: id,
+            imgSize: 2
+            /*
+             0: Do not append image
+             1: Icon size
+             2: Full size
+             */
+        };
+        send('ss', 'loadSnapShot', param, function (res){
+                if (res){
+
+                }
+                if (cb){cb();}
+        });
+    }
+}
+
+
 
 
 /*************************************************************/
-function polling(){
-    clearTimeout(_poll);
-    _poll = setTimeout(function (){
-        getDSMInfo(function (){
-            getAudio(function (){
-                polling();
-                setStates();
-            });
-            if(api.AudioStation.installed){
-                if(current_player){
-                    getStatusRemotePlayer(current_player);
-                }
-            }
-        });
-    }, poll_time);
-}
 function getInstallingPackets(cb){
     send('dsm', 'getPollingData', function (res){
-        Object.keys(res.packages).forEach(function(k) {
-            if(api[k]){
-                api[k]['installed'] = res.packages[k];
-            }
-        });
+        if(res){
+            Object.keys(res.packages).forEach(
+                function (k){
+                    if (api[k]){
+                        api[k]['installed'] = res.packages[k];
+                    }
+                });
+        } else {
+            error({code:999});
+        }
         if(cb){cb();}
     });
 }
 function getInfo(key){
     send(api[key].name, 'getInfo', function (res){
-        Object.keys(res).forEach(function(k) {
-            states[key].info[k] = res[k];
-        });
+        if(res){
+            Object.keys(res).forEach(
+                function (k){
+                    states[key].info[k] = res[k];
+                });
+        } else {
+            error({code:998});
+        }
     });
 }
 function send(api, method, params, cb){
@@ -425,6 +503,7 @@ function setObject(name, val){
 function error(e){
     var code = e.code;
     var err;
+    if(code !== 'ECONNREFUSED'){
         switch (code) {
             case 100:
                 err = '100';
@@ -468,7 +547,8 @@ function error(e){
             /*default:
                 return 'Unknown error';*/
         }
-    if(code == 400 || code == 119){
+    }
+    if(code == 400 || code == 119 || code == 'ECONNREFUSED'){
         clearTimeout(_poll);
         adapter.setState('info.connection', false, true);
         setTimeout(function (){

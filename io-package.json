@@ -280,6 +280,20 @@
             },
             "native": {
             }
+        },
+        {
+            "_id": "AudioStation.info.playlist",
+            "type": "state",
+            "common": {
+                "role": "media.playlist",
+                "name": "AudioStation playlist",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
         }
     ]
 }

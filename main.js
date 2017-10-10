@@ -555,5 +555,5 @@ function error(e){
                 polling();
         }, poll_time);
     }
-    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
+    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + err ? JSON.stringify(err) : '');
 }

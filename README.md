@@ -9,6 +9,10 @@ ioBroker Synology adapter
 
 Драйвер позволяет получать данные и управлять вашим NAS сервером фирмы Synology.
 
+Можно отправить любую команду(метод) установив значение обьекта '''sendMethod''', например:
+Получить инфо SurveillanceStation это метод getInfo без дополнительных параметров.
+'''{"method":"getInfo", "params":{}}'''
+
 ## Changelog
 
 ### 0.0.1

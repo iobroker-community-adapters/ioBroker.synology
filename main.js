@@ -148,11 +148,8 @@ function polling(){
     clearTimeout(_poll);
     _poll = setTimeout(function (){
         getDSMInfo(function (){
-            getAudio(function (){
-                polling();
-                setStates();
-            });
             if(api.AudioStation.installed){
+                getAudio();
                 if(current_player){
                     getStatusRemotePlayer(current_player);
                 }
@@ -160,6 +157,8 @@ function polling(){
             if(api.SurveillanceStation.installed){
                 listEvents();
             }
+            setStates();
+            polling();
         });
     }, poll_time);
 }
@@ -441,6 +440,9 @@ function send(api, method, params, cb){
         params = null;
     }
     syno[api][method](params, function(err, data) {
+        if(!data){
+            data = '';
+        }
         if(!err){
             adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
         } else{
@@ -555,5 +557,8 @@ function error(e){
                 polling();
         }, poll_time);
     }
-    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + err ? JSON.stringify(err) : '');
+    if(!err){
+        err = '';
+    }
+    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
 }

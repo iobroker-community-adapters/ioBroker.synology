@@ -22,6 +22,10 @@
             "nl": "Info and control your NAS Synology"
         },
         "platform": "Javascript/Node.js",
+        "license":                  "MIT",
+	"authors": [
+            "instalator"
+        ],
         "mode": "daemon",
         "icon": "synology.png",
         "enabled": false,

@@ -408,7 +408,7 @@ function listCameras(cb){
                     port: arr[i].port,
                     host: arr[i].host,
                     model: arr[i].model,
-                    status: arr[i].status, //0: ENABLED• 1: DISABLED• 2: ACCTIVATING• 3: DISABLING• 4: RESTARTING• 5: UNKNOWN
+                    status: CamStatus(arr[i].status),
                     recStatus: arr[i].recStatus,
                     snapshot_path: arr[i].snapshot_path,
                     enabled: arr[i].enabled
@@ -417,6 +417,32 @@ function listCameras(cb){
         }
         if(cb){cb();}
     });
+}
+
+function CamStatus(status){
+    //0: ENABLED• 1: DISABLED• 2: ACCTIVATING• 3: DISABLING• 4: RESTARTING• 5: UNKNOWN
+    switch (status) {
+        case 0:
+            status = 'ENABLED';
+            break;
+        case 1:
+            status = 'DISABLED';
+            break;
+        case 2:
+            status = 'ACCTIVATING';
+            break;
+        case 3:
+            status = 'DISABLING';
+            break;
+        case 4:
+            status = 'RESTARTING';
+            break;
+        case 5:
+            status = 'UNKNOWN';
+            break;
+        default:
+    }
+    return status;
 }
 function getSnapshotCamera(camid, cb){
     //var decodedImage = new Buffer(encodedImage, 'base64').toString('binary');

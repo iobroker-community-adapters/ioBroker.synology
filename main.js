@@ -5,22 +5,22 @@ var adapter = utils.adapter('synology');
 var Syno = require('syno');
 
 var states = {
-    'DiskStationManager':    {'info': {}  },
+    'DiskStationManager':    {'info': {}, 'hdd_info': {}, 'vol_info': {}  },
     'FileStation':           {'info': {}  },
     'DownloadStation':       {'info': {}  },
     'AudioStation':          {'info': {}, 'Browser': ''  },
     'VideoStation':          {'info': {}  },
     'VideoStation_DTV':      {'info': {}  },
-    'SurveillanceStation':   {'info': {}  }
+    'SurveillanceStation':   {'info': {}, 'cameras': {}  }
 };
 var old_states = {
-    'DiskStationManager':    {'info': {}  },
+    'DiskStationManager':    {'info': {}, 'hdd_info': {}, 'vol_info': {}  },
     'FileStation':           {'info': {}  },
     'DownloadStation':       {'info': {}  },
     'AudioStation':          {'info': {}, 'Browser': ''  },
     'VideoStation':          {'info': {}  },
     'VideoStation_DTV':      {'info': {}  },
-    'SurveillanceStation':   {'info': {}  }
+    'SurveillanceStation':   {'info': {}, 'cameras': {}  }
 };
 var api = {
    'DiskStationManager':  { name: 'dsm',  polldata: [],  installed: true  },
@@ -74,6 +74,8 @@ adapter.on('stateChange', function (id, state) {
         }  else if (command == 'selected_player'){
 
             current_player = val;  /*  /AS  */
+        }  else if (command == 'getSnapshotCamera'){
+            getSnapshotCamera(val);
         } else {
             if (api[name]){
                 if (api[name].installed){
@@ -148,12 +150,12 @@ function polling(){
     clearTimeout(_poll);
     _poll = setTimeout(function (){
         getDSMInfo(function (){
-            if(api.AudioStation.installed){
+            /*if(api.AudioStation.installed){ //камент для теста
                 getAudio();
                 if(current_player){
                     getStatusRemotePlayer(current_player);
                 }
-            }
+            }*/
             if(api.SurveillanceStation.installed){
                 listEvents();
             }
@@ -162,7 +164,6 @@ function polling(){
         });
     }, poll_time);
 }
-
 /////////////////* DiskStationManager */////////////////////////
 function getDSMInfo(cb){
     send('dsm', 'getInfo', function (res){
@@ -183,7 +184,37 @@ function getDSMInfo(cb){
                     states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
                     states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
                 }
-                if(cb){cb();}
+                var param = {
+                    type: "storage",
+                    version: 1
+                };
+                send('dsm', 'infoSystem', param, function (res){
+                    if(res){
+                        res.hdd_info.forEach(function(k, i) {
+                            var diskname = k.diskno.toLowerCase().replace(' ', '_');
+                            states.DiskStationManager.hdd_info[diskname] = {
+                                'diskno'  : k.diskno,
+                                'model'   : k.model.replace(/\s{2,}/g, ''),
+                                'status'  : k.status,
+                                'temp'    : k.temp,
+                                'volume'  : k.volume,
+                                'capacity': (k.capacity / 1073741824).toFixed(2, 10)
+                            };
+                        });
+                        res.vol_info.forEach(function(k, i) {
+                            var volname = k.name.toLowerCase();
+                            states.DiskStationManager.vol_info[volname] = {
+                                'name'       : k.name,
+                                'status'     : k.status,
+                                'total_size' : (k.total_size / 1073741824).toFixed(2, 10),
+                                'used_size'  : (k.used_size / 1073741824).toFixed(2, 10),
+                                'used'       : ((k.used_size / k.total_size) * 100).toFixed(2, 10),
+                                'desc'       : k.desc
+                            };
+                        });
+                        if(cb){cb();}
+                    }
+                });
             });
         });
     });
@@ -335,40 +366,67 @@ function getStatusRemotePlayer(id, cb){
     }
 }
 
-///////////////////* DownloadStation */////////////////////////
-
-///////////////////* VideoStation *////////////////////////////
-
-///////////////////* VideoStation_DTV *////////////////////////
-
 ///////////////////* SurveillanceStation */////////////////////
 function listEvents(cb){
     //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
-    send('ss', 'listEvents', function (res){
+
+    var param = {
+        camId: 2
+        //cameraIds:"2",
+        //blIncludeDeletedCam:true,
+        //deviceOutCap:true,
+        //streamInfo:true,
+        //ptz:true,
+        //basic:true,
+        //privCamType:3,
+        //camAppInfo:true,
+        //optimize:true,
+        //fisheye:true,
+        //eventDetection:true
+    };
+    //send('ss', 'getInfoCamera', param, function (res){
+    send('ss', 'motionEnumCameraEvent', param, function (res){
         if(res){
-            states.SurveillanceStation.events = JSON.stringify(res.events);
+            states.SurveillanceStation.events = JSON.stringify(res);
+           // adapter.log.error('++++++++++ ' + JSON.stringify(res));
         }
         if(cb){cb();}
     });
 }
+
 function listCameras(cb){
-    //{"cameras":[],"delcam":[],"existCamMntTypeMap":null,"keyTotalCnt":2,"keyUsedCnt":0,"timestamp":"1507648326","total":0}
-    send('ss', 'listCameras', function (res){
+    var param = {
+        basic:true
+    };
+    send('ss', 'listCameras', param, function (res){
         if(res){
-            states.SurveillanceStation.cameras = JSON.stringify(res.cameras);
+            var arr = res.cameras;
+            arr.forEach(function (k, i){
+                states.SurveillanceStation.cameras[arr[i].name] = {
+                    host: arr[i].host,
+                    id:   arr[i].id,
+                    port: arr[i].port,
+                    host: arr[i].host,
+                    model: arr[i].model,
+                    status: arr[i].status, //0: ENABLED• 1: DISABLED• 2: ACCTIVATING• 3: DISABLING• 4: RESTARTING• 5: UNKNOWN
+                    recStatus: arr[i].recStatus,
+                    snapshot_path: arr[i].snapshot_path,
+                    enabled: arr[i].enabled
+                }
+            });
         }
         if(cb){cb();}
     });
 }
 function getSnapshotCamera(camid, cb){
     //var decodedImage = new Buffer(encodedImage, 'base64').toString('binary');
+    //{"method":"getSnapshotCamera", "params":{"cameraId":2, "camStm": 1, "preview": true}}
     if(camid){
         var param = {
-            cameraId: camid
+            'cameraId': camid
         };
         send('ss', 'getSnapshotCamera', param, function (res){
                 if (res){
-
                 }
                 if (cb){cb();}
             });
@@ -404,7 +462,9 @@ function loadSnapShot(id, cb){
 }
 
 
-
+///////////////////* DownloadStation */////////////////////////
+///////////////////* VideoStation *////////////////////////////
+///////////////////* VideoStation_DTV *////////////////////////
 
 /*************************************************************/
 function getInstallingPackets(cb){
@@ -455,6 +515,7 @@ function send(api, method, params, cb){
     });
 }
 function setStates(){
+    adapter.log.debug('setStates');
     var ids = '';
     Object.keys(states).forEach(function(_api) {
         Object.keys(states[_api]).forEach(function(_type) {
@@ -535,7 +596,10 @@ function error(e){
                 err = '119';
                 break;
             case 400:
-                err = 'Error connection';
+                err = 'Error connection/Execution failed';
+                break;
+            case 401:
+                err = 'Parameter invalid';
                 break;
             case 405:
                 err = '{"error":{"code":405},"success":false}';
@@ -562,3 +626,4 @@ function error(e){
     }
     adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
 }
+

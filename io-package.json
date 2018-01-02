@@ -298,6 +298,20 @@
             },
             "native": {
             }
+        },
+        {
+            "_id": "SurveillanceStation.getSnapshotCamera",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "SurveillanceStation getSnapshotCamera",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
         }
     ]
 }

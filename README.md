@@ -13,6 +13,12 @@ ioBroker Synology adapter
 Получить инфо SurveillanceStation это метод getInfo без дополнительных параметров.
 ```{"method":"getInfo", "params":{}}```
 
+The driver allows you to receive data and manage your Synology NAS server.
+
+You can send any command (method) by setting the sendMethod object, for example:
+Get the SurveillanceStation info is a getInfo method with no additional parameters.
+```{"method": "getInfo", "params": {}}```
+
 ## Changelog
 
 ### 0.0.3

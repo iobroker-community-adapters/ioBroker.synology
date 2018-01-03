@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "synology",
-        "version": "0.0.2",
+        "version": "0.0.3",
         "news": {
-            "0.0.2": {
+            "0.0.3": {
                 "en": "initial adapter",
                 "de": "Initiale Version",
                 "ru": "Первоначальный адаптер",
@@ -233,8 +233,8 @@
             "_id": "AudioStation.stop",
             "type": "state",
             "common": {
-                "role": "button",
-                "name": "AudioStation stop",
+                "role": "button.stop",
+                "name": "Controlling playback stop",
                 "type": "boolean",
                 "read": false,
                 "write": true,
@@ -247,8 +247,8 @@
             "_id": "AudioStation.next",
             "type": "state",
             "common": {
-                "role": "button",
-                "name": "AudioStation next",
+                "role": "button.next",
+                "name": "Controlling playback next",
                 "type": "boolean",
                 "read": false,
                 "write": true,
@@ -261,8 +261,8 @@
             "_id": "AudioStation.prev",
             "type": "state",
             "common": {
-                "role": "button",
-                "name": "AudioStation prev",
+                "role": "button.prev",
+                "name": "Controlling playback previous",
                 "type": "boolean",
                 "read": false,
                 "write": true,
@@ -270,6 +270,61 @@
             },
             "native": {
             }
+        },
+        {
+            "_id": "AudioStation.seek",
+            "type": "state",
+            "common": {
+                "role": "media.seek",
+                "name": "Controlling playback seek",
+                "type": "number",
+                "unit": "%",
+                "min": 0,
+                "max": 100,
+                "read": true,
+                "write": true
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.duration",
+            "type": "state",
+            "common": {
+                "role": "media.duration.text",
+                "name": "duration track",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "AudioStation.current_duration",
+            "type": "state",
+            "common": {
+                "role": "media.duration.text",
+                "name": "playback duration",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "AudioStation.current_elapsed",
+            "type": "state",
+            "common": {
+                "role": "media.elapsed.text",
+                "name": "playback elapsed",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
         },
         {
             "_id": "AudioStation.selected_player",
@@ -281,6 +336,21 @@
                 "read": true,
                 "write": true,
                 "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "AudioStation.volume",
+            "type": "state",
+            "common": {
+                "name": "volume",
+                "type": "number",
+                "role": "level.volume",
+                "read": true,
+                "write": false,
+                "min": 0,
+                "max": 100
             },
             "native": {
             }
@@ -305,6 +375,34 @@
             "common": {
                 "role": "state",
                 "name": "SurveillanceStation getSnapshotCamera",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "DownloadStation.add_url_download",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DownloadStation add url download",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {
+            }
+        },
+        {
+            "_id": "DownloadStation.folder",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DownloadStation folder for download",
                 "type": "string",
                 "read": true,
                 "write": true,

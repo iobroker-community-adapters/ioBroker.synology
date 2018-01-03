@@ -31,7 +31,7 @@ var api = {
    'VideoStation_DTV':    { name: 'dt',   polldata: [],  installed: false },
    'SurveillanceStation': { name: 'ss',   polldata: [],  installed: false }
 };
-var /*params,*/ poll_time = 5000, _poll, remote_players = [];
+var /*params,*/ poll_time = 5000, _poll, remote_players = [], connect;
 var current_player = '';
 var syno;
 
@@ -127,6 +127,7 @@ adapter.on('message', function (obj) {
 adapter.on('ready', function () {
     adapter.subscribeStates('*');
     syno = new Syno({
+        ignoreCertificateErrors: true,
         host: adapter.config.host ? adapter.config.host: '192.168.1.19',
         port: adapter.config.port ? adapter.config.port: '5000',
         account: adapter.config.login ? adapter.config.login: 'admin2',
@@ -141,6 +142,7 @@ function main() {
     clearTimeout(_poll);
     getInstallingPackets(function (){
         adapter.setState('info.connection', true, true);
+        connect = true;
         Object.keys(api).forEach(function(k) {
             if(api[k].installed){
                 getInfo(k);
@@ -156,6 +158,10 @@ function polling(){
     clearTimeout(_poll);
     _poll = setTimeout(function (){
         getDSMInfo(function (){
+            if(!connect){
+                adapter.setState('info.connection', true, true);
+                connect = true;
+            }
             if(api.AudioStation.installed){ //камент для теста
                 getAudio(function (){
                     if(current_player){
@@ -708,6 +714,7 @@ function error(e){
     if(code == 400 || code == 119 || code == 'ECONNREFUSED'){
         clearTimeout(_poll);
         adapter.setState('info.connection', false, true);
+        connect = false;
         setTimeout(function (){
                 polling();
         }, poll_time);

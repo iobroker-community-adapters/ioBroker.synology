@@ -12,14 +12,17 @@
                 "nl": "Eerste release"
             }
         },
-        "title": "Synology NAS adapter",
+        "title": "Synology NAS",
         "desc": {
-            "en": "Info and control your NAS Synology",
-            "de": "Info and control your NAS Synology",
-            "ru": "Info and control your NAS Synology",
-            "pt": "Info and control your NAS Synology",
-            "fr": "Info and control your NAS Synology",
-            "nl": "Info and control your NAS Synology"
+           	"en": "Get status and control your NAS Synology",
+			"de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
+			"ru": "Позволяет получать статус и управлять NAS Synology",
+			"pt": "Obtenha status e controle sua NAS Synology",
+			"nl": "Krijg status en controleer uw NAS Synology",
+			"fr": "Obtenez le statut et contrôlez votre NAS Synology",
+			"it": "Ottieni lo stato e controlla la tua Synology NAS",
+			"es": "Obtenga el estado y controle su NAS Synology",
+			"pl": "Uzyskaj status i kontroluj swój NAS Synology"
         },
         "platform": "Javascript/Node.js",
         "license":                  "MIT",

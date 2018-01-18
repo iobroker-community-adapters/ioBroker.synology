@@ -722,7 +722,7 @@ function error(e){
     if(!err){
         err = '';
     }
-    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
+    adapter.log.debug('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
 }
 
 function SecToText(sec){

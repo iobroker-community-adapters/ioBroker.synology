@@ -36,7 +36,7 @@
         "keywords": ["synology NAS control"],
         "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
         "loglevel": "info",
-        "type": "hardware"
+        "type": "infrastructure"
     },
     "native": {
         "host":     "localhost",

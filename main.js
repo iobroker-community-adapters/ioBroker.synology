@@ -128,13 +128,15 @@ adapter.on('ready', function () {
     adapter.subscribeStates('*');
     syno = new Syno({
         ignoreCertificateErrors: true,
+        /*rejectUnauthorized: false,*/
         host: adapter.config.host ? adapter.config.host: '127.0.0.1',
         port: adapter.config.port ? adapter.config.port: '5000',
         account: adapter.config.login ? adapter.config.login: 'admin',
-        passwd: adapter.config.password ? adapter.config.password: 'qwerty',
+        passwd: adapter.config.password ? adapter.config.password: '',
         protocol: adapter.config.https ? 'https' : 'http',
         apiVersion: adapter.config.version ? adapter.config.version: '6.0.2'
     });
+    poll_time = adapter.config.polling ? adapter.config.polling: 5000;
     main();
 });
 
@@ -690,7 +692,7 @@ function error(e){
                 err = '119';
                 break;
             case 400:
-                err = 'Error connection/Execution failed';
+                err = 'Error connection/Execution failed (error password?)';
                 break;
             case 401:
                 err = 'Parameter invalid';

@@ -1,8 +1,16 @@
 {
     "common": {
         "name": "synology",
-        "version": "0.0.3",
+        "version": "0.0.4",
         "news": {
+            "0.0.4": {
+                "en": "initial adapter",
+                "de": "Initiale Version",
+                "ru": "Первоначальный адаптер",
+                "pt": "Versão inicial",
+                "fr": "Version initiale",
+                "nl": "Eerste release"
+            },
             "0.0.3": {
                 "en": "initial adapter",
                 "de": "Initiale Version",
@@ -44,7 +52,8 @@
         "login":    "admin",
         "password": "",
         "https":    false,
-        "version":  "6.0.2"
+        "version":  "6.0.2",
+        "polling": 5000
     },
     "objects": [
 

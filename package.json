@@ -1,6 +1,6 @@
 {
   "name": "iobroker.synology",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Info and control your NAS Synology",
   "author": {
     "name": "instalator",
@@ -24,7 +24,7 @@
     "url": "https://github.com/instalator/ioBroker.synology"
   },
   "dependencies": {
-    "syno": "*"
+    "syno": "https://github.com/homeinstalator/syno/tarball/master/"
   },
   "devDependencies": {
     "grunt": "^1.0.1",

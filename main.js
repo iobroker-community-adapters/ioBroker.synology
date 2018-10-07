@@ -31,7 +31,7 @@ var api = {
    'VideoStation_DTV':    { name: 'dt',   polldata: [],  installed: false },
    'SurveillanceStation': { name: 'ss',   polldata: [],  installed: false }
 };
-var /*params,*/ poll_time = 5000, _poll, remote_players = [], connect;
+var poll_time = 5000, _poll, remote_players = [], connect = false;
 var current_player = '';
 var syno;
 
@@ -169,9 +169,6 @@ function polling(){
                     }
                 });
             }
-            if(api.DownloadStation.installed){
-
-            }
             if(api.SurveillanceStation.installed){
                 //listEvents(); //TODO надо доделать камеры
             }
@@ -255,7 +252,7 @@ function getAudio(cb){
                         current_player = state.val;
                         getStatusRemotePlayer(current_player);
                     } else {
-                        adapter.log.error('getAudio id плеера (' + state.val + ')не найден в списке доступных:' + JSON.stringify(remote_players));
+                        adapter.log.debug('getAudio id плеера (' + state.val + ')не найден в списке доступных:' + JSON.stringify(remote_players));
                     }
                 }
             });

@@ -128,9 +128,9 @@ adapter.on('ready', function () {
     adapter.subscribeStates('*');
     syno = new Syno({
         ignoreCertificateErrors: true,
-        host: adapter.config.host ? adapter.config.host: '192.168.1.19',
+        host: adapter.config.host ? adapter.config.host: '127.0.0.1',
         port: adapter.config.port ? adapter.config.port: '5000',
-        account: adapter.config.login ? adapter.config.login: 'admin2',
+        account: adapter.config.login ? adapter.config.login: 'admin',
         passwd: adapter.config.password ? adapter.config.password: 'qwerty',
         protocol: adapter.config.https ? 'https' : 'http',
         apiVersion: adapter.config.version ? adapter.config.version: '6.0.2'

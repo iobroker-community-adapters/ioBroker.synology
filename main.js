@@ -227,8 +227,8 @@ function getDSMInfo(cb){
                                 'desc'       : k.desc
                             };
                         });
-                        if(cb){cb();}
                     }
+                    if(cb){cb();}
                 });
             });
         });

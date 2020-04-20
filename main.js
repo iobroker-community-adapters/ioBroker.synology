@@ -74,7 +74,7 @@ function startAdapter(options) {
                                     } else {
                                         param = {};
                                     }
-                                    send(api[name]['name'], val, param,  (res) =>{
+                                    send(api[name]['name'], val, param, (res) => {
                                         if (res) {
                                             let id = name + '.sendMethod';
                                             adapter.setState(id, {
@@ -177,48 +177,42 @@ let api = {
 
 function main() {
     adapter.subscribeStates('*');
-    syno = new Syno({
-        ignoreCertificateErrors: true,
-        /*rejectUnauthorized: false,*/
-        host: adapter.config.host ? adapter.config.host : '127.0.0.1',
-        port: adapter.config.port ? adapter.config.port : '5000',
-        account: adapter.config.login ? adapter.config.login : 'admin',
-        passwd: adapter.config.password ? adapter.config.password : ' ',
-        protocol: adapter.config.https ? 'https' : 'http',
-        apiVersion: adapter.config.version ? adapter.config.version : '6.0.2',
-        debug: true
-    });
-    poll_time = adapter.config.polling ? adapter.config.polling : 5000;
-
-    _poll && clearTimeout(_poll);
-
-    syno[api][method](params,  (err, data, asd) =>{
-        if (!data) {
-            data = '';
-        }
-        if (!err) {
-            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
-        } else {
-            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
-            error(err);
-        }
-        cb && cb(data);
-
-    });
-    
-    getInstallingPackets( () =>{
-        adapter.setState('info.connection', true, true);
-        connect = true;
-        Object.keys(api).forEach( (k) =>{
-            if (api[k].installed) {
-                getInfo(k);
-            }
+    try {
+        syno = new Syno({
+            ignoreCertificateErrors: true,
+            /*rejectUnauthorized: false,*/
+            host: adapter.config.host || '127.0.0.1',
+            port: adapter.config.port || '5000',
+            account: adapter.config.login || 'admin',
+            passwd: adapter.config.password || '',
+            protocol: adapter.config.https ? 'https' : 'http',
+            apiVersion: adapter.config.version || '6.2.2',
+            //debug: true
         });
-        if (api.SurveillanceStation.installed) {
-            listCameras();
-        }
-        polling();
-    });
+        
+        poll_time = adapter.config.polling ? adapter.config.polling : 5000;
+        _poll && clearTimeout(_poll);
+        
+        /*syno.auth.request('login', (err, data, asd) =>{
+            connect = true;
+        });*/
+        
+        getInstallingPackets(() => {
+            adapter.setState('info.connection', true, true);
+            connect = true;
+            Object.keys(api).forEach((k) => {
+                if (api[k].installed) {
+                    getInfo(k);
+                }
+            });
+            if (api.SurveillanceStation.installed) {
+                listCameras();
+            }
+            polling();
+        });
+    } catch (e) {
+        adapter.log.error('Synology Error: ' + e.message);
+    }
 }
 
 function polling() {
@@ -247,18 +241,18 @@ function polling() {
 
 /////////////////* DiskStationManager */////////////////////////
 function getDSMInfo(cb) {
-    send('dsm', 'getInfo',  (res) =>{
-        Object.keys(res).forEach( (k) =>{
+    send('dsm', 'getInfo', (res) => {
+        Object.keys(res).forEach((k) => {
             states.DiskStationManager.info[k] = res[k];
         });
-        send('dsm', 'getSystemUtilization',  (res) =>{
+        send('dsm', 'getSystemUtilization', (res) => {
             //states.DiskStationManager.resources = res;
             if (res) {
                 states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
                 states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
                 states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
             }
-            send('dsm', 'getSystemStatus',  (res) =>{
+            send('dsm', 'getSystemStatus', (res) => {
                 //states.DiskStationManager.system_status = res;
                 if (res) {
                     states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
@@ -269,9 +263,9 @@ function getDSMInfo(cb) {
                     type: "storage",
                     version: 1
                 };
-                send('dsm', 'infoSystem', param,  (res) =>{
+                send('dsm', 'infoSystem', param, (res) => {
                     if (res) {
-                        res.hdd_info.forEach( (k, i) =>{
+                        res.hdd_info.forEach((k, i) => {
                             let diskname = k.diskno.toLowerCase().replace(' ', '_');
                             states.DiskStationManager.hdd_info[diskname] = {
                                 'diskno': k.diskno,
@@ -282,7 +276,7 @@ function getDSMInfo(cb) {
                                 'capacity': (k.capacity / 1073741824).toFixed(2, 10)
                             };
                         });
-                        res.vol_info.forEach( (k, i) =>{
+                        res.vol_info.forEach((k, i) => {
                             let volname = k.name.toLowerCase();
                             states.DiskStationManager.vol_info[volname] = {
                                 'name': k.name,
@@ -305,14 +299,14 @@ function getDSMInfo(cb) {
 
 ///////////////////* AudioStation *////////////////////////////
 function getAudio(cb) {
-    send('as', 'listRemotePlayers',  (res) =>{
+    send('as', 'listRemotePlayers', (res) => {
         if (res) {
             //adapter.log.error('****************** ' + JSON.stringify(res));
             states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
-            res.players.forEach( (k, i) =>{
+            res.players.forEach((k, i) => {
                 remote_players[i] = k.id;
             });
-            adapter.getState('AudioStation.selected_player',  (err, state) =>{
+            adapter.getState('AudioStation.selected_player', (err, state) => {
                 if ((err || !state)) {
                     current_player = '';
                 } else {
@@ -334,9 +328,9 @@ function Browser(id, cb) {
     if (id && id !== '/') {
         param = {id: id};
     }
-    send('as', 'listFolders', param,  (res) =>{
+    send('as', 'listFolders', param, (res) => {
         let arr = [];
-        res.items.forEach( (k, i) =>{
+        res.items.forEach((k, i) => {
             let filetype = 'file';
             if (res.items[i].type === 'folder') {
                 filetype = 'directory';
@@ -374,7 +368,7 @@ function PlayControl(cmd, val, cb) {
             param.value = (states.AudioStation.duration / 100) * val;
         }
         adapter.log.debug('PlayControl cmd - ' + cmd + '. param - ' + JSON.stringify(param));
-        send('as', 'controlRemotePlayer', param,  (res) =>{
+        send('as', 'controlRemotePlayer', param, (res) => {
             //current_player = '';
             cb && cb();
         });
@@ -401,13 +395,13 @@ function PlayFolder(id, folder, limit, cb) {
                 "sort_direction": "ASC"
             }]
         };
-        send('as', 'updatePlayListRemotePlayer', param,  (res) =>{
+        send('as', 'updatePlayListRemotePlayer', param, (res) => {
         });
         param = {
             id: id,
             action: 'play'
         };
-        send('as', 'controlRemotePlayer', param,  (res) =>{
+        send('as', 'controlRemotePlayer', param, (res) => {
         });
 
     }
@@ -428,13 +422,13 @@ function PlayTrack(id, track, cb) {
             songs: track,
             containers_json: []
         };
-        send('as', 'updatePlayListRemotePlayer', param,  (res) =>{
+        send('as', 'updatePlayListRemotePlayer', param, (res) => {
         });
         param = {
             id: id,
             action: 'play'
         };
-        send('as', 'controlRemotePlayer', param,  (res) =>{
+        send('as', 'controlRemotePlayer', param, (res) => {
         });
     }
 }
@@ -446,7 +440,7 @@ function getStatusRemotePlayer(id, cb) {
             id: id,
             additional: 'song_tag,song_audio,subplayer_volume'
         };
-        send('as', 'getStatusRemotePlayerStatus', param,  (res) =>{
+        send('as', 'getStatusRemotePlayerStatus', param, (res) => {
             //states.AudioStation.StatusRemotePlayer = JSON.stringify(res);
             //adapter.log.error('******************* getStatusRemotePlayerStatus - ' + JSON.stringify(res));
             states.AudioStation.state_playing = res.state;
@@ -459,10 +453,10 @@ function getStatusRemotePlayer(id, cb) {
             states.AudioStation.current_elapsed = SecToText(res.song.additional.song_audio.duration - res.position);
             states.AudioStation.seek = parseInt((res.position / res.song.additional.song_audio.duration) * 100, 10);
             if (res.state === 'playing' && res.song) {
-                send('as', 'getPlayListRemotePlayer', param,  (res) =>{
+                send('as', 'getPlayListRemotePlayer', param, (res) => {
                     let playlist = [];
                     let arr = res.songs;
-                    arr.forEach( (k, i) =>{
+                    arr.forEach((k, i) => {
                         playlist[i] = {
                             "id": arr[i].id,
                             "artist": "",
@@ -509,7 +503,7 @@ function listEvents(cb) {
         version: 1
     };
     //send('ss', 'getInfoCamera', param, function (res){
-    send('ss', 'listHistoryActionRules', param,  (res) =>{
+    send('ss', 'listHistoryActionRules', param, (res) => {
         if (res) {
             states.SurveillanceStation.events = JSON.stringify(res);
             adapter.log.error('****************** ' + JSON.stringify(res));
@@ -522,10 +516,10 @@ function listCameras(cb) {
     let param = {
         basic: true
     };
-    send('ss', 'listCameras', param,  (res) =>{
+    send('ss', 'listCameras', param, (res) => {
         if (res) {
             let arr = res.cameras;
-            arr.forEach( (k, i) =>{
+            arr.forEach((k, i) => {
                 states.SurveillanceStation.cameras[arr[i].name] = {
                     host: arr[i].host,
                     id: arr[i].id,
@@ -578,7 +572,7 @@ function getSnapshotCamera(camid, cb) {
         let param = {
             'cameraId': camid
         };
-        send('ss', 'getSnapshotCamera', param,  (res) =>{
+        send('ss', 'getSnapshotCamera', param, (res) => {
             if (res) {
             }
             cb && cb();
@@ -588,7 +582,7 @@ function getSnapshotCamera(camid, cb) {
 
 function listSnapShots(cb) {
     //{"auInfo":{"cms":null,"deleteByRecordId":{"data":[]},"serverAction":{"0":null,"1":null,"2":null,"3":null,"4":null,"5":null},"timestamp":1507218967,"volumeAction":null},"data":[],"recCntData":{"recCnt":{"date":{"-1":0}},"total":0},"timestamp":"1507650252","total":0}
-    send('ss', 'listSnapShots',  (res) =>{
+    send('ss', 'listSnapShots', (res) => {
         if (res) {
             states.SurveillanceStation.snapshots_list = JSON.stringify(res.data);
         }
@@ -607,7 +601,7 @@ function loadSnapShot(id, cb) {
              2: Full size
              */
         };
-        send('ss', 'loadSnapShot', param,  (res) =>{
+        send('ss', 'loadSnapShot', param, (res) => {
             if (res) {
 
             }
@@ -624,13 +618,13 @@ function addDownload(url, cb) {
         uri: [url],
         version: 2
     };
-    adapter.getState('AudioStation.folder',  (err, state) =>{
+    adapter.getState('AudioStation.folder', (err, state) => {
         if ((err || !state)) {
         } else {
             param.destination = state.val;
         }
     });
-    send('dl', 'createTask', param,  (res) =>{
+    send('dl', 'createTask', param, (res) => {
         if (res) {
             adapter.log.error('****************** ' + JSON.stringify(res));
         }
@@ -643,13 +637,13 @@ function addDownload(url, cb) {
 
 /*************************************************************/
 function getInstallingPackets(cb) {
-    send('dsm', 'getPollingData',  (res) =>{
+    send('dsm', 'getPollingData', (res, asd, easd) => {
         if (res) {
-            Object.keys(res.packages).forEach((k) =>{
-                    if (api[k]) {
-                        api[k]['installed'] = res.packages[k];
-                    }
-                });
+            Object.keys(res.packages).forEach((k) => {
+                if (api[k]) {
+                    api[k]['installed'] = res.packages[k];
+                }
+            });
         } else {
             error({code: 999});
         }
@@ -658,11 +652,11 @@ function getInstallingPackets(cb) {
 }
 
 function getInfo(key) {
-    send(api[key].name, 'getInfo',  (res) =>{
+    send(api[key].name, 'getInfo', (res) => {
         if (res) {
-            Object.keys(res).forEach((k) =>{
-                    states[key].info[k] = res[k];
-                });
+            Object.keys(res).forEach((k) => {
+                states[key].info[k] = res[k];
+            });
         } else {
             error({code: 998});
         }
@@ -673,8 +667,11 @@ function send(api, method, params, cb) {
     if (typeof params == 'function') {
         cb = params;
         params = null;
+        /*params = {
+            "_sid": "123"
+        };*/
     }
-    syno[api][method](params,  (err, data, asd) =>{
+    syno[api][method](params, (err, data, asd) => {
         if (!data) {
             data = '';
         }
@@ -692,13 +689,13 @@ function send(api, method, params, cb) {
 function setStates() {
     adapter.log.debug('setStates');
     let ids = '';
-    Object.keys(states).forEach( (_api) =>{
-        Object.keys(states[_api]).forEach( (_type) =>{
+    Object.keys(states).forEach((_api) => {
+        Object.keys(states[_api]).forEach((_type) => {
             if (typeof states[_api][_type] == 'object') {
-                Object.keys(states[_api][_type]).forEach( (key) =>{
+                Object.keys(states[_api][_type]).forEach((key) => {
                     if (typeof states[_api][_type][key] == 'object') {
                         //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
-                        Object.keys(states[_api][_type][key]).forEach( (key2) =>{
+                        Object.keys(states[_api][_type][key]).forEach((key2) => {
                             //adapter.log.error('*********' + states[_api][_type][key][key2]);
                             if (!old_states[_api][_type].hasOwnProperty(key)) {
                                 old_states[_api][_type][key] = {};
@@ -732,7 +729,7 @@ function setObject(name, val) {
     let type = 'string';
     let role = 'state';
     adapter.log.debug('setObject ' + JSON.stringify(name));
-    adapter.getState(name,  (err, state) =>{
+    adapter.getState(name, (err, state) => {
         if ((err || !state)) {
             adapter.setObject(name, {
                 type: 'state',
@@ -812,7 +809,7 @@ function error(e) {
         _poll && clearTimeout(_poll);
         adapter.setState('info.connection', false, true);
         connect = false;
-        timeOutPoll = setTimeout( () =>{
+        timeOutPoll = setTimeout(() => {
             polling();
         }, poll_time);
     }

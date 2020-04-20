@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "synology",
-        "version": "0.0.4",
+        "version": "0.0.10",
         "news": {
+            "0.0.10": {
+                "en": "Formatting and timer behavior cleaning",
+                "de": "Formatting and timer behavior cleaning",
+                "ru": "Formatting and timer behavior cleaning",
+                "pt": "Formatting and timer behavior cleaning",
+                "nl": "Formatting and timer behavior cleaning",
+                "fr": "Formatting and timer behavior cleaning",
+                "it": "Formatting and timer behavior cleaning",
+                "es": "Formatting and timer behavior cleaning",
+                "pl": "Formatting and timer behavior cleaning",
+                "zh-cn": "Formatting and timer behavior cleaning"
+            },
             "0.0.4": {
                 "en": "initial adapter",
                 "de": "Initiale Version",
@@ -38,12 +50,16 @@
             "instalator"
         ],
         "mode": "daemon",
+        "main": "main.js",
         "icon": "synology.png",
         "enabled": false,
+        "messagebox": false,
         "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
         "keywords": ["synology NAS control"],
         "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
         "loglevel": "info",
+        "compact": true,
+        "materialize": true,
         "type": "infrastructure"
     },
     "native": {

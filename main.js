@@ -187,16 +187,15 @@ function main() {
             passwd: adapter.config.password || '',
             protocol: adapter.config.https ? 'https' : 'http',
             apiVersion: adapter.config.version || '6.2.2',
-            //debug: true
+            otp: 'ASE32YJSBKUOIDPB',
+            debug: false
         });
         
+        //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));
+
         poll_time = adapter.config.polling ? adapter.config.polling : 5000;
         _poll && clearTimeout(_poll);
-        
-        /*syno.auth.request('login', (err, data, asd) =>{
-            connect = true;
-        });*/
-        
+
         getInstallingPackets(() => {
             adapter.setState('info.connection', true, true);
             connect = true;
@@ -216,7 +215,7 @@ function main() {
 }
 
 function polling() {
-    clearTimeout(_poll);
+    _poll && clearTimeout(_poll);
     _poll = setTimeout(() => {
         getDSMInfo(() => {
             if (!connect) {
@@ -241,6 +240,7 @@ function polling() {
 
 /////////////////* DiskStationManager */////////////////////////
 function getDSMInfo(cb) {
+    adapter.log.debug('--------------------- getDSMInfo -----------------------');
     send('dsm', 'getInfo', (res) => {
         Object.keys(res).forEach((k) => {
             states.DiskStationManager.info[k] = res[k];
@@ -299,6 +299,7 @@ function getDSMInfo(cb) {
 
 ///////////////////* AudioStation *////////////////////////////
 function getAudio(cb) {
+    adapter.log.debug('--------------------- getAudio -----------------------');
     send('as', 'listRemotePlayers', (res) => {
         if (res) {
             //adapter.log.error('****************** ' + JSON.stringify(res));
@@ -324,6 +325,7 @@ function getAudio(cb) {
 }
 
 function Browser(id, cb) {
+    adapter.log.debug('--------------------- Browser -----------------------');
     let param = {};
     if (id && id !== '/') {
         param = {id: id};
@@ -348,6 +350,7 @@ function Browser(id, cb) {
 }
 
 function PlayControl(cmd, val, cb) {
+    adapter.log.debug('--------------------- PlayControl -----------------------');
     let id = current_player;
     let param = {};
     if (id) {
@@ -376,6 +379,7 @@ function PlayControl(cmd, val, cb) {
 }
 
 function PlayFolder(id, folder, limit, cb) {
+    adapter.log.debug('--------------------- PlayFolder -----------------------');
     if (!id) {
         id = current_player;
     }
@@ -396,18 +400,18 @@ function PlayFolder(id, folder, limit, cb) {
             }]
         };
         send('as', 'updatePlayListRemotePlayer', param, (res) => {
+            param = {
+                id: id,
+                action: 'play'
+            };
+            send('as', 'controlRemotePlayer', param, (res) => {
+            });
         });
-        param = {
-            id: id,
-            action: 'play'
-        };
-        send('as', 'controlRemotePlayer', param, (res) => {
-        });
-
     }
 }
 
 function PlayTrack(id, track, cb) {
+    adapter.log.debug('--------------------- PlayTrack -----------------------');
     if (!id) {
         id = current_player;
     }
@@ -423,17 +427,19 @@ function PlayTrack(id, track, cb) {
             containers_json: []
         };
         send('as', 'updatePlayListRemotePlayer', param, (res) => {
+            param = {
+                id: id,
+                action: 'play'
+            };
+            send('as', 'controlRemotePlayer', param, (res) => {
+            });
         });
-        param = {
-            id: id,
-            action: 'play'
-        };
-        send('as', 'controlRemotePlayer', param, (res) => {
-        });
+
     }
 }
 
 function getStatusRemotePlayer(id, cb) {
+    adapter.log.debug('--------------------- getStatusRemotePlayer -----------------------');
     let param = {};
     if (id) {
         param = {
@@ -513,6 +519,7 @@ function listEvents(cb) {
 }
 
 function listCameras(cb) {
+    adapter.log.debug('--------------------- listCameras -----------------------');
     let param = {
         basic: true
     };
@@ -540,6 +547,7 @@ function listCameras(cb) {
  * @return {string}
  */
 function CamStatus(status) {
+    adapter.log.debug('--------------------- CamStatus -----------------------');
     //0: ENABLED• 1: DISABLED• 2: ACCTIVATING• 3: DISABLING• 4: RESTARTING• 5: UNKNOWN
     switch (status) {
         case 0:
@@ -566,6 +574,7 @@ function CamStatus(status) {
 }
 
 function getSnapshotCamera(camid, cb) {
+    adapter.log.debug('--------------------- getSnapshotCamera -----------------------');
     //let decodedImage = new Buffer(encodedImage, 'base64').toString('binary');
     //{"method":"getSnapshotCamera", "params":{"cameraId":2, "camStm": 1, "preview": true}}
     if (camid) {
@@ -612,6 +621,7 @@ function loadSnapShot(id, cb) {
 
 ///////////////////* DownloadStation */////////////////////////
 function addDownload(url, cb) {
+    adapter.log.debug('--------------------- addDownload -----------------------');
     let param = {
         type: "url",
         create_list: true,
@@ -637,6 +647,7 @@ function addDownload(url, cb) {
 
 /*************************************************************/
 function getInstallingPackets(cb) {
+    adapter.log.debug('--------------------- getInstallingPackets -----------------------');
     send('dsm', 'getPollingData', (res, asd, easd) => {
         if (res) {
             Object.keys(res.packages).forEach((k) => {
@@ -652,6 +663,8 @@ function getInstallingPackets(cb) {
 }
 
 function getInfo(key) {
+    adapter.log.debug('--------------------- getInfo -----------------------');
+    adapter.log.debug('key = ' + key);
     send(api[key].name, 'getInfo', (res) => {
         if (res) {
             Object.keys(res).forEach((k) => {
@@ -667,27 +680,20 @@ function send(api, method, params, cb) {
     if (typeof params == 'function') {
         cb = params;
         params = null;
-        /*params = {
-            "_sid": "123"
-        };*/
     }
-    syno[api][method](params, (err, data, asd) => {
-        if (!data) {
-            data = '';
-        }
+    syno[api][method](params, (err, data) => {
+        adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
+        data = data || '';
         if (!err) {
-            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
+            cb && cb(data);
         } else {
-            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
-            error(err);
+            err && error(err);
         }
-        cb && cb(data);
-
     });
 }
 
 function setStates() {
-    adapter.log.debug('setStates');
+    adapter.log.debug('--------------------- setStates -----------------------');
     let ids = '';
     Object.keys(states).forEach((_api) => {
         Object.keys(states[_api]).forEach((_type) => {
@@ -728,9 +734,9 @@ function setStates() {
 function setObject(name, val) {
     let type = 'string';
     let role = 'state';
-    adapter.log.debug('setObject ' + JSON.stringify(name));
-    adapter.getState(name, (err, state) => {
-        if ((err || !state)) {
+    //adapter.log.debug('setObject ' + JSON.stringify(name));
+    adapter.getObject(name, function (err, obj) {
+        if ((err || !obj)) {
             adapter.setObject(name, {
                 type: 'state',
                 common: {
@@ -741,14 +747,15 @@ function setObject(name, val) {
                 },
                 native: {}
             });
-            adapter.setState(name, {
-                val: val,
-                ack: true
-            });
+            adapter.setState(name, {val: val, ack: true});
         } else {
-            adapter.setState(name, {
-                val: val,
-                ack: true
+            adapter.getState(name, function (err, state) {
+                if (state.val === val) {
+                    //adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' = newVal: ' + val + ' }');
+                } else if (state.val !== val) {
+                    adapter.setState(name, {val: val, ack: true});
+                    adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' != newVal: ' + val + ' }');
+                }
             });
         }
     });
@@ -756,7 +763,7 @@ function setObject(name, val) {
 
 function error(e) {
     let code = e.code;
-    let err;
+    let err = '';
     if (code !== 'ECONNREFUSED') {
         switch (code) {
             case 100:
@@ -805,7 +812,7 @@ function error(e) {
                 return 'Unknown error';*/
         }
     }
-    if (code === 400 || code === 119 || code === 'ECONNREFUSED') {
+    if (code === 400/* || code === 119*/ || code === 'ECONNREFUSED') {
         _poll && clearTimeout(_poll);
         adapter.setState('info.connection', false, true);
         connect = false;
@@ -813,10 +820,11 @@ function error(e) {
             polling();
         }, poll_time);
     }
-    if (!err) {
-        err = '';
-    }
-    adapter.log.debug('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
+
+    adapter.log.error('******************************************************************************');
+    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
+    adapter.log.error('******************************************************************************');
+
 }
 
 /**

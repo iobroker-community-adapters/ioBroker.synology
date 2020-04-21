@@ -32,12 +32,32 @@ function startAdapter(options) {
                 if (command === 'reboot') {
                     name = 'DiskStationManager';
                     val = 'rebootSystem';
+                    send(api[name]['name'], val, (res) => {
+                        adapter.log.debug('System reboot');
+                        _poll && clearTimeout(_poll);
+                        adapter.setState('info.connection', false, true);
+                        connect = false;
+                        timeOutPoll = setTimeout(() => {
+                            polling();
+                        }, 30000);
+                    });
+                    return;
                 }
                 if (command === 'shutdown') {
                     name = 'DiskStationManager';
                     val = 'shutdownSystem';
-                }
+                    send(api[name]['name'], val, (res) => {
+                        adapter.log.debug('System shutdown');
 
+                        _poll && clearTimeout(_poll);
+                        adapter.setState('info.connection', false, true);
+                        connect = false;
+                        timeOutPoll = setTimeout(() => {
+                            polling();
+                        }, 30000);
+                    });
+                    return;
+                }
                 if (command === 'Browser') {  /*  /AS  */
                     Browser(val);
                 } else if (command === 'play_folder') {
@@ -190,7 +210,7 @@ function main() {
             otp: 'ASE32YJSBKUOIDPB',
             debug: false
         });
-        
+
         //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));
 
         poll_time = adapter.config.polling ? adapter.config.polling : 5000;
@@ -681,15 +701,19 @@ function send(api, method, params, cb) {
         cb = params;
         params = null;
     }
-    syno[api][method](params, (err, data) => {
-        adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
-        data = data || '';
-        if (!err) {
-            cb && cb(data);
-        } else {
-            err && error(err);
-        }
-    });
+    try {
+        syno[api][method](params, (err, data) => {
+            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
+            data = data || '';
+            if (!err) {
+                cb && cb(data);
+            } else {
+                err && error(err);
+            }
+        });
+    } catch (e) {
+        adapter.log.error('--- Send Error ' + JSON.stringify(e));
+    }
 }
 
 function setStates() {
@@ -812,7 +836,7 @@ function error(e) {
                 return 'Unknown error';*/
         }
     }
-    if (code === 400/* || code === 119*/ || code === 'ECONNREFUSED') {
+    if (code === 400/* || code === 119*/ || code === 'ECONNREFUSED' || code === 'ETIMEDOUT') {
         _poll && clearTimeout(_poll);
         adapter.setState('info.connection', false, true);
         connect = false;

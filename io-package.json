@@ -216,20 +216,6 @@
             }
         },
         {
-            "_id": "AudioStation.Browser",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "AudioStation Browser Files",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
             "_id": "SurveillanceStation.getSnapshotCamera",
             "type": "state",
             "common": {

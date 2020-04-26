@@ -2,7 +2,8 @@
 
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
-const as = require('./lib/as.js');
+const AS = require('./lib/as.js');
+const tools = require('./lib/tools.js');
 const parse = require('./lib/parsers.js');
 let adapter, syno, timeOutPoll, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true, firstStart = true;
 const slowPollingTime = 60000;
@@ -27,7 +28,7 @@ function startAdapter(options){
                 if (command === 'reboot'){
                     name = 'DiskStationManager';
                     val = 'rebootSystem';
-                    send(api[name]['name'], val, (res) => {
+                    tools.send(api[name]['name'], val, (res) => {
                         adapter.log.debug('System reboot');
                         //timeOutPoll && clearTimeout(timeOutPoll);
                         adapter.setState('info.connection', false, true);
@@ -54,21 +55,13 @@ function startAdapter(options){
                     return;
                 }
                 if (command === 'Browser'){  /*  /AS  */
-                    Browser(val);
+                    AS.Browser(syno, states, name, val);
                 } else if (command === 'play_folder'){
-                    let a = val.split(',');
-                    PlayFolder(a[0], a[1]);
+                    AS.PlayFolder(syno, states, name, val);
                 } else if (command === 'play_track'){
-                    let s = val.split(',');
-                    PlayTrack(s[0], s[1]);
-                } else if (command === 'stop' || command === 'next' || command === 'prev'){
-                    PlayControl(command);
-                } else if (command === 'selected_player'){
-                    current_player = val;  /*  /AS  */
-                } else if (command === 'volume'){
-                    PlayControl('set_volume', val);  /*  /AS  */
-                } else if (command === 'seek'){
-                    PlayControl(command, val);  /*  /AS  */
+                    AS.PlayTrack(syno, states, name, val);
+                } else if (command === 'stop' || command === 'next' || command === 'prev' || command === 'volume' || command === 'seek' || command === 'pause' || command === 'play' || command === 'repeat' || command === 'shuffle'){
+                    AS.PlayControl(syno, states, name, command, val);
                 } else if (command === 'getSnapshotCamera'){
                     getSnapshotCamera(val);
                 } else if (command === 'add_url_download'){
@@ -149,15 +142,33 @@ let old_states = {
 };
 
 const objects = {
+    //action: set_shuffle value: false
+    //action: set_shuffle value: true
     current_duration: {role: "media.duration.text", name: "playback duration", type: "string", read: true, write: false, def: ""},
     current_elapsed:  {role: "media.elapsed.text", name: "playback elapsed", type: "string", read: true, write: false, def: ""},
     duration:         {role: "media.duration.text", name: "duration track", type: "string", read: true, write: false, def: ""},
     seek:             {role: "media.seek", name: "Controlling playback seek", type: "number", unit: "%", min: 0, max: 100, read: true, write: true, def: ""},
     volume:           {role: "level.volume", name: "volume", type: "number", min: 0, max: 100, read: true, write: true, def: ""},
     playlist:         {role: "media.playlist", name: "AudioStation playlist", type: "string", read: true, write: true, def: ""},
+    repeat:           {role: "media.mode.repeat", name: "Repeat control", type: "string", read: true, write: true, states: {none: "Off", all: "All", one: "One"}, def: ""},
+    shuffle:          {role: "media.mode.shuffle", name: "Shuffle control", type: "boolean", read: true, write: true, def: ""},
     prev:             {role: "button.prev", name: "Controlling playback previous", type: "boolean", read: false, write: true, def: ""},
     next:             {role: "button.next", name: "Controlling playback next", type: "boolean", read: false, write: true, def: ""},
-    stop:             {role: "button.stop", name: "Controlling playback stop", type: "boolean", read: false, write: true, def: ""}
+    stop:             {role: "button.stop", name: "Controlling playback stop", type: "boolean", read: false, write: true, def: ""},
+    pause:            {role: "button.pause", name: "Controlling playback pause", type: "boolean", read: false, write: true, def: ""},
+    play:             {role: "button.play", name: "Controlling playback play", type: "boolean", read: false, write: true, def: ""},
+    memory_usage:     {role: "state", name: "memory_usage", type: "number", unit: "%", read: true, write: false, def: ""},
+    cpu_load:         {role: "state", name: "cpu_load", type: "number", unit: "%", read: true, write: false, def: ""},
+    used:             {role: "state", name: "used", type: "number", unit: "%", read: true, write: false, def: ""},
+    ram:              {role: "state", name: "ram", type: "number", unit: "MB", read: true, write: false, def: ""},
+    capacity:         {role: "state", name: "capacity", type: "number", unit: "GB", read: true, write: false, def: ""},
+    total_size:       {role: "state", name: "total_size", type: "number", unit: "GB", read: true, write: false, def: ""},
+    used_size:        {role: "state", name: "used_size", type: "number", unit: "GB", read: true, write: false, def: ""},
+    temperature:      {role: "state", name: "temperature", type: "number", unit: "°C", read: true, write: false, def: ""},
+    Browser:      {role: "state", name: "AudioStation Browser Files", type: "object", read: true, write: true, def: ""},
+    play_folder:      {role: "state", name: "play_folder", type: "string", read: true, write: true, def: ""},
+    play_track:      {role: "state", name: "play_track", type: "string", read: true, write: true, def: ""},
+    
 };
 
 //http://192.168.1.101:5000/webapi/entry.cgi?api=SYNO.SurveillanceStation.HomeMode&version=1&method=Switch&on=true&_sid=Gj.tXLURyrKZg1510MPN674502
@@ -196,24 +207,23 @@ function getStatusRemotePlayers(states){
 }
 
 function clearPlayerStates(playerid){
-    states.AudioStation.players[playerid].status = 'stop';
-    states.AudioStation.players[playerid].state_playing = '';
     states.AudioStation.players[playerid].playlist_total = '';
-    states.AudioStation.players[playerid].volume = '';
+    states.AudioStation.players[playerid].volume = 0;
     states.AudioStation.players[playerid].album = '';
     states.AudioStation.players[playerid].artist = '';
     states.AudioStation.players[playerid].genre = '';
-    states.AudioStation.players[playerid].year = '';
+    states.AudioStation.players[playerid].year = 0;
     states.AudioStation.players[playerid].song_id = '';
     states.AudioStation.players[playerid].title = '';
     states.AudioStation.players[playerid].path = '';
     states.AudioStation.players[playerid].repeat = '';
     states.AudioStation.players[playerid].shuffle = '';
-    states.AudioStation.players[playerid].bitrate = '';
-    states.AudioStation.players[playerid].duration = '';
-    states.AudioStation.players[playerid].current_duration = '';
-    states.AudioStation.players[playerid].current_elapsed = '';
-    states.AudioStation.players[playerid].seek = '';
+    states.AudioStation.players[playerid].bitrate = 0;
+    states.AudioStation.players[playerid].duration = 0;
+    states.AudioStation.players[playerid].current_duration = 0;
+    states.AudioStation.players[playerid].current_elapsed = 0;
+    states.AudioStation.players[playerid].duration_sec = 0;
+    states.AudioStation.players[playerid].seek = 0;
     states.AudioStation.players[playerid].playlist = '';
 }
 
@@ -223,10 +233,18 @@ function getStatusPlayer(playerid, cb){
         param = {
             id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
         };
-        send('as', 'getStatusRemotePlayerStatus', param, (res) => {
-            if (res.state === 'playing' && res.song){
+        tools.send(syno, 'as', 'getStatusRemotePlayerStatus', param, (res) => {
+            states.AudioStation.players[playerid].state_playing = res.state;
+            let state = res.state;
+            if (state === 'playing'){
+                state = 'play';
+            } else if (state === 'stopped'){
+                state = 'stop';
+            }
+            states.AudioStation.players[playerid].status = state;
+            if ((res.state === 'playing' || res.state === 'pause') && res.song){
                 states = parse.RemotePlayerStatus(playerid, states, res);
-                send('as', 'getPlayListRemotePlayer', param, (res) => {
+                tools.send(syno, 'as', 'getPlayListRemotePlayer', param, (res) => {
                     if (res){
                         states = parse.PlayListRemotePlayer(playerid, states, res);
                     }
@@ -338,7 +356,7 @@ function listEvents(cb){
         start: 0, limit: 100, version: 1
     };
     //send('ss', 'getInfoCamera', param, function (res){
-    send('ss', 'listHistoryActionRules', param, (res) => {
+    tools.send(syno, 'ss', 'listHistoryActionRules', param, (res) => {
         if (res){
             states.SurveillanceStation.events = JSON.stringify(res);
             adapter.log.error('****************** ' + JSON.stringify(res));
@@ -352,7 +370,7 @@ function listCameras(cb){
     let param = {
         basic: true
     };
-    send('ss', 'listCameras', param, (res) => {
+    tools.send(syno, 'ss', 'listCameras', param, (res) => {
         if (res){
             let arr = res.cameras;
             arr.forEach((k, i) => {
@@ -403,7 +421,7 @@ function getSnapshotCamera(camid, cb){
         let param = {
             'cameraId': camid
         };
-        send('ss', 'getSnapshotCamera', param, (res) => {
+        tools.send(syno, 'ss', 'getSnapshotCamera', param, (res) => {
             if (res){
             }
             cb && cb();
@@ -413,7 +431,7 @@ function getSnapshotCamera(camid, cb){
 
 function listSnapShots(cb){
     //{"auInfo":{"cms":null,"deleteByRecordId":{"data":[]},"serverAction":{"0":null,"1":null,"2":null,"3":null,"4":null,"5":null},"timestamp":1507218967,"volumeAction":null},"data":[],"recCntData":{"recCnt":{"date":{"-1":0}},"total":0},"timestamp":"1507650252","total":0}
-    send('ss', 'listSnapShots', (res) => {
+    tools.send(syno, 'ss', 'listSnapShots', (res) => {
         if (res){
             states.SurveillanceStation.snapshots_list = JSON.stringify(res.data);
         }
@@ -431,7 +449,7 @@ function loadSnapShot(id, cb){
              2: Full size
              */
         };
-        send('ss', 'loadSnapShot', param, (res) => {
+        tools.send(syno, 'ss', 'loadSnapShot', param, (res) => {
             if (res){
 
             }
@@ -452,7 +470,7 @@ function addDownload(url, cb){
             param.destination = state.val;
         }
     });
-    send('dl', 'createTask', param, (res) => {
+    tools.send(syno, 'dl', 'createTask', param, (res) => {
         if (res){
             adapter.log.error('****************** ' + JSON.stringify(res));
         }
@@ -462,7 +480,7 @@ function addDownload(url, cb){
 
 /*************************************************************/
 
-function send(api, method, params, cb){
+/*function send(api, method, params, cb){
     if (typeof params == 'function'){
         cb = params;
         params = null;
@@ -480,7 +498,7 @@ function send(api, method, params, cb){
     } catch (e) {
         adapter.log.error('--- Send Error ' + JSON.stringify(e));
     }
-}
+}*/
 
 function setStates(){
     adapter.log.debug('--------------------- setStates -----------------------');

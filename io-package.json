@@ -3,7 +3,7 @@
         "name": "synology",
         "version": "0.1.0",
         "news": {
-            "0.0.10": {
+            "0.1.0": {
                 "en": "Formatting and timer behavior cleaning",
                 "de": "Formatting and timer behavior cleaning",
                 "ru": "Formatting and timer behavior cleaning",

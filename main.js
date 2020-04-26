@@ -2,10 +2,12 @@
 
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
-//"syno": "https://github.com/homeinstalator/syno/tarball/master/",
-let adapter, poll_time = 5000, _poll, timeOutPoll, remote_players = [], connect = false;
+const as = require('./lib/as.js');
+let adapter, timeOutPoll, connect = false;
 let current_player = '';
 let syno;
+let iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true, firstStart = true;
+const slowPollingTime = 60000;
 
 function startAdapter(options) {
     return adapter = utils.adapter(Object.assign({}, options, {
@@ -13,7 +15,6 @@ function startAdapter(options) {
         name: 'synology',
         ready: main,
         unload: callback => {
-            _poll && clearTimeout(_poll);
             timeOutPoll && clearTimeout(timeOutPoll);
             try {
                 adapter.log.debug('cleaned everything up...');
@@ -34,12 +35,12 @@ function startAdapter(options) {
                     val = 'rebootSystem';
                     send(api[name]['name'], val, (res) => {
                         adapter.log.debug('System reboot');
-                        _poll && clearTimeout(_poll);
+                        //timeOutPoll && clearTimeout(timeOutPoll);
                         adapter.setState('info.connection', false, true);
                         connect = false;
-                        timeOutPoll = setTimeout(() => {
-                            polling();
-                        }, 30000);
+                        /*timeOutPoll = setTimeout(() => {
+                            //polling();
+                        }, 30000);*/
                     });
                     return;
                 }
@@ -49,12 +50,12 @@ function startAdapter(options) {
                     send(api[name]['name'], val, (res) => {
                         adapter.log.debug('System shutdown');
 
-                        _poll && clearTimeout(_poll);
+                        //timeOutPoll && clearTimeout(timeOutPoll);
                         adapter.setState('info.connection', false, true);
                         connect = false;
-                        timeOutPoll = setTimeout(() => {
-                            polling();
-                        }, 30000);
+                        /*timeOutPoll = setTimeout(() => {
+                            //polling();
+                        }, 30000);*/
                     });
                     return;
                 }
@@ -127,6 +128,7 @@ let states = {
     'DownloadStation': {'info': {}},
     'AudioStation': {
         'info': {},
+        'players': {},
         'Browser': ''
     },
     'VideoStation': {'info': {}},
@@ -134,6 +136,43 @@ let states = {
     'SurveillanceStation': {
         'info': {},
         'cameras': {}
+    },
+    api: {
+        'dsm': {
+            name: 'DiskStationManager',
+            polldata: [],
+            installed: true
+        },
+        'fs': {
+            name: 'FileStation',
+            polldata: [],
+            installed: false
+        },
+        'dl': {
+            name: 'DownloadStation',
+            polldata: [],
+            installed: false
+        },
+        'as': {
+            name: 'AudioStation',
+            polldata: [],
+            installed: false
+        },
+        'vs': {
+            name: 'VideoStation',
+            polldata: [],
+            installed: false
+        },
+        'dtv': {
+            name: 'dtVideoStation_DTV',
+            polldata: [],
+            installed: false
+        },
+        'ss': {
+            name: 'SurveillanceStation',
+            polldata: [],
+            installed: false
+        }
     }
 };
 let old_states = {
@@ -146,6 +185,7 @@ let old_states = {
     'DownloadStation': {'info': {}},
     'AudioStation': {
         'info': {},
+        'players': {},
         'Browser': ''
     },
     'VideoStation': {'info': {}},
@@ -153,43 +193,43 @@ let old_states = {
     'SurveillanceStation': {
         'info': {},
         'cameras': {}
-    }
-};
-let api = {
-    'DiskStationManager': {
-        name: 'dsm',
-        polldata: [],
-        installed: true
     },
-    'FileStation': {
-        name: 'fs',
-        polldata: [],
-        installed: false
-    },
-    'DownloadStation': {
-        name: 'dl',
-        polldata: [],
-        installed: false
-    },
-    'AudioStation': {
-        name: 'as',
-        polldata: [],
-        installed: false
-    },
-    'VideoStation': {
-        name: 'vs',
-        polldata: [],
-        installed: false
-    },
-    'VideoStation_DTV': {
-        name: 'dt',
-        polldata: [],
-        installed: false
-    },
-    'SurveillanceStation': {
-        name: 'ss',
-        polldata: [],
-        installed: false
+    api: {
+        'dsm': {
+            name: 'DiskStationManager',
+            polldata: [],
+            installed: true
+        },
+        'fs': {
+            name: 'FileStation',
+            polldata: [],
+            installed: false
+        },
+        'dl': {
+            name: 'DownloadStation',
+            polldata: [],
+            installed: false
+        },
+        'as': {
+            name: 'AudioStation',
+            polldata: [],
+            installed: false
+        },
+        'vs': {
+            name: 'VideoStation',
+            polldata: [],
+            installed: false
+        },
+        'dtv': {
+            name: 'dtVideoStation_DTV',
+            polldata: [],
+            installed: false
+        },
+        'ss': {
+            name: 'SurveillanceStation',
+            polldata: [],
+            installed: false
+        }
     }
 };
 
@@ -197,6 +237,8 @@ let api = {
 
 function main() {
     adapter.subscribeStates('*');
+    startTime = new Date().getTime();
+    endTime = new Date().getTime();
     try {
         syno = new Syno({
             ignoreCertificateErrors: true,
@@ -210,275 +252,78 @@ function main() {
             otp: 'ASE32YJSBKUOIDPB',
             debug: false
         });
-
         //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));
-
-        poll_time = adapter.config.polling ? adapter.config.polling : 5000;
-        _poll && clearTimeout(_poll);
-
-        getInstallingPackets(() => {
-            adapter.setState('info.connection', true, true);
-            connect = true;
-            Object.keys(api).forEach((k) => {
-                if (api[k].installed) {
-                    getInfo(k);
-                }
-            });
-            if (api.SurveillanceStation.installed) {
-                listCameras();
-            }
-            polling();
-        });
+        timeOutPoll && clearTimeout(timeOutPoll);
+        queuePolling();
     } catch (e) {
         adapter.log.error('Synology Error: ' + e.message);
     }
 }
 
-function polling() {
-    _poll && clearTimeout(_poll);
-    _poll = setTimeout(() => {
-        getDSMInfo(() => {
-            if (!connect) {
-                adapter.setState('info.connection', true, true);
-                connect = true;
-            }
-            if (api.AudioStation.installed) { //камент для теста
-                getAudio(() => {
-                    if (current_player) {
-                        getStatusRemotePlayer(current_player);
-                    }
-                });
-            }
-            if (api.SurveillanceStation.installed) {
-                //listEvents(); //TODO надо доделать камеры
-            }
-            setStates();
-            polling();
-        });
-    }, poll_time);
-}
+let PollCmd = {
+    "firstPoll": [
+        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parseInstallingPackets},
+        {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'fs', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'dl', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'as', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'vs', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        //{api: 'dtv', method: 'GetInfoTuner', params: {}, ParseFunction: parseInfo},
+        {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parseListRemotePlayers}
+    ],
+    "fastPoll": [
+        {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parseSystemUtilization},
+        {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parseSystemStatus},
+        {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parseInfoSystem},
+        getStatusRemotePlayers,
+    ],
+    "slowPoll": [
+        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parseInstallingPackets}
+    ],
+};
 
-/////////////////* DiskStationManager */////////////////////////
-function getDSMInfo(cb) {
-    adapter.log.debug('--------------------- getDSMInfo -----------------------');
-    send('dsm', 'getInfo', (res) => {
-        Object.keys(res).forEach((k) => {
-            states.DiskStationManager.info[k] = res[k];
-        });
-        send('dsm', 'getSystemUtilization', (res) => {
-            //states.DiskStationManager.resources = res;
-            if (res) {
-                states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
-                states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
-                states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
-            }
-            send('dsm', 'getSystemStatus', (res) => {
-                //states.DiskStationManager.system_status = res;
-                if (res) {
-                    states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
-                    states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
-                    states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
-                }
-                let param = {
-                    type: "storage",
-                    version: 1
-                };
-                send('dsm', 'infoSystem', param, (res) => {
-                    if (res) {
-                        res.hdd_info.forEach((k, i) => {
-                            let diskname = k.diskno.toLowerCase().replace(' ', '_');
-                            states.DiskStationManager.hdd_info[diskname] = {
-                                'diskno': k.diskno,
-                                'model': k.model.replace(/\s{2,}/g, ''),
-                                'status': k.status,
-                                'temp': k.temp,
-                                'volume': k.volume,
-                                'capacity': (k.capacity / 1073741824).toFixed(2, 10)
-                            };
-                        });
-                        res.vol_info.forEach((k, i) => {
-                            let volname = k.name.toLowerCase();
-                            states.DiskStationManager.vol_info[volname] = {
-                                'name': k.name,
-                                'status': k.status,
-                                'total_size': (k.total_size / 1073741824).toFixed(2, 10),
-                                'used_size': (k.used_size / 1073741824).toFixed(2, 10),
-                                'used': ((k.used_size / k.total_size) * 100).toFixed(2, 10),
-                                'desc': k.desc
-                            };
-                        });
-                    }
-                    cb && cb();
-                });
-            });
+function getStatusRemotePlayers(states) {
+    Object.keys(states.AudioStation.players).forEach((playerid) => {
+        getStatusPlayer(playerid, (res) => {
+            //console.log(res);
         });
     });
+    return states;
 }
 
-///////////////////* FileStation */////////////////////////////
-
-///////////////////* AudioStation *////////////////////////////
-function getAudio(cb) {
-    adapter.log.debug('--------------------- getAudio -----------------------');
-    send('as', 'listRemotePlayers', (res) => {
-        if (res) {
-            //adapter.log.error('****************** ' + JSON.stringify(res));
-            states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
-            res.players.forEach((k, i) => {
-                remote_players[i] = k.id;
-            });
-            adapter.getState('AudioStation.selected_player', (err, state) => {
-                if ((err || !state)) {
-                    current_player = '';
-                } else {
-                    if (~remote_players.indexOf(state.val)) {
-                        current_player = state.val;
-                        getStatusRemotePlayer(current_player);
-                    } else {
-                        adapter.log.debug('getAudio id плеера (' + state.val + ')не найден в списке доступных:' + JSON.stringify(remote_players));
-                    }
-                }
-            });
-        }
-        cb && cb();
-    });
-}
-
-function Browser(id, cb) {
-    adapter.log.debug('--------------------- Browser -----------------------');
+function getStatusPlayer(playerid, cb) {
+    adapter.log.debug('--------------------- getStatusPlayer -----------------------');
     let param = {};
-    if (id && id !== '/') {
-        param = {id: id};
-    }
-    send('as', 'listFolders', param, (res) => {
-        let arr = [];
-        res.items.forEach((k, i) => {
-            let filetype = 'file';
-            if (res.items[i].type === 'folder') {
-                filetype = 'directory';
-            }
-            arr.push({
-                "id": res.items[i].id,
-                "file": res.items[i].path,
-                "filetype": filetype,
-                "title": res.items[i].title
-            });
-        });
-        states.AudioStation.Browser = JSON.stringify(arr);
-        cb && cb();
-    });
-}
-
-function PlayControl(cmd, val, cb) {
-    adapter.log.debug('--------------------- PlayControl -----------------------');
-    let id = current_player;
-    let param = {};
-    if (id) {
+    if (playerid) {
         param = {
-            id: id,
-            action: cmd
-        };
-        if (cmd === 'set_volume') {
-            if (val < 0) {
-                val = 0;
-            }
-            if (val > 100) {
-                val = 100;
-            }
-            param.value = val;
-        }
-        if (cmd === 'seek') {
-            param.value = (states.AudioStation.duration / 100) * val;
-        }
-        adapter.log.debug('PlayControl cmd - ' + cmd + '. param - ' + JSON.stringify(param));
-        send('as', 'controlRemotePlayer', param, (res) => {
-            //current_player = '';
-            cb && cb();
-        });
-    }
-}
-
-function PlayFolder(id, folder, limit, cb) {
-    adapter.log.debug('--------------------- PlayFolder -----------------------');
-    if (!id) {
-        id = current_player;
-    }
-    let param = {};
-    if (id) { //uuid:2eff7682-632d-6283-c2cc-29e985e5955c
-        param = {
-            id: id,
-            library: 'shared',
-            offset: 0,
-            limit: 1,
-            play: true,
-            containers_json: [{
-                "type": "folder",
-                "id": folder,
-                "recursive": true,
-                "sort_by": "title",
-                "sort_direction": "ASC"
-            }]
-        };
-        send('as', 'updatePlayListRemotePlayer', param, (res) => {
-            param = {
-                id: id,
-                action: 'play'
-            };
-            send('as', 'controlRemotePlayer', param, (res) => {
-            });
-        });
-    }
-}
-
-function PlayTrack(id, track, cb) {
-    adapter.log.debug('--------------------- PlayTrack -----------------------');
-    if (!id) {
-        id = current_player;
-    }
-    let param = {};
-    if (id) { //uuid:bab0037b-3c03-7bb9-4d0a-7b093cb9358c
-        param = {
-            id: id,
-            library: 'shared',
-            offset: 0,
-            limit: 1,
-            play: true,
-            songs: track,
-            containers_json: []
-        };
-        send('as', 'updatePlayListRemotePlayer', param, (res) => {
-            param = {
-                id: id,
-                action: 'play'
-            };
-            send('as', 'controlRemotePlayer', param, (res) => {
-            });
-        });
-
-    }
-}
-
-function getStatusRemotePlayer(id, cb) {
-    adapter.log.debug('--------------------- getStatusRemotePlayer -----------------------');
-    let param = {};
-    if (id) {
-        param = {
-            id: id,
+            id: playerid,
             additional: 'song_tag,song_audio,subplayer_volume'
         };
         send('as', 'getStatusRemotePlayerStatus', param, (res) => {
-            //states.AudioStation.StatusRemotePlayer = JSON.stringify(res);
             //adapter.log.error('******************* getStatusRemotePlayerStatus - ' + JSON.stringify(res));
-            states.AudioStation.state_playing = res.state;
-            states.AudioStation.position = res.position;
-            states.AudioStation.playlist_total = res.playlist_total;
-            states.AudioStation.volume = res.volume;
-            states.AudioStation.song = JSON.stringify(res.song);
-            states.AudioStation.duration = SecToText(res.song.additional.song_audio.duration);
-            states.AudioStation.current_duration = SecToText(res.position);
-            states.AudioStation.current_elapsed = SecToText(res.song.additional.song_audio.duration - res.position);
-            states.AudioStation.seek = parseInt((res.position / res.song.additional.song_audio.duration) * 100, 10);
             if (res.state === 'playing' && res.song) {
+                current_player = playerid;
+                states.AudioStation.players[playerid].status = 'play';
+                states.AudioStation.players[playerid].state_playing = res.state;
+                states.AudioStation.players[playerid].position = res.position;
+                states.AudioStation.players[playerid].playlist_total = res.playlist_total;
+                states.AudioStation.players[playerid].volume = res.volume;
+                states.AudioStation.players[playerid].song = JSON.stringify(res.song);
+                states.AudioStation.players[playerid].album = res.song.additional.song_tag.album;
+                states.AudioStation.players[playerid].artist = res.song.additional.song_tag.artist;
+                states.AudioStation.players[playerid].genre = res.song.additional.song_tag.genre;
+                states.AudioStation.players[playerid].year = res.song.additional.song_tag.year;
+                states.AudioStation.players[playerid].song_id = res.song.id;
+                states.AudioStation.players[playerid].title = res.song.title;
+                states.AudioStation.players[playerid].path = res.song.path;
+                states.AudioStation.players[playerid].repeat = res.play_mode.repeat;
+                states.AudioStation.players[playerid].shuffle = res.play_mode.shuffle;
+                states.AudioStation.players[playerid].bitrate = res.song.additional.song_audio.bitrate;
+                states.AudioStation.players[playerid].duration = SecToText(res.song.additional.song_audio.duration);
+                states.AudioStation.players[playerid].current_duration = SecToText(res.position);
+                states.AudioStation.players[playerid].current_elapsed = SecToText(res.song.additional.song_audio.duration - res.position);
+                states.AudioStation.players[playerid].seek = parseInt((res.position / res.song.additional.song_audio.duration) * 100, 10);
                 send('as', 'getPlayListRemotePlayer', param, (res) => {
                     let playlist = [];
                     let arr = res.songs;
@@ -497,12 +342,191 @@ function getStatusRemotePlayer(id, cb) {
                             "cover": ""
                         }
                     });
-                    states.AudioStation.playlist = JSON.stringify(playlist);
+                    states.AudioStation.players[playerid].playlist = JSON.stringify(playlist);
                 });
+            } else {
+                states.AudioStation.players[playerid].status = 'stop';
+                states.AudioStation.players[playerid].state_playing = '';
+                states.AudioStation.players[playerid].position = '';
+                states.AudioStation.players[playerid].playlist_total = '';
+                states.AudioStation.players[playerid].volume = '';
+                states.AudioStation.players[playerid].song = '';
+                states.AudioStation.players[playerid].album = '';
+                states.AudioStation.players[playerid].artist = '';
+                states.AudioStation.players[playerid].genre = '';
+                states.AudioStation.players[playerid].year = '';
+                states.AudioStation.players[playerid].song_id = '';
+                states.AudioStation.players[playerid].title = '';
+                states.AudioStation.players[playerid].path = '';
+                states.AudioStation.players[playerid].repeat = '';
+                states.AudioStation.players[playerid].shuffle = '';
+                states.AudioStation.players[playerid].bitrate = '';
+                states.AudioStation.players[playerid].duration = '';
+                states.AudioStation.players[playerid].current_duration = '';
+                states.AudioStation.players[playerid].current_elapsed = '';
+                states.AudioStation.players[playerid].seek = '';
+                states.AudioStation.players[playerid].playlist = '';
             }
-            cb && cb();
+            cb && cb(res);
         });
     }
+}
+
+function parseListRemotePlayers(api, states, res) {
+    states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
+    res.players.forEach((player, i) => {
+        states.AudioStation.players[player.id] = {'name': player.name};
+    });
+    return states;
+}
+
+function parseInfoSystem(api, states, res) {
+    res.hdd_info.forEach((key) => {
+        let diskname = key.diskno.toLowerCase().replace(' ', '_');
+        states.DiskStationManager.hdd_info[diskname] = {
+            'diskno': key.diskno,
+            'model': key.model.replace(/\s{2,}/g, ''),
+            'status': key.status,
+            'temp': key.temp,
+            'volume': key.volume,
+            'capacity': (key.capacity / 1073741824).toFixed(2, 10)
+        };
+    });
+    res.vol_info.forEach((key) => {
+        const volname = key.name.toLowerCase();
+        states.DiskStationManager.vol_info[volname] = {
+            'name': key.name,
+            'status': key.status,
+            'total_size': (key.total_size / 1073741824).toFixed(2, 10),
+            'used_size': (key.used_size / 1073741824).toFixed(2, 10),
+            'used': ((key.used_size / key.total_size) * 100).toFixed(2, 10),
+            'desc': key.desc
+        };
+    });
+    return states;
+}
+
+function parseInstallingPackets(api, states, res) {
+    Object.keys(res.packages).forEach((key) => {
+        if (states.api[key]) {
+            states.api[key]['installed'] = res.packages[key];
+        }
+    });
+    return states;
+}
+
+function parseInfo(api, states, res) {
+    if (states.api[api].installed) {
+        const apiName = states.api[api].name;
+        Object.keys(res).forEach((key) => {
+            states[apiName].info[key] = res[key];
+        });
+    }
+    return states;
+}
+
+function parseSystemUtilization(api, states, res) {
+    states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + parseInt(res.cpu.user_load);
+    states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
+    states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
+    return states;
+}
+
+function parseSystemStatus(api, states, res) {
+    states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
+    states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
+    states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
+    return states;
+}
+
+function queuePolling() {
+    if (pollAllowed) {
+        iteration = 0;
+        isPoll = true;
+        let namePolling = '';
+        if (endTime - startTime > slowPollingTime) {
+            startTime = new Date().getTime();
+            namePolling = 'slowPoll';
+        } else {
+            if (firstStart) {
+                pollAllowed = false;
+                namePolling = 'firstPoll';
+            } else {
+                namePolling = 'fastPoll';
+            }
+        }
+        adapter.log.debug('slowPollingTime = ' + (endTime - startTime));
+        sendPolling(namePolling);
+
+    }
+}
+
+function sendPolling(namePolling, cb) {
+    adapter.log.debug('-----------------------------------------------------------------------------------------------------');
+    if (typeof PollCmd[namePolling][iteration] === 'function') {
+        states = PollCmd[namePolling][iteration](states);
+        iterator(namePolling, cb);
+    } else {
+        const api = PollCmd[namePolling][iteration].api;
+        const method = PollCmd[namePolling][iteration].method;
+        const params = PollCmd[namePolling][iteration].params;
+        adapter.log.debug('Получаем информацию из массива (' + namePolling + ') api: ' + api + ' method: ' + method + ' params: ' + JSON.stringify(params));
+        try {
+            syno[api][method](params, (err, res) => {
+                adapter.log.debug(!err && res ? 'Ответ получен, парсим:' : 'Нет ответа на команду, читаем следующую.');
+                if (!err && res) {
+                    states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                } else if (err) {
+                    adapter.log.error('Error - ' + err);
+                }
+                iterator(namePolling, cb);
+                /*iteration++;
+                if (iteration > PollCmd[namePolling].length - 1) {
+                    iteration = 0;
+                    if (namePolling === 'firstPoll') firstStart = false;
+                    queueCmd && sendQueue(queueCmd);
+                    pollAllowed = true;
+                    adapter.log.debug('### Все данные прочитали, сохраняем полученные данные. ###');
+                    isPoll = false;
+                    setStates();
+                    timeOutPoll = setTimeout(() => {
+                        endTime = new Date().getTime();
+                        queuePolling();
+                    }, poll_time);
+                } else {
+                    sendPolling(namePolling, cb);
+                }*/
+            });
+        } catch (e) {
+            error(e);
+        }
+    }
+}
+
+function iterator(namePolling, cb) {
+    iteration++;
+    if (iteration > PollCmd[namePolling].length - 1) {
+        iteration = 0;
+        if (namePolling === 'firstPoll') firstStart = false;
+        queueCmd && sendQueue(queueCmd);
+        pollAllowed = true;
+        adapter.log.debug('### Все данные прочитали, сохраняем полученные данные. ###');
+        isPoll = false;
+        setStates();
+        timeOutPoll = setTimeout(() => {
+            endTime = new Date().getTime();
+            queuePolling();
+        }, 500);
+    } else {
+        sendPolling(namePolling, cb);
+    }
+}
+
+function sendQueue(cmd) {
+    send(cmd, (response) => {
+        queueCmd = null;
+        cmd.cb && cmd.cb(response);
+    });
 }
 
 ///////////////////* SurveillanceStation */////////////////////
@@ -666,35 +690,6 @@ function addDownload(url, cb) {
 ///////////////////* VideoStation_DTV *////////////////////////
 
 /*************************************************************/
-function getInstallingPackets(cb) {
-    adapter.log.debug('--------------------- getInstallingPackets -----------------------');
-    send('dsm', 'getPollingData', (res, asd, easd) => {
-        if (res) {
-            Object.keys(res.packages).forEach((k) => {
-                if (api[k]) {
-                    api[k]['installed'] = res.packages[k];
-                }
-            });
-        } else {
-            error({code: 999});
-        }
-        cb && cb();
-    });
-}
-
-function getInfo(key) {
-    adapter.log.debug('--------------------- getInfo -----------------------');
-    adapter.log.debug('key = ' + key);
-    send(api[key].name, 'getInfo', (res) => {
-        if (res) {
-            Object.keys(res).forEach((k) => {
-                states[key].info[k] = res[k];
-            });
-        } else {
-            error({code: 998});
-        }
-    });
-}
 
 function send(api, method, params, cb) {
     if (typeof params == 'function') {
@@ -703,7 +698,7 @@ function send(api, method, params, cb) {
     }
     try {
         syno[api][method](params, (err, data) => {
-            adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
+            //adapter.log.debug('---DEBUG RES DATA--- :{"api": ' + api + ', "method": ' + method + ' } \r\nRESPONSE: ' + JSON.stringify(data));
             data = data || '';
             if (!err) {
                 cb && cb(data);
@@ -720,45 +715,47 @@ function setStates() {
     adapter.log.debug('--------------------- setStates -----------------------');
     let ids = '';
     Object.keys(states).forEach((_api) => {
-        Object.keys(states[_api]).forEach((_type) => {
-            if (typeof states[_api][_type] == 'object') {
-                Object.keys(states[_api][_type]).forEach((key) => {
-                    if (typeof states[_api][_type][key] == 'object') {
-                        //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
-                        Object.keys(states[_api][_type][key]).forEach((key2) => {
-                            //adapter.log.error('*********' + states[_api][_type][key][key2]);
-                            if (!old_states[_api][_type].hasOwnProperty(key)) {
-                                old_states[_api][_type][key] = {};
+        if (_api !== 'api') {
+            Object.keys(states[_api]).forEach((_type) => {
+                if (typeof states[_api][_type] == 'object') {
+                    Object.keys(states[_api][_type]).forEach((key) => {
+                        if (typeof states[_api][_type][key] == 'object') {
+                            //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
+                            Object.keys(states[_api][_type][key]).forEach((key2) => {
+                                //adapter.log.error('*********' + states[_api][_type][key][key2]);
+                                if (!old_states[_api][_type].hasOwnProperty(key)) {
+                                    old_states[_api][_type][key] = {};
+                                }
+                                if (states[_api][_type][key][key2] !== old_states[_api][_type][key][key2]) {
+                                    old_states[_api][_type][key][key2] = states[_api][_type][key][key2];
+                                    ids = _api + '.' + _type + '.' + key + '.' + key2;
+                                    setObject(ids, states[_api][_type][key][key2]);
+                                }
+                            });
+                        } else {
+                            if (states[_api][_type][key] !== old_states[_api][_type][key]) {
+                                old_states[_api][_type][key] = states[_api][_type][key];
+                                ids = _api + '.' + _type + '.' + key;
+                                setObject(ids, states[_api][_type][key]);
                             }
-                            if (states[_api][_type][key][key2] !== old_states[_api][_type][key][key2]) {
-                                old_states[_api][_type][key][key2] = states[_api][_type][key][key2];
-                                ids = _api + '.' + _type + '.' + key + '.' + key2;
-                                setObject(ids, states[_api][_type][key][key2]);
-                            }
-                        });
-                    } else {
-                        if (states[_api][_type][key] !== old_states[_api][_type][key]) {
-                            old_states[_api][_type][key] = states[_api][_type][key];
-                            ids = _api + '.' + _type + '.' + key;
-                            setObject(ids, states[_api][_type][key]);
                         }
+                    });
+                } else {
+                    if (states[_api][_type] !== old_states[_api][_type]) {
+                        old_states[_api][_type] = states[_api][_type];
+                        ids = _api + '.' + _type;
+                        setObject(ids, states[_api][_type]);
                     }
-                });
-            } else {
-                if (states[_api][_type] !== old_states[_api][_type]) {
-                    old_states[_api][_type] = states[_api][_type];
-                    ids = _api + '.' + _type;
-                    setObject(ids, states[_api][_type]);
                 }
-            }
-        });
+            });
+        }
     });
 }
 
 function setObject(name, val) {
     let type = 'string';
     let role = 'state';
-    //adapter.log.debug('setObject ' + JSON.stringify(name));
+    adapter.log.debug('setObject ' + JSON.stringify(name));
     adapter.getObject(name, function (err, obj) {
         if ((err || !obj)) {
             adapter.setObject(name, {
@@ -774,11 +771,15 @@ function setObject(name, val) {
             adapter.setState(name, {val: val, ack: true});
         } else {
             adapter.getState(name, function (err, state) {
-                if (state.val === val) {
-                    //adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' = newVal: ' + val + ' }');
-                } else if (state.val !== val) {
-                    adapter.setState(name, {val: val, ack: true});
-                    adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' != newVal: ' + val + ' }');
+                if (!err && state !== null) {
+                    if (state.val === val) {
+                        //adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' = newVal: ' + val + ' }');
+                    } else if (state.val !== val) {
+                        adapter.setState(name, {val: val, ack: true});
+                        adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' != newVal: ' + val + ' }');
+                    }
+                } else {
+                    adapter.log.debug('setState error ' + name);
                 }
             });
         }
@@ -837,23 +838,18 @@ function error(e) {
         }
     }
     if (code === 400/* || code === 119*/ || code === 'ECONNREFUSED' || code === 'ETIMEDOUT') {
-        _poll && clearTimeout(_poll);
+        timeOutPoll && clearTimeout(timeOutPoll);
         adapter.setState('info.connection', false, true);
         connect = false;
         timeOutPoll = setTimeout(() => {
-            polling();
-        }, poll_time);
+            queuePolling()
+        }, 1000);
     }
-
     adapter.log.error('******************************************************************************');
     adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
     adapter.log.error('******************************************************************************');
-
 }
 
-/**
- * @return {string}
- */
 function SecToText(sec) {
     let res;
     let m = Math.floor(sec / 60);

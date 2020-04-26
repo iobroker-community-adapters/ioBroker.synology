@@ -28,6 +28,9 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 
 ## Changelog
 
+### 0.1.0
+* (instalator) 
+
 ### 0.0.4 (2018-10-07)
 * (instalator) Изменен репозиторий библиотеки
 * (instalator) Добавлено в конфиг время опроса

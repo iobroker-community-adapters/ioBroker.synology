@@ -2,7 +2,6 @@
 
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
-//const tools = require('./lib/tools.js');
 const parse = require('./lib/parsers.js');
 let adapter, syno, timeOutPoll, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true, firstStart = true;
 const slowPollingTime = 60000;
@@ -57,15 +56,17 @@ function startAdapter(options){
                         });
                     }
                 } else if (command === 'play_folder'){
-                    PlayFolder(syno, states, name, val);
+                    PlayFolder(states, name, val);
                 } else if (command === 'play_track'){
-                    PlayTrack(syno, states, name, val);
+                    PlayTrack(states, name, val);
                 } else if (command === 'stop' || command === 'next' || command === 'prev' || command === 'volume' || command === 'seek' || command === 'pause' || command === 'play' || command === 'repeat' || command === 'shuffle'){
-                    PlayControl(syno, states, name, command, val);
+                    PlayControl(states, name, command, val);
                 } else if (command === 'getSnapshotCamera'){
                     getSnapshotCamera(val);
                 } else if (command === 'add_url_download'){
                     addDownload(val);
+                } else if (command === 'status_on'){
+                    send('ss', 'switchHomeMode', {on: val});
                 } else {
                     if (states.api[name]){
                         if (states.api[name].installed){
@@ -111,7 +112,7 @@ let states = {
     'AudioStation':        {'info': {}, 'players': {}},
     'VideoStation':        {'info': {}},
     'VideoStation_DTV':    {'info': {}},
-    'SurveillanceStation': {'info': {}, 'cameras': {}},
+    'SurveillanceStation': {'info': {}, 'cameras': {}, HomeMode: {}},
     api:                   {
         'dsm': {name: 'DiskStationManager', polldata: [], installed: true},
         'fs':  {name: 'FileStation', polldata: [], installed: true},
@@ -122,6 +123,7 @@ let states = {
         'ss':  {name: 'SurveillanceStation', polldata: [], installed: false}
     }
 };
+
 let old_states = {
     'DiskStationManager':  {'info': {}, 'hdd_info': {}, 'vol_info': {}},
     'FileStation':         {'info': {}},
@@ -129,7 +131,7 @@ let old_states = {
     'AudioStation':        {'info': {}, 'players': {}},
     'VideoStation':        {'info': {}},
     'VideoStation_DTV':    {'info': {}},
-    'SurveillanceStation': {'info': {}, 'cameras': {}},
+    'SurveillanceStation': {'info': {}, 'cameras': {}, HomeMode: {}},
     api:                   {
         'dsm': {name: 'DiskStationManager', polldata: [], installed: true},
         'fs':  {name: 'FileStation', polldata: [], installed: true},
@@ -168,7 +170,7 @@ const objects = {
     Browser:          {role: "state", name: "AudioStation Browser Files", type: "object", read: true, write: true, def: ""},
     play_folder:      {role: "state", name: "play_folder", type: "string", read: true, write: true, def: ""},
     play_track:       {role: "state", name: "play_track", type: "string", read: true, write: true, def: ""},
-
+    status_on:        {role: "state", name: "status_on", type: "boolean", read: true, write: true, def: ""},
 };
 
 //http://192.168.1.101:5000/webapi/entry.cgi?api=SYNO.SurveillanceStation.HomeMode&version=1&method=Switch&on=true&_sid=Gj.tXLURyrKZg1510MPN674502
@@ -183,13 +185,15 @@ let PollCmd = {
         {api: 'vs', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'dtv', method: 'GetInfoTuner', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parse.Info},
+        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers}
     ],
     "fastPoll":  [
         {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parse.SystemUtilization},
         {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parse.SystemStatus},
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
-        getStatusRemotePlayers
+        getStatusRemotePlayers,
+        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
     ],
     "slowPoll":  [
         {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets}
@@ -293,6 +297,7 @@ function sendPolling(namePolling, cb){
             syno[api][method](params, (err, res) => {
                 adapter.log.debug(!err && res ? 'Ответ получен, парсим:' :'Нет ответа на команду, читаем следующую.');
                 if (!err && res){
+                    connect = true;
                     setInfoConnection(true);
                     states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
                 } else if (err){
@@ -338,6 +343,7 @@ function iterator(namePolling, cb){
 }
 
 //////////////////////////* SurveillanceStation */////////////////////
+
 function listEvents(cb){
     //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
 
@@ -507,7 +513,7 @@ function Browser(_states, playerid, val, cb){
     });
 }
 
-function PlayControl(syno, states, playerid, cmd, val, cb){
+function PlayControl(states, playerid, cmd, val, cb){
     //adapter.log.debug('--------------------- PlayControl -----------------------');
     let param = {
         id:     playerid,
@@ -530,14 +536,11 @@ function PlayControl(syno, states, playerid, cmd, val, cb){
             param.action = 'set_shuffle';
             param.value = val;
         }
-        //adapter.log.debug('PlayControl cmd - ' + cmd + '. param - ' + JSON.stringify(param));
-        send('as', 'controlRemotePlayer', param, (res) => {
-            //cb && cb();
-        });
+        send('as', 'controlRemotePlayer', param);
     }
 }
 
-function PlayFolder(syno, states, playerid, folder, cb){
+function PlayFolder(states, playerid, folder, cb){
     //adapter.log.debug('--------------------- PlayFolder -----------------------');
     let param = {};
     if (playerid){
@@ -567,7 +570,7 @@ function PlayFolder(syno, states, playerid, folder, cb){
     }
 }
 
-function PlayTrack(syno, states, playerid, val, cb){
+function PlayTrack(states, playerid, val, cb){
     //adapter.log.debug('--------------------- PlayTrack -----------------------');
     let param = {};
     if (playerid){
@@ -689,12 +692,8 @@ function setObject(id, val){
             adapter.extendObject(id, {common: common});
             adapter.getState(id, function (err, state){
                 if (!err && state !== null){
-                    if (state.val === val){
-                        //adapter.log.debug('setState ' + name + ' { oldVal: ' + state.val + ' = newVal: ' + val + ' }');
-                    } else if (state.val !== val){
-                        adapter.setState(id, {
-                            val: val, ack: true
-                        });
+                    if (!state.ack || state.val !== val){
+                        adapter.setState(id, {val: val, ack: true});
                         adapter.log.debug('setState ' + id + ' { oldVal: ' + state.val + ' != newVal: ' + val + ' }');
                     }
                 } else {
@@ -703,7 +702,6 @@ function setObject(id, val){
             });
         }
     });
-    objects
 }
 
 function error(e){

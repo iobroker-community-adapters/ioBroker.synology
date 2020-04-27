@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "syno": "https://github.com/homeinstalator/syno/tarball/master/",
+    "moment": "^2.24.0",
     "@iobroker/adapter-core": "^2.2.1"
   },
   "devDependencies": {

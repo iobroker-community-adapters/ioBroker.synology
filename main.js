@@ -292,8 +292,8 @@ function sendPolling(namePolling, cb){
         try {
             syno[api][method](params, (err, res) => {
                 adapter.log.debug(!err && res ? 'Ответ получен, парсим:' :'Нет ответа на команду, читаем следующую.');
-                setInfoConnection(true);
                 if (!err && res){
+                    setInfoConnection(true);
                     states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
                 } else if (err){
                     adapter.log.error('Error - ' + err);
@@ -765,9 +765,7 @@ function error(e){
             queuePolling()
         }, 1000);
     }
-    adapter.log.error('******************************************************************************');
-    adapter.log.error('***DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
-    adapter.log.error('******************************************************************************');
+    adapter.log.error('*** DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
 }
 
 function main(){
@@ -800,12 +798,12 @@ function main(){
     }
 }
 
-function setInfoConnection(state){
+function setInfoConnection(val){
     adapter.getState('info.connection', function (err, state){
         if (!err && state !== null){
-            if (state.val === state){
-            } else if (state.val !== state){
-                adapter.setState('info.connection', state, true);
+            if (state.val === val){
+            } else if (state.val !== val){
+                adapter.setState('info.connection', val, true);
             }
         }
     });

@@ -59,6 +59,10 @@ function startAdapter(options){
                     PlayFolder(states, name, val);
                 } else if (command === 'play_track'){
                     PlayTrack(states, name, val);
+                } else if (command === 'song_id'){
+                    PlayTrackId(states, name, val);
+                } else if (command === 'current_play'){
+                    PlayTrackNum(states, name, val);
                 } else if (command === 'stop' || command === 'next' || command === 'prev' || command === 'volume' || command === 'seek' || command === 'pause' || command === 'play' || command === 'repeat' || command === 'shuffle'){
                     PlayControl(states, name, command, val);
                 } else if (command === 'getSnapshotCamera'){
@@ -146,11 +150,20 @@ let old_states = {
 const objects = {
     //action: set_shuffle value: false
     //action: set_shuffle value: true
-    current_duration: {role: "media.duration.text", name: "playback duration", type: "string", read: true, write: false, def: ""},
-    current_elapsed:  {role: "media.elapsed.text", name: "playback elapsed", type: "string", read: true, write: false, def: ""},
-    duration:         {role: "media.duration.text", name: "duration track", type: "string", read: true, write: false, def: ""},
+    current_duration: {role: "media.duration.text", name: "Playback duration", type: "string", read: true, write: false, def: ""},
+    current_elapsed:  {role: "media.elapsed.text", name: "Playback elapsed", type: "string", read: true, write: false, def: ""},
+    current_play:     {role: "media.track", name: "Controlling and state current play track number", type: "string", read: true, write: true, def: ""},
+    song_id:          {role: "media.playid", name: "Controlling and state current play track id", type: "number", read: true, write: true, def: ""},
+    artist:           {role: "media.artist", name: "artist", type: "string", read: true, write: false, def: ""},
+    album:            {role: "media.album", name: "album", type: "string", read: true, write: false, def: ""},
+    title:            {role: "media.title", name: "title", type: "string", read: true, write: false, def: ""},
+    genre:            {role: "media.genre", name: "genre", type: "string", read: true, write: false, def: ""},
+    year:             {role: "media.date", name: "year", type: "string", read: true, write: false, def: ""},
+    duration_sec:     {role: "media.duration", name: "duration_sec", type: "number", read: true, write: false, def: ""},
+    duration:         {role: "media.duration.text", name: "Duration track", type: "string", read: true, write: false, def: ""},
+    bitrate:          {role: "media.bitrate", name: "bitrate", type: "string", unit: "kbps", read: true, write: false, def: ""},
     seek:             {role: "media.seek", name: "Controlling playback seek", type: "number", unit: "%", min: 0, max: 100, read: true, write: true, def: ""},
-    volume:           {role: "level.volume", name: "volume", type: "number", min: 0, max: 100, read: true, write: true, def: ""},
+    volume:           {role: "level.volume", name: "Volume", type: "number", min: 0, max: 100, read: true, write: true, def: ""},
     playlist:         {role: "media.playlist", name: "AudioStation playlist", type: "string", read: true, write: true, def: ""},
     repeat:           {role: "media.mode.repeat", name: "Repeat control", type: "string", read: true, write: true, states: {none: "Off", all: "All", one: "One"}, def: ""},
     shuffle:          {role: "media.mode.shuffle", name: "Shuffle control", type: "boolean", read: true, write: true, def: ""},
@@ -159,6 +172,7 @@ const objects = {
     stop:             {role: "button.stop", name: "Controlling playback stop", type: "boolean", read: false, write: true, def: ""},
     pause:            {role: "button.pause", name: "Controlling playback pause", type: "boolean", read: false, write: true, def: ""},
     play:             {role: "button.play", name: "Controlling playback play", type: "boolean", read: false, write: true, def: ""},
+    state_playing:    {role: "media.state", name: "Status player", type: "string", read: true, write: false, def: ""},
     memory_usage:     {role: "state", name: "memory_usage", type: "number", unit: "%", read: true, write: false, def: ""},
     cpu_load:         {role: "state", name: "cpu_load", type: "number", unit: "%", read: true, write: false, def: ""},
     used:             {role: "state", name: "used", type: "number", unit: "%", read: true, write: false, def: ""},
@@ -200,150 +214,7 @@ let PollCmd = {
     ]
 };
 
-function getStatusRemotePlayers(states){
-    adapter.log.debug('--------------------- getStatusPlayer -----------------------');
-    Object.keys(states.AudioStation.players).forEach((playerid) => {
-        getStatusPlayer(playerid, (res) => {
-            //console.log(res);
-        });
-    });
-    return states;
-}
-
-function clearPlayerStates(playerid){
-    states.AudioStation.players[playerid].playlist_total = '';
-    states.AudioStation.players[playerid].volume = 0;
-    states.AudioStation.players[playerid].album = '';
-    states.AudioStation.players[playerid].artist = '';
-    states.AudioStation.players[playerid].genre = '';
-    states.AudioStation.players[playerid].year = 0;
-    states.AudioStation.players[playerid].song_id = '';
-    states.AudioStation.players[playerid].title = '';
-    states.AudioStation.players[playerid].path = '';
-    states.AudioStation.players[playerid].repeat = '';
-    states.AudioStation.players[playerid].shuffle = '';
-    states.AudioStation.players[playerid].bitrate = 0;
-    states.AudioStation.players[playerid].duration = 0;
-    states.AudioStation.players[playerid].current_duration = 0;
-    states.AudioStation.players[playerid].current_elapsed = 0;
-    states.AudioStation.players[playerid].duration_sec = 0;
-    states.AudioStation.players[playerid].seek = 0;
-    states.AudioStation.players[playerid].playlist = '';
-}
-
-function getStatusPlayer(playerid, cb){
-    let param = {};
-    if (playerid){
-        param = {
-            id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
-        };
-        send('as', 'getStatusRemotePlayerStatus', param, (res) => {
-            states.AudioStation.players[playerid].state_playing = res.state;
-            let state = res.state;
-            if (state === 'playing'){
-                state = 'play';
-            } else if (state === 'stopped'){
-                state = 'stop';
-            }
-            states.AudioStation.players[playerid].status = state;
-            if ((res.state === 'playing' || res.state === 'pause') && res.song){
-                states = parse.RemotePlayerStatus(playerid, states, res);
-                send('as', 'getPlayListRemotePlayer', param, (res) => {
-                    if (res){
-                        states = parse.PlayListRemotePlayer(playerid, states, res);
-                    }
-                });
-            } else {
-                clearPlayerStates(playerid);
-            }
-            cb && cb(res);
-        });
-    }
-}
-
-function queuePolling(){
-    if (pollAllowed){
-        iteration = 0;
-        isPoll = true;
-        let namePolling = '';
-        if (endTime - startTime > slowPollingTime){
-            startTime = new Date().getTime();
-            namePolling = 'slowPoll';
-        } else {
-            if (firstStart){
-                pollAllowed = false;
-                namePolling = 'firstPoll';
-            } else {
-                namePolling = 'fastPoll';
-            }
-        }
-        adapter.log.debug('slowPollingTime = ' + (endTime - startTime));
-        sendPolling(namePolling);
-
-    }
-}
-
-function sendPolling(namePolling, cb){
-    adapter.log.debug('-----------------------------------------------------------------------------------------------------');
-    if (typeof PollCmd[namePolling][iteration] === 'function'){
-        states = PollCmd[namePolling][iteration](states);
-        iterator(namePolling, cb);
-    } else if (states.api[PollCmd[namePolling][iteration].api].installed){
-        const api = PollCmd[namePolling][iteration].api;
-        const method = PollCmd[namePolling][iteration].method;
-        const params = PollCmd[namePolling][iteration].params;
-        adapter.log.debug('Получаем информацию из массива (' + namePolling + ') api: ' + api + ' method: ' + method + ' params: ' + JSON.stringify(params));
-        try {
-            syno[api][method](params, (err, res) => {
-                adapter.log.debug(!err && res ? 'Ответ получен, парсим:' :'Нет ответа на команду, читаем следующую.');
-                if (!err && res){
-                    connect = true;
-                    setInfoConnection(true);
-                    states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
-                } else if (err){
-                    adapter.log.error('Error - ' + err);
-                }
-                if (queueCmd){
-                    adapter.log.debug('* Get queueCmd *');
-                    queueCmd(states, (res) => {
-                        adapter.log.debug('queueCmd Response: '/* + JSON.stringify(res)*/);
-                        states = res;
-                        queueCmd = null;
-                        iterator(namePolling, cb);
-                    });
-                } else {
-                    iterator(namePolling, cb);
-                }
-            });
-        } catch (e) {
-            error(e);
-        }
-    } else {
-        adapter.log.debug('Packet ' + PollCmd[namePolling][iteration].api + ' non installed, skipped');
-        iterator(namePolling, cb);
-    }
-}
-
-function iterator(namePolling, cb){
-    iteration++;
-    if (iteration > PollCmd[namePolling].length - 1){
-        iteration = 0;
-        if (namePolling === 'firstPoll') firstStart = false;
-        pollAllowed = true;
-        adapter.log.debug('### Все данные прочитали, сохраняем полученные данные. ###');
-        isPoll = false;
-        setStates();
-        timeOutPoll = setTimeout(() => {
-            endTime = new Date().getTime();
-            queuePolling();
-        }, 500);
-    } else {
-        sendPolling(namePolling, cb);
-    }
-}
-
 //////////////////////////* SurveillanceStation */////////////////////
-
 function listEvents(cb){
     //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
 
@@ -488,6 +359,67 @@ function addDownload(url, cb){
 }
 
 ////////////////////////* AudioStation *////////////////////////////
+function getStatusRemotePlayers(states){
+    adapter.log.debug('--------------------- getStatusPlayer -----------------------');
+    Object.keys(states.AudioStation.players).forEach((playerid) => {
+        getStatusPlayer(playerid, (res) => {
+            //console.log(res);
+        });
+    });
+    return states;
+}
+
+function clearPlayerStates(playerid){
+    states.AudioStation.players[playerid].playlist_total = '';
+    states.AudioStation.players[playerid].volume = 0;
+    states.AudioStation.players[playerid].album = '';
+    states.AudioStation.players[playerid].artist = '';
+    states.AudioStation.players[playerid].genre = '';
+    states.AudioStation.players[playerid].year = 0;
+    states.AudioStation.players[playerid].song_id = '';
+    states.AudioStation.players[playerid].title = '';
+    states.AudioStation.players[playerid].path = '';
+    states.AudioStation.players[playerid].repeat = '';
+    states.AudioStation.players[playerid].shuffle = '';
+    states.AudioStation.players[playerid].bitrate = 0;
+    states.AudioStation.players[playerid].duration = 0;
+    states.AudioStation.players[playerid].current_duration = 0;
+    states.AudioStation.players[playerid].current_elapsed = 0;
+    states.AudioStation.players[playerid].duration_sec = 0;
+    states.AudioStation.players[playerid].seek = 0;
+    states.AudioStation.players[playerid].playlist = '';
+    states.AudioStation.players[playerid].current_play = 0;
+}
+
+function getStatusPlayer(playerid, cb){
+    let param = {};
+    if (playerid){
+        param = {
+            id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
+        };
+        send('as', 'getStatusRemotePlayerStatus', param, (res) => {
+            let state = res.state;
+            if (state === 'playing'){
+                state = 'play';
+            } else if (state === 'stopped' || state === 'none'){
+                state = 'stop';
+            }
+            states.AudioStation.players[playerid].state_playing = state;
+            if ((res.state === 'playing' || res.state === 'pause') && res.song){
+                states = parse.RemotePlayerStatus(playerid, states, res);
+                send('as', 'getPlayListRemotePlayer', param, (res) => {
+                    if (res){
+                        states = parse.PlayListRemotePlayer(playerid, states, res);
+                    }
+                });
+            } else {
+                clearPlayerStates(playerid);
+            }
+            cb && cb(res);
+        });
+    }
+}
+
 function Browser(_states, playerid, val, cb){
     adapter.log.debug('--------------------- Browser -----------------------');
     let param = {};
@@ -545,26 +477,26 @@ function PlayFolder(states, playerid, folder, cb){
     let param = {};
     if (playerid){
         param = {
-            id:              playerid,
-            library:         'shared',
-            offset:          0,
-            limit:           1,
-            play:            true,
-            containers_json: [
-                {
-                    "type":           "folder",
-                    "id":             folder,
-                    "recursive":      true,
-                    "sort_by":        "title",
-                    "sort_direction": "ASC"
-                }]
+            id:     playerid,
+            action: 'stop'
         };
-        send('as', 'updatePlayListRemotePlayer', param, (res) => {
+        send('as', 'controlRemotePlayer', param, (res) => {
             param = {
-                id:     playerid,
-                action: 'play'
+                id:                 playerid,
+                library:            'shared',
+                keep_shuffle_order: false,
+                offset:             0,
+                limit:              0,
+                play:               true,
+                containers_json:    JSON.stringify([{"type": "folder", "id": folder, "recursive": true, "sort_by": "title", "sort_direction": "ASC"}])
             };
-            send('as', 'controlRemotePlayer', param, (res) => {
+            send('as', 'updatePlayListRemotePlayer', param, (res) => {
+                param = {
+                    id:     playerid,
+                    action: 'play'
+                };
+                send('as', 'controlRemotePlayer', param, (res) => {
+                });
             });
         });
     }
@@ -572,6 +504,7 @@ function PlayFolder(states, playerid, folder, cb){
 
 function PlayTrack(states, playerid, val, cb){
     //adapter.log.debug('--------------------- PlayTrack -----------------------');
+    //action: play value: 2005
     let param = {};
     if (playerid){
         param = {
@@ -581,9 +514,9 @@ function PlayTrack(states, playerid, val, cb){
             limit:           1,
             play:            true,
             songs:           val,
-            containers_json: []
+            containers_json: JSON.stringify([])
         };
-        send('as', 'updatePlayListRemotePlayer', param, (res) => {
+        send('as', 'updatePlayListRemotePlayer', param, (res) => { //updatesongsPlaylist
             param = {
                 id:     playerid,
                 action: 'play'
@@ -594,7 +527,118 @@ function PlayTrack(states, playerid, val, cb){
     }
 }
 
-/*************************************************************/
+function PlayTrackNum(states, playerid, val, cb){
+    //adapter.log.debug('--------------------- PlayTrack -----------------------');
+    //action: play value: 2005
+    let param = {};
+    if (playerid){
+        param = {
+            id:     playerid,
+            action: 'play',
+            value:  val
+        };
+        send('as', 'controlRemotePlayer', param, (res) => {
+        });
+    }
+}
+
+function PlayTrackId(states, playerid, val, cb){
+    //adapter.log.debug('--------------------- PlayTrack -----------------------');
+    try {
+        let arr = JSON.parse(states.AudioStation.players[playerid].playlist);
+        let track = arr.findIndex(item => item.id === val);
+        if (track){
+            send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: track}, (res) => {
+            });
+        } else {
+            adapter.log.error('PlayTrackId: Error track not found');
+        }
+    } catch (e) {
+        adapter.log.error('PlayTrackId: Error parse playlist');
+    }
+}
+
+/****************************************************************/
+function queuePolling(){
+    if (pollAllowed){
+        iteration = 0;
+        isPoll = true;
+        let namePolling = '';
+        if (endTime - startTime > slowPollingTime){
+            startTime = new Date().getTime();
+            namePolling = 'slowPoll';
+        } else {
+            if (firstStart){
+                pollAllowed = false;
+                namePolling = 'firstPoll';
+            } else {
+                namePolling = 'fastPoll';
+            }
+        }
+        adapter.log.debug('slowPollingTime = ' + (endTime - startTime));
+        sendPolling(namePolling);
+
+    }
+}
+
+function sendPolling(namePolling, cb){
+    adapter.log.debug('-----------------------------------------------------------------------------------------------------');
+    if (typeof PollCmd[namePolling][iteration] === 'function'){
+        states = PollCmd[namePolling][iteration](states);
+        iterator(namePolling, cb);
+    } else if (states.api[PollCmd[namePolling][iteration].api].installed){
+        const api = PollCmd[namePolling][iteration].api;
+        const method = PollCmd[namePolling][iteration].method;
+        const params = PollCmd[namePolling][iteration].params;
+        adapter.log.debug('Получаем информацию из массива (' + namePolling + ') api: ' + api + ' method: ' + method + ' params: ' + JSON.stringify(params));
+        try {
+            syno[api][method](params, (err, res) => {
+                adapter.log.debug(!err && res ? 'Ответ получен, парсим:' :'Нет ответа на команду, читаем следующую.');
+                if (!err && res){
+                    connect = true;
+                    setInfoConnection(true);
+                    states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                } else if (err){
+                    adapter.log.error('Error - ' + err);
+                }
+                if (queueCmd){
+                    adapter.log.debug('* Get queueCmd *');
+                    queueCmd(states, (res) => {
+                        adapter.log.debug('queueCmd Response: '/* + JSON.stringify(res)*/);
+                        states = res;
+                        queueCmd = null;
+                        iterator(namePolling, cb);
+                    });
+                } else {
+                    iterator(namePolling, cb);
+                }
+            });
+        } catch (e) {
+            error(e);
+        }
+    } else {
+        adapter.log.debug('Packet ' + PollCmd[namePolling][iteration].api + ' non installed, skipped');
+        iterator(namePolling, cb);
+    }
+}
+
+function iterator(namePolling, cb){
+    iteration++;
+    if (iteration > PollCmd[namePolling].length - 1){
+        iteration = 0;
+        if (namePolling === 'firstPoll') firstStart = false;
+        pollAllowed = true;
+        adapter.log.debug('### Все данные прочитали, сохраняем полученные данные. ###');
+        isPoll = false;
+        setStates();
+        timeOutPoll = setTimeout(() => {
+            endTime = new Date().getTime();
+            queuePolling();
+        }, 500);
+    } else {
+        sendPolling(namePolling, cb);
+    }
+}
 
 function send(api, method, params, cb){
     if (typeof params == 'function'){
@@ -607,8 +651,8 @@ function send(api, method, params, cb){
             data = data || '';
             if (!err){
                 cb && cb(data);
-            } else {
-                err && error(err);
+            } else if (err){
+                error(err, cb);
             }
         });
     } catch (e) {
@@ -704,7 +748,7 @@ function setObject(id, val){
     });
 }
 
-function error(e){
+function error(e, cb){
     let code = e.code;
     let err = '';
     if (code !== 'ECONNREFUSED'){
@@ -762,6 +806,8 @@ function error(e){
         timeOutPoll = setTimeout(() => {
             queuePolling()
         }, 1000);
+    } else {
+        cb && cb(e)
     }
     adapter.log.error('*** DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
 }

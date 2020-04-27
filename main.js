@@ -28,7 +28,7 @@ function startAdapter(options){
                     send('dsm', 'rebootSystem', (res) => {
                         adapter.log.debug('System reboot');
                         timeOutPoll && clearTimeout(timeOutPoll);
-                        adapter.setState('info.connection', false, true);
+                        setInfoConnection(false);
                         connect = false;
                         timeOutPoll = setTimeout(() => {
                             endTime = new Date().getTime();
@@ -41,7 +41,7 @@ function startAdapter(options){
                     send('dsm', 'shutdownSystem', (res) => {
                         adapter.log.debug('System shutdown');
                         timeOutPoll && clearTimeout(timeOutPoll);
-                        adapter.setState('info.connection', false, true);
+                        setInfoConnection(false);
                         connect = false;
                         timeOutPoll = setTimeout(() => {
                             endTime = new Date().getTime();
@@ -51,8 +51,8 @@ function startAdapter(options){
                     return;
                 }
                 if (command === 'Browser'){  /*  /AS  */
-                    queueCmd = function(_states, cb){
-                        Browser(_states, name, val, (_states)=>{
+                    queueCmd = function (_states, cb){
+                        Browser(_states, name, val, (_states) => {
                             cb && cb(_states);
                         });
                     }
@@ -82,7 +82,7 @@ function startAdapter(options){
                                     } else {
                                         param = {};
                                     }
-                                    send( api[name]['name'], val, param, (res) => {
+                                    send(api[name]['name'], val, param, (res) => {
                                         if (res){
                                             let id = name + '.sendMethod';
                                             adapter.setState(id, {
@@ -233,7 +233,7 @@ function getStatusPlayer(playerid, cb){
         param = {
             id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
         };
-        send( 'as', 'getStatusRemotePlayerStatus', param, (res) => {
+        send('as', 'getStatusRemotePlayerStatus', param, (res) => {
             states.AudioStation.players[playerid].state_playing = res.state;
             let state = res.state;
             if (state === 'playing'){
@@ -244,7 +244,7 @@ function getStatusPlayer(playerid, cb){
             states.AudioStation.players[playerid].status = state;
             if ((res.state === 'playing' || res.state === 'pause') && res.song){
                 states = parse.RemotePlayerStatus(playerid, states, res);
-                send( 'as', 'getPlayListRemotePlayer', param, (res) => {
+                send('as', 'getPlayListRemotePlayer', param, (res) => {
                     if (res){
                         states = parse.PlayListRemotePlayer(playerid, states, res);
                     }
@@ -292,6 +292,7 @@ function sendPolling(namePolling, cb){
         try {
             syno[api][method](params, (err, res) => {
                 adapter.log.debug(!err && res ? 'Ответ получен, парсим:' :'Нет ответа на команду, читаем следующую.');
+                setInfoConnection(true);
                 if (!err && res){
                     states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
                 } else if (err){
@@ -299,7 +300,7 @@ function sendPolling(namePolling, cb){
                 }
                 if (queueCmd){
                     adapter.log.debug('* Get queueCmd *');
-                    queueCmd(states, (res)=>{
+                    queueCmd(states, (res) => {
                         adapter.log.debug('queueCmd Response: '/* + JSON.stringify(res)*/);
                         states = res;
                         queueCmd = null;
@@ -358,7 +359,7 @@ function listEvents(cb){
         start: 0, limit: 100, version: 1
     };
     //send('ss', 'getInfoCamera', param, function (res){
-    send( 'ss', 'listHistoryActionRules', param, (res) => {
+    send('ss', 'listHistoryActionRules', param, (res) => {
         if (res){
             states.SurveillanceStation.events = JSON.stringify(res);
             adapter.log.error('****************** ' + JSON.stringify(res));
@@ -372,7 +373,7 @@ function listCameras(cb){
     let param = {
         basic: true
     };
-    send( 'ss', 'listCameras', param, (res) => {
+    send('ss', 'listCameras', param, (res) => {
         if (res){
             let arr = res.cameras;
             arr.forEach((k, i) => {
@@ -433,7 +434,7 @@ function getSnapshotCamera(camid, cb){
 
 function listSnapShots(cb){
     //{"auInfo":{"cms":null,"deleteByRecordId":{"data":[]},"serverAction":{"0":null,"1":null,"2":null,"3":null,"4":null,"5":null},"timestamp":1507218967,"volumeAction":null},"data":[],"recCntData":{"recCnt":{"date":{"-1":0}},"total":0},"timestamp":"1507650252","total":0}
-    send( 'ss', 'listSnapShots', (res) => {
+    send('ss', 'listSnapShots', (res) => {
         if (res){
             states.SurveillanceStation.snapshots_list = JSON.stringify(res.data);
         }
@@ -451,7 +452,7 @@ function loadSnapShot(id, cb){
              2: Full size
              */
         };
-        send( 'ss', 'loadSnapShot', param, (res) => {
+        send('ss', 'loadSnapShot', param, (res) => {
             if (res){
 
             }
@@ -472,7 +473,7 @@ function addDownload(url, cb){
             param.destination = state.val;
         }
     });
-    send( 'dl', 'createTask', param, (res) => {
+    send('dl', 'createTask', param, (res) => {
         if (res){
             adapter.log.error('****************** ' + JSON.stringify(res));
         }
@@ -487,7 +488,7 @@ function Browser(_states, playerid, val, cb){
     if (val && val !== '/'){
         param = {id: val};
     }
-    send( 'as', 'listFolders', param, (res) => {
+    send('as', 'listFolders', param, (res) => {
         let arr = [];
         res.items.forEach((k, i) => {
             let filetype = 'file';
@@ -530,7 +531,7 @@ function PlayControl(syno, states, playerid, cmd, val, cb){
             param.value = val;
         }
         //adapter.log.debug('PlayControl cmd - ' + cmd + '. param - ' + JSON.stringify(param));
-        send( 'as', 'controlRemotePlayer', param, (res) => {
+        send('as', 'controlRemotePlayer', param, (res) => {
             //cb && cb();
         });
     }
@@ -555,12 +556,12 @@ function PlayFolder(syno, states, playerid, folder, cb){
                     "sort_direction": "ASC"
                 }]
         };
-        send( 'as', 'updatePlayListRemotePlayer', param, (res) => {
+        send('as', 'updatePlayListRemotePlayer', param, (res) => {
             param = {
                 id:     playerid,
                 action: 'play'
             };
-            send( 'as', 'controlRemotePlayer', param, (res) => {
+            send('as', 'controlRemotePlayer', param, (res) => {
             });
         });
     }
@@ -579,12 +580,12 @@ function PlayTrack(syno, states, playerid, val, cb){
             songs:           val,
             containers_json: []
         };
-        send( 'as', 'updatePlayListRemotePlayer', param, (res) => {
+        send('as', 'updatePlayListRemotePlayer', param, (res) => {
             param = {
                 id:     playerid,
                 action: 'play'
             };
-            send( 'as', 'controlRemotePlayer', param, (res) => {
+            send('as', 'controlRemotePlayer', param, (res) => {
             });
         });
     }
@@ -592,7 +593,7 @@ function PlayTrack(syno, states, playerid, val, cb){
 
 /*************************************************************/
 
-function send(api, method, params, cb) {
+function send(api, method, params, cb){
     if (typeof params == 'function'){
         cb = params;
         params = null;
@@ -756,9 +757,9 @@ function error(e){
                 return 'Unknown error';*/
         }
     }
-    if (code === 400/* || code === 119*/ || code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
+    if (code === 400 || code === 500 || code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutPoll && clearTimeout(timeOutPoll);
-        adapter.setState('info.connection', false, true);
+        setInfoConnection(false);
         connect = false;
         timeOutPoll = setTimeout(() => {
             queuePolling()
@@ -797,6 +798,17 @@ function main(){
     } catch (e) {
         adapter.log.error('Synology Error: ' + e.message);
     }
+}
+
+function setInfoConnection(state){
+    adapter.getState('info.connection', function (err, state){
+        if (!err && state !== null){
+            if (state.val === state){
+            } else if (state.val !== state){
+                adapter.setState('info.connection', state, true);
+            }
+        }
+    });
 }
 
 if (module.parent){

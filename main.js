@@ -69,6 +69,8 @@ function startAdapter(options){
                     getSnapshotCamera(val);
                 } else if (command === 'add_url_download'){
                     addDownload(val);
+                }  else if (command === 'enabled'){
+                    switchCam(states, name, command, val);
                 } else if (command === 'status_on'){
                     send('ss', 'switchHomeMode', {on: val});
                 } else {
@@ -148,8 +150,6 @@ let old_states = {
 };
 
 const objects = {
-    //action: set_shuffle value: false
-    //action: set_shuffle value: true
     current_duration: {role: "media.duration.text", name: "Playback duration", type: "string", read: true, write: false, def: ""},
     current_elapsed:  {role: "media.elapsed.text", name: "Playback elapsed", type: "string", read: true, write: false, def: ""},
     current_play:     {role: "media.track", name: "Controlling and state current play track number", type: "string", read: true, write: true, def: ""},
@@ -200,6 +200,7 @@ let PollCmd = {
         {api: 'dtv', method: 'GetInfoTuner', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
+        {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras},
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers}
     ],
     "fastPoll":  [
@@ -210,11 +211,23 @@ let PollCmd = {
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
     ],
     "slowPoll":  [
-        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets}
+        {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras}
     ]
 };
 
 //////////////////////////* SurveillanceStation */////////////////////
+function switchCam(states, name, command, val){
+    /*
+        cameraIds: "2"
+        blIncludeDeletedCam: false
+        api: SYNO.SurveillanceStation.Camera
+        method: Disable
+        version: 7
+     */
+    send('ss', 'disableCamera', {cameraIds: "2", blIncludeDeletedCam: false}, (res) => {
+    });
+}
+
 function listEvents(cb){
     //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
 
@@ -243,54 +256,6 @@ function listEvents(cb){
         }
         cb && cb();
     });
-}
-
-function listCameras(cb){
-    adapter.log.debug('--------------------- listCameras -----------------------');
-    let param = {
-        basic: true
-    };
-    send('ss', 'listCameras', param, (res) => {
-        if (res){
-            let arr = res.cameras;
-            arr.forEach((k, i) => {
-                states.SurveillanceStation.cameras[arr[i].name] = {
-                    host: arr[i].host, id: arr[i].id, port: arr[i].port, model: arr[i].model, status: CamStatus(arr[i].status), recStatus: arr[i].recStatus, snapshot_path: arr[i].snapshot_path, enabled: arr[i].enabled
-                }
-            });
-        }
-        cb && cb();
-    });
-}
-
-/**
- * @return {string}
- */
-function CamStatus(status){
-    adapter.log.debug('--------------------- CamStatus -----------------------');
-    //0: ENABLED• 1: DISABLED• 2: ACCTIVATING• 3: DISABLING• 4: RESTARTING• 5: UNKNOWN
-    switch (status) {
-        case 0:
-            status = 'ENABLED';
-            break;
-        case 1:
-            status = 'DISABLED';
-            break;
-        case 2:
-            status = 'ACCTIVATING';
-            break;
-        case 3:
-            status = 'DISABLING';
-            break;
-        case 4:
-            status = 'RESTARTING';
-            break;
-        case 5:
-            status = 'UNKNOWN';
-            break;
-        default:
-    }
-    return status;
 }
 
 function getSnapshotCamera(camid, cb){
@@ -395,7 +360,7 @@ function getStatusPlayer(playerid, cb){
     let param = {};
     if (playerid){
         param = {
-            id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
+            id: playerid, additional: 'song_tag, song_audio, subplayer_volume, song_rating'
         };
         send('as', 'getStatusRemotePlayerStatus', param, (res) => {
             let state = res.state;
@@ -410,6 +375,13 @@ function getStatusPlayer(playerid, cb){
                 send('as', 'getPlayListRemotePlayer', param, (res) => {
                     if (res){
                         states = parse.PlayListRemotePlayer(playerid, states, res);
+                        /*let track = states.AudioStation.players[playerid].song_id;
+                        //api=SYNO.AudioStation.Cover&output_default=true&is_hr=false&version=3&library=shared&_dc=1587979276191&method=getsongcover&view=large&id=music_118995&SynoToken=1jaGQXtsfEEvc"
+                        send('as', 'getSongCover', {id: track}, (res) => {
+                            if (res){
+                                states.AudioStation.players[playerid].state_playing = state;;
+                            }
+                        });*/
                     }
                 });
             } else {
@@ -476,26 +448,31 @@ function PlayFolder(states, playerid, folder, cb){
     //adapter.log.debug('--------------------- PlayFolder -----------------------');
     let param = {};
     if (playerid){
-        param = {
-            id:     playerid,
-            action: 'stop'
-        };
-        send('as', 'controlRemotePlayer', param, (res) => {
+        send('as', 'controlRemotePlayer', {id: playerid, action: 'stop'}, (res) => {
             param = {
-                id:                 playerid,
-                library:            'shared',
-                keep_shuffle_order: false,
-                offset:             0,
-                limit:              0,
-                play:               true,
-                containers_json:    JSON.stringify([{"type": "folder", "id": folder, "recursive": true, "sort_by": "title", "sort_direction": "ASC"}])
+                id:            playerid,
+                offset:        0,
+                songs:         '',
+                limit:         states.AudioStation.players[playerid].playlist_total || 10000,
+                updated_index: -1
             };
-            send('as', 'updatePlayListRemotePlayer', param, (res) => {
+            send('as', 'updatePlayListRemotePlayer', param, (res) => { //clear playlist
                 param = {
-                    id:     playerid,
-                    action: 'play'
+                    id:                 playerid,
+                    library:            'shared',
+                    keep_shuffle_order: false,
+                    offset:             0,
+                    limit:              0,
+                    play:               true,
+                    containers_json:    JSON.stringify([{"type": "folder", "id": folder, "recursive": true, "sort_by": "title", "sort_direction": "ASC"}])
                 };
-                send('as', 'controlRemotePlayer', param, (res) => {
+                send('as', 'updatePlayListRemotePlayer', param, (res) => { //add folder to playlist
+                    param = {
+                        id:     playerid,
+                        action: 'play'
+                    };
+                    send('as', 'controlRemotePlayer', param, (res) => {
+                    });
                 });
             });
         });

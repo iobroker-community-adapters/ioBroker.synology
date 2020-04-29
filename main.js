@@ -104,6 +104,18 @@ function startAdapter(options){
                     }
                 }
             }
+        },
+        message:        obj => {
+            if (typeof obj === 'object' && obj.command){
+                adapter.log.debug(`message ******* ${JSON.stringify(obj)}`);
+                if (obj.command === 'getSnapshot' && obj.message.camId){
+                    getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
+                        obj.callback && adapter.sendTo(obj.from, obj.command, res, obj.callback);
+                    });
+                }
+            } else {
+                adapter.log.debug(`message x ${obj.command}`);
+            }
         }
     }));
 }
@@ -274,9 +286,13 @@ function getSnapshotCamera(camid, cb){
         if (res && !res.code && !res.message){
             let buf = Buffer.from(res, 'binary');
             fs.writeFile(dir + 'snapshotCam_' + camid + '.jpg', buf, (err) => {
+                if (!err){
+                    cb && cb(dir + 'snapshotCam_' + camid + '.jpg');
+                } else {
+                    cb && cb(false);
+                }
             });
         }
-        cb && cb();
     });
 }
 
@@ -798,6 +814,7 @@ function error(e, cb){
 function main(){
     if (!adapter.systemConfig) return;
     adapter.subscribeStates('*');
+    setInfoConnection(false);
     startTime = new Date().getTime();
     endTime = new Date().getTime();
     pollTime = adapter.config.polling || 100;

@@ -53,16 +53,16 @@
     "main": "main.js",
     "icon": "synology.png",
     "enabled": false,
-    "messagebox": false,
+    "messagebox": true,
+    "loglevel": "info",
+    "compact": true,
+    "materialize": true,
+    "type": "infrastructure",
     "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
     "keywords": [
       "synology NAS control"
     ],
-    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
-    "loglevel": "info",
-    "compact": true,
-    "materialize": true,
-    "type": "infrastructure"
+    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md"
   },
   "native": {
     "host": "localhost",
@@ -85,7 +85,7 @@
         "name": "If connected to Synology",
         "type": "boolean",
         "read": true,
-        "write": false,
+        "write": true,
         "def": false
       },
       "native": {

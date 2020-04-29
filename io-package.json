@@ -220,7 +220,7 @@
             "type": "state",
             "common": {
                 "role": "state",
-                "name": "Get snapshot by camera number or name",
+                "name": "Get snapshot by camera number",
                 "type": "string",
                 "read": true,
                 "write": true,

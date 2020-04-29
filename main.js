@@ -4,7 +4,8 @@ const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
 const fs = require('fs');
 const parse = require('./lib/parsers.js');
-let adapter, syno, timeOutPoll, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true, firstStart = true,
+let adapter, syno, timeOutPoll, timeOutRecconect, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
+    firstStart = true,
     dir;
 const slowPollingTime = 60000;
 
@@ -12,6 +13,7 @@ function startAdapter(options){
     return adapter = utils.adapter(Object.assign({}, options, {
         systemConfig:   true, name: 'synology', ready: main, unload: callback => {
             timeOutPoll && clearTimeout(timeOutPoll);
+            timeOutRecconect && clearTimeout(timeOutRecconect);
             try {
                 adapter.log.debug('cleaned everything up...');
                 callback();
@@ -31,10 +33,8 @@ function startAdapter(options){
                         timeOutPoll && clearTimeout(timeOutPoll);
                         setInfoConnection(false);
                         connect = false;
-                        timeOutPoll = setTimeout(() => {
-                            endTime = new Date().getTime();
-                            queuePolling();
-                        }, 500);
+                        endTime = new Date().getTime();
+                        queuePolling();
                     });
                     return;
                 }
@@ -44,10 +44,8 @@ function startAdapter(options){
                         timeOutPoll && clearTimeout(timeOutPoll);
                         setInfoConnection(false);
                         connect = false;
-                        timeOutPoll = setTimeout(() => {
-                            endTime = new Date().getTime();
-                            queuePolling();
-                        }, 500);
+                        endTime = new Date().getTime();
+                        queuePolling();
                     });
                     return;
                 }
@@ -212,10 +210,11 @@ let PollCmd = {
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
         getStatusRemotePlayers,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
-        addLinkSnapShot
+        //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent}
     ],
     "slowPoll":  [
-        {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras}
+        {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras},
+        addLinkSnapShot
     ]
 };
 
@@ -621,7 +620,7 @@ function iterator(namePolling, cb){
         timeOutPoll = setTimeout(() => {
             endTime = new Date().getTime();
             queuePolling();
-        }, 500);
+        }, 100);
     } else {
         sendPolling(namePolling, cb);
     }
@@ -787,12 +786,12 @@ function error(e, cb){
         }
     }
     if (code === 400 || code === 500 || code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
-        timeOutPoll && clearTimeout(timeOutPoll);
+        timeOutRecconect && clearTimeout(timeOutRecconect);
         setInfoConnection(false);
         connect = false;
-        timeOutPoll = setTimeout(() => {
+        timeOutRecconect = setTimeout(() => {
             queuePolling()
-        }, 1000);
+        }, 10000);
     } else {
         cb && cb(e)
     }
@@ -800,6 +799,7 @@ function error(e, cb){
 }
 
 function main(){
+    if (!adapter.systemConfig) return;
     adapter.subscribeStates('*');
     startTime = new Date().getTime();
     endTime = new Date().getTime();

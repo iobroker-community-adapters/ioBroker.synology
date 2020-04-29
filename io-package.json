@@ -220,7 +220,7 @@
             "type": "state",
             "common": {
                 "role": "state",
-                "name": "SurveillanceStation getSnapshotCamera",
+                "name": "Get snapshot by camera number or name",
                 "type": "string",
                 "read": true,
                 "write": true,

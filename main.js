@@ -2,8 +2,10 @@
 
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
+const fs = require('fs');
 const parse = require('./lib/parsers.js');
-let adapter, syno, timeOutPoll, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true, firstStart = true;
+let adapter, syno, timeOutPoll, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true, firstStart = true,
+    dir;
 const slowPollingTime = 60000;
 
 function startAdapter(options){
@@ -69,7 +71,7 @@ function startAdapter(options){
                     getSnapshotCamera(val);
                 } else if (command === 'add_url_download'){
                     addDownload(val);
-                }  else if (command === 'enabled'){
+                } else if (command === 'enabled'){
                     switchCam(states, name, command, val);
                 } else if (command === 'status_on'){
                     send('ss', 'switchHomeMode', {on: val});
@@ -185,6 +187,7 @@ const objects = {
     play_folder:      {role: "state", name: "play_folder", type: "string", read: true, write: true, def: ""},
     play_track:       {role: "state", name: "play_track", type: "string", read: true, write: true, def: ""},
     status_on:        {role: "state", name: "status_on", type: "boolean", read: true, write: true, def: ""},
+    enabled:          {role: "state", name: "is enabled", type: "boolean", read: true, write: true, def: ""},
 };
 
 //http://192.168.1.101:5000/webapi/entry.cgi?api=SYNO.SurveillanceStation.HomeMode&version=1&method=Switch&on=true&_sid=Gj.tXLURyrKZg1510MPN674502
@@ -209,6 +212,7 @@ let PollCmd = {
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
         getStatusRemotePlayers,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
+        addLinkSnapShot
     ],
     "slowPoll":  [
         {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras}
@@ -217,20 +221,28 @@ let PollCmd = {
 
 //////////////////////////* SurveillanceStation */////////////////////
 function switchCam(states, name, command, val){
-    /*
-        cameraIds: "2"
-        blIncludeDeletedCam: false
-        api: SYNO.SurveillanceStation.Camera
-        method: Disable
-        version: 7
-     */
-    send('ss', 'disableCamera', {cameraIds: "2", blIncludeDeletedCam: false}, (res) => {
+    let method = !!val ? 'enableCamera' :'disableCamera';
+    if (name !== 'undefined'){
+        let camId = states.SurveillanceStation.cameras[name].id.toString();
+        send('ss', method, {cameraIds: camId, blIncludeDeletedCam: false}, (res) => {
+        });
+    }
+}
+
+function addLinkSnapShot(states){
+    adapter.log.debug('--------------------- addLinkSnapShot -----------------------');
+    Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
+        if (nameCam){
+            const camId = states.SurveillanceStation.cameras[nameCam].id;
+            const _sid = syno.sessions.SurveillanceStation ? syno.sessions.SurveillanceStation._sid :'';
+            states.SurveillanceStation.cameras[nameCam]['linkSnapshot'] = syno.protocol + '://' + syno.host + ':' + syno.port + '/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId= ' + camId + '&_sid=' + _sid;
+        }
     });
+    return states;
 }
 
 function listEvents(cb){
     //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
-
     /*let param = {
         camId: 2
         //cameraIds:"2",
@@ -260,18 +272,16 @@ function listEvents(cb){
 
 function getSnapshotCamera(camid, cb){
     adapter.log.debug('--------------------- getSnapshotCamera -----------------------');
-    //let decodedImage = new Buffer(encodedImage, 'base64').toString('binary');
-    //{"method":"getSnapshotCamera", "params":{"cameraId":2, "camStm": 1, "preview": true}}
-    if (camid){
-        let param = {
-            'cameraId': camid
-        };
-        send('ss', 'getSnapshotCamera', param, (res) => {
-            if (res){
-            }
-            cb && cb();
-        });
-    }
+    //https://192.168.88.11:5001/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId=2&_sid=AG34IoOr9g6dE1790PDN236400
+    const param = {'cameraId': camid, "preview": true};
+    send('ss', 'getSnapshotCamera', param, (res) => {
+        if (res && !res.code && !res.message){
+            let buf = Buffer.from(res, 'binary');
+            fs.writeFile(dir + 'snapshotCam_' + camid + '.jpg', buf, (err) => {
+            });
+        }
+        cb && cb();
+    });
 }
 
 function listSnapShots(cb){
@@ -618,7 +628,7 @@ function iterator(namePolling, cb){
 }
 
 function send(api, method, params, cb){
-    if (typeof params == 'function'){
+    if (typeof params === 'function'){
         cb = params;
         params = null;
     }
@@ -786,7 +796,7 @@ function error(e, cb){
     } else {
         cb && cb(e)
     }
-    adapter.log.error('*** DEBUG RES ERR : code(' + code + ') ' + JSON.stringify(err));
+    adapter.log.error('*** DEBUG RES ERROR : code(' + code + ') ' + e.message);
 }
 
 function main(){
@@ -799,6 +809,10 @@ function main(){
     parse.on('info', (msg) => {
         adapter.log.info('* ' + msg);
     });
+
+    dir = utils.controllerDir + '/' + adapter.systemConfig.dataDir + adapter.namespace.replace('.', '_') + '/';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+
     try {
         syno = new Syno({
             ignoreCertificateErrors: true, /*rejectUnauthorized: false,*/

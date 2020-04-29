@@ -26,6 +26,13 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 
 ```{"method":"getInfo", "params":{}}```
 
+### Messagebox
+```
+sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
+    if(res) sendTo('telegram.0', {text: res, caption: 'caption for image'});
+});
+```
+
 ## Changelog
 
 ### 0.1.0

@@ -29,7 +29,12 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 ## Changelog
 
 ### 0.1.0
-* (instalator) 
+* (instalator) added HomeMode switch 
+* (instalator) change for audiostation 
+* (instalator) change for as and ss
+* (instalator) added snapshot functional 
+* (instalator) fixed systemConfig 
+* (instalator) fixed many error 
 
 ### 0.0.4 (2018-10-07)
 * (instalator) Изменен репозиторий библиотеки

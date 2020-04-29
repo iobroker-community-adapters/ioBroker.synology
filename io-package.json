@@ -1,261 +1,263 @@
 {
-    "common": {
-        "name": "synology",
-        "version": "0.1.0",
-        "news": {
-            "0.1.0": {
-                "en": "Formatting and timer behavior cleaning",
-                "de": "Formatting and timer behavior cleaning",
-                "ru": "Formatting and timer behavior cleaning",
-                "pt": "Formatting and timer behavior cleaning",
-                "nl": "Formatting and timer behavior cleaning",
-                "fr": "Formatting and timer behavior cleaning",
-                "it": "Formatting and timer behavior cleaning",
-                "es": "Formatting and timer behavior cleaning",
-                "pl": "Formatting and timer behavior cleaning",
-                "zh-cn": "Formatting and timer behavior cleaning"
-            },
-            "0.0.4": {
-                "en": "initial adapter",
-                "de": "Initiale Version",
-                "ru": "Первоначальный адаптер",
-                "pt": "Versão inicial",
-                "fr": "Version initiale",
-                "nl": "Eerste release"
-            },
-            "0.0.3": {
-                "en": "initial adapter",
-                "de": "Initiale Version",
-                "ru": "Первоначальный адаптер",
-                "pt": "Versão inicial",
-                "fr": "Version initiale",
-                "nl": "Eerste release"
-            }
-        },
-        "title": "Synology NAS",
-        "desc": {
-           	"en": "Get status and control your NAS Synology",
-			"de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
-			"ru": "Позволяет получать статус и управлять NAS Synology",
-			"pt": "Obtenha status e controle sua NAS Synology",
-			"nl": "Krijg status en controleer uw NAS Synology",
-			"fr": "Obtenez le statut et contrôlez votre NAS Synology",
-			"it": "Ottieni lo stato e controlla la tua Synology NAS",
-			"es": "Obtenga el estado y controle su NAS Synology",
-			"pl": "Uzyskaj status i kontroluj swój NAS Synology"
-        },
-        "platform": "Javascript/Node.js",
-        "license":                  "MIT",
-	"authors": [
-            "instalator"
-        ],
-        "mode": "daemon",
-        "main": "main.js",
-        "icon": "synology.png",
-        "enabled": false,
-        "messagebox": false,
-        "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
-        "keywords": ["synology NAS control"],
-        "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
-        "loglevel": "info",
-        "compact": true,
-        "materialize": true,
-        "type": "infrastructure"
+  "common": {
+    "name": "synology",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "de": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "ru": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "pt": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "nl": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "fr": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "it": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "es": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "pl": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
+        "zh-cn": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error"
+      },
+      "0.0.4": {
+        "en": "initial adapter",
+        "de": "Initiale Version",
+        "ru": "Первоначальный адаптер",
+        "pt": "Versão inicial",
+        "fr": "Version initiale",
+        "nl": "Eerste release"
+      },
+      "0.0.3": {
+        "en": "initial adapter",
+        "de": "Initiale Version",
+        "ru": "Первоначальный адаптер",
+        "pt": "Versão inicial",
+        "fr": "Version initiale",
+        "nl": "Eerste release"
+      }
     },
-    "native": {
-        "host":     "localhost",
-        "port":     "5000",
-        "login":    "admin",
-        "password": "",
-        "https":    false,
-        "version":  "6.2.2",
-        "polling": 5000
+    "title": "Synology NAS",
+    "desc": {
+      "en": "Get status and control your NAS Synology",
+      "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
+      "ru": "Позволяет получать статус и управлять NAS Synology",
+      "pt": "Obtenha status e controle sua NAS Synology",
+      "nl": "Krijg status en controleer uw NAS Synology",
+      "fr": "Obtenez le statut et contrôlez votre NAS Synology",
+      "it": "Ottieni lo stato e controlla la tua Synology NAS",
+      "es": "Obtenga el estado y controle su NAS Synology",
+      "pl": "Uzyskaj status i kontroluj swój NAS Synology"
     },
-    "objects": [
-
+    "platform": "Javascript/Node.js",
+    "license": "MIT",
+    "authors": [
+      "instalator"
     ],
-    "instanceObjects": [
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": "If connected to Synology",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "commands.reboot",
-            "type": "state",
-            "common": {
-                "role": "button",
-                "name": "Reboot NAS",
-                "type": "boolean",
-                "read": false,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "commands.shutdown",
-            "type": "state",
-            "common": {
-                "role": "button",
-                "name": "Shutdown NAS",
-                "type": "boolean",
-                "read": false,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "DiskStationManager.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "DiskStationManager",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "FileStation.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "FileStation",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "DownloadStation.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "DownloadStation",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "AudioStation.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "AudioStation",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "VideoStation.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "VideoStation",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "VideoStation_DTV.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "VideoStation_DTV",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "SurveillanceStation.sendMethod",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "SurveillanceStation",
-                "type": "object",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "SurveillanceStation.getSnapshotCamera",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "Get snapshot by camera number",
-                "type": "string",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "DownloadStation.add_url_download",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "DownloadStation add url download",
-                "type": "string",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        },
-        {
-            "_id": "DownloadStation.folder",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "DownloadStation folder for download",
-                "type": "string",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {
-            }
-        }
-    ]
+    "mode": "daemon",
+    "main": "main.js",
+    "icon": "synology.png",
+    "enabled": false,
+    "messagebox": false,
+    "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
+    "keywords": [
+      "synology NAS control"
+    ],
+    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
+    "loglevel": "info",
+    "compact": true,
+    "materialize": true,
+    "type": "infrastructure"
+  },
+  "native": {
+    "host": "localhost",
+    "port": "5000",
+    "login": "admin",
+    "password": "",
+    "https": false,
+    "version": "6.2.2",
+    "polling": 100,
+    "slowPollingTime": 60000
+  },
+  "objects": [
+  ],
+  "instanceObjects": [
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "If connected to Synology",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "commands.reboot",
+      "type": "state",
+      "common": {
+        "role": "button",
+        "name": "Reboot NAS",
+        "type": "boolean",
+        "read": false,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "commands.shutdown",
+      "type": "state",
+      "common": {
+        "role": "button",
+        "name": "Shutdown NAS",
+        "type": "boolean",
+        "read": false,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "DiskStationManager.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "DiskStationManager",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "FileStation.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "FileStation",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "DownloadStation.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "DownloadStation",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "AudioStation.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "AudioStation",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "VideoStation.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "VideoStation",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "VideoStation_DTV.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "VideoStation_DTV",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "SurveillanceStation.sendMethod",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "SurveillanceStation",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "SurveillanceStation.getSnapshotCamera",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Get snapshot by camera number",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "DownloadStation.add_url_download",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "DownloadStation add url download",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    },
+    {
+      "_id": "DownloadStation.folder",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "DownloadStation folder for download",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {
+      }
+    }
+  ]
 }

@@ -1,13 +1,10 @@
 "use strict";
-
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
 const fs = require('fs');
 const parse = require('./lib/parsers.js');
-let adapter, syno, timeOutPoll, timeOutRecconect, connect = false, current_player = '', iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
-    firstStart = true,
-    dir;
-const slowPollingTime = 60000;
+let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
+    firstStart = true, slowPollingTime, dir;
 
 function startAdapter(options){
     return adapter = utils.adapter(Object.assign({}, options, {
@@ -620,7 +617,7 @@ function iterator(namePolling, cb){
         timeOutPoll = setTimeout(() => {
             endTime = new Date().getTime();
             queuePolling();
-        }, 100);
+        }, pollTime);
     } else {
         sendPolling(namePolling, cb);
     }
@@ -803,6 +800,8 @@ function main(){
     adapter.subscribeStates('*');
     startTime = new Date().getTime();
     endTime = new Date().getTime();
+    pollTime = adapter.config.polling || 100;
+    slowPollingTime = adapter.config.slowPollingTime || 60000;
     parse.on('debug', (msg) => {
         adapter.log.debug('* ' + msg);
     });

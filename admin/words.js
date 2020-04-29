@@ -86,16 +86,28 @@ systemDictionary = {
         "zh-cn": "默认值（5000）"
     },
     "polling":                                              {
-        "en": "Polling time (ms)",
-        "de": "Abrufzeit (ms)",
-        "ru": "Время опроса (мс)",
-        "pt": "Tempo de votação (ms)",
-        "nl": "Polling-tijd (ms)",
-        "fr": "Temps d'interrogation (ms)",
-        "it": "Tempo di polling (ms)",
-        "es": "Tiempo de sondeo (ms)",
-        "pl": "Czas odpytywania (ms)",
-        "zh-cn": "轮询时间（毫秒）"
+        "en": "Parameter polling time (ms)",
+        "de": "Parameterabrufzeit (ms)",
+        "ru": "Время опроса параметра (мс)",
+        "pt": "Tempo de pesquisa de parâmetro (ms)",
+        "nl": "Parameter pollingtijd (ms)",
+        "fr": "Temps d'interrogation des paramètres (ms)",
+        "it": "Tempo di polling dei parametri (ms)",
+        "es": "Tiempo de sondeo de parámetros (ms)",
+        "pl": "Czas odpytywania parametru (ms)",
+        "zh-cn": "参数轮询时间（毫秒）"
+    },
+    "slowPollingTime":                                              {
+        "en": "Polling time for additional parameters (ms)",
+        "de": "Abfragezeit für zusätzliche Parameter (ms)",
+        "ru": "Время опроса для дополнительных параметров (мс)",
+        "pt": "Tempo de pesquisa para parâmetros adicionais (ms)",
+        "nl": "Polling-tijd voor aanvullende parameters (ms)",
+        "fr": "Temps d'interrogation pour les paramètres supplémentaires (ms)",
+        "it": "Tempo di polling per parametri aggiuntivi (ms)",
+        "es": "Tiempo de sondeo para parámetros adicionales (ms)",
+        "pl": "Czas odpytywania dla dodatkowych parametrów (ms)",
+        "zh-cn": "附加参数的轮询时间（毫秒）"
     },
     "on save adapter restarts with new config immediately": {
         "de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",

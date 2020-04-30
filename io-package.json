@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "news": {
+      "0.1.1": {
+        "en": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "de": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "ru": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "pt": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "nl": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "fr": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "it": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "es": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "pl": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
+        "zh-cn": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring"
+      },
       "0.1.0": {
         "en": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
         "de": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
@@ -14,22 +26,6 @@
         "es": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
         "pl": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
         "zh-cn": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error"
-      },
-      "0.0.4": {
-        "en": "initial adapter",
-        "de": "Initiale Version",
-        "ru": "Первоначальный адаптер",
-        "pt": "Versão inicial",
-        "fr": "Version initiale",
-        "nl": "Eerste release"
-      },
-      "0.0.3": {
-        "en": "initial adapter",
-        "de": "Initiale Version",
-        "ru": "Первоначальный адаптер",
-        "pt": "Versão inicial",
-        "fr": "Version initiale",
-        "nl": "Eerste release"
       }
     },
     "title": "Synology NAS",
@@ -85,7 +81,7 @@
         "name": "If connected to Synology",
         "type": "boolean",
         "read": true,
-        "write": true,
+        "write": false,
         "def": false
       },
       "native": {

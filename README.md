@@ -51,6 +51,13 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 
+### 0.1.1
+* (instalator) added messagebox for snapshot
+* (instalator) update readme
+* (instalator) added ss link for different streams
+* (instalator) fix error
+* (instalator) refactoring
+
 ### 0.1.0
 * (instalator) added HomeMode switch 
 * (instalator) change for audiostation 

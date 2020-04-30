@@ -13,14 +13,14 @@
 ## Description
 The driver allows you to receive data and manage your Synology NAS server.
 
-#### sendMethod
+### sendMethod
 
 You can send any command (method) by setting the sendMethod object, for example:
 Get the SurveillanceStation info is a getInfo method with no additional parameters.
 
 ```{"method": "getInfo", "params": {}}```
 
-#### Control
+### Control
 **commands.reboot** - reboot NAS
 
 **commands.shutdown** - shutdown NAS
@@ -43,7 +43,7 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 * play_track - Play track by its id (e.g. *music_120847*)
 * current_play - Control and status of the current track by its number in the playlist (e.g. *14*)
 
-#### Messagebox
+### Messagebox
 ```
 sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
     if(res) sendTo('telegram.0', {text: res, caption: 'caption for image'});

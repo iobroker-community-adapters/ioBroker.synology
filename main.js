@@ -210,7 +210,7 @@ let PollCmd = {
         {api: 'dtv', method: 'GetInfoTuner', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
-        {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras},
+        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers}
     ],
     "fastPoll":  [
@@ -219,11 +219,12 @@ let PollCmd = {
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
         getStatusRemotePlayers,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
-        //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent}
+
     ],
     "slowPoll":  [
-        {api: 'ss', method: 'listCameras', params: {basic: true}, ParseFunction: parse.listCameras},
-        addLinkSnapShot
+        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
+        addLinkSnapShot,
+        getLiveViewPathCamera,
     ]
 };
 
@@ -240,48 +241,60 @@ function switchCam(states, name, command, val){
 function addLinkSnapShot(states){
     adapter.log.debug('--------------------- addLinkSnapShot -----------------------');
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
-        if (nameCam){
+        if (nameCam !== undefined){
             const camId = states.SurveillanceStation.cameras[nameCam].id;
             const _sid = syno.sessions.SurveillanceStation ? syno.sessions.SurveillanceStation._sid :'';
             states.SurveillanceStation.cameras[nameCam]['linkSnapshot'] = syno.protocol + '://' + syno.host + ':' + syno.port + '/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId= ' + camId + '&_sid=' + _sid;
         }
     });
+
+    /*for(let nameCam in states.SurveillanceStation.cameras) {
+        if (!states.SurveillanceStation.cameras.hasOwnProperty(nameCam)) continue;
+        if (states.SurveillanceStation.cameras[nameCam].id === id){
+            return nameCam;
+        }
+    }*/
     return states;
 }
 
-function listEvents(cb){
-    //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
-    /*let param = {
-        camId: 2
-        //cameraIds:"2",
-        //blIncludeDeletedCam:true,
-        //deviceOutCap:true,
-        //streamInfo:true,
-        //ptz:true,
-        //basic:true,
-        //privCamType:3,
-        //camAppInfo:true,
-        //optimize:true,
-        //fisheye:true,
-        //eventDetection:true
-    };*/
-    let param = {
-        start: 0, limit: 100, version: 1
-    };
-    //send('ss', 'getInfoCamera', param, function (res){
-    send('ss', 'listHistoryActionRules', param, (res) => {
-        if (res){
-            states.SurveillanceStation.events = JSON.stringify(res);
-            adapter.log.error('****************** ' + JSON.stringify(res));
-        }
-        cb && cb();
+const getArrIdCams = () => {
+    let ids = [];
+    Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
+        if (nameCam) ids.push(states.SurveillanceStation.cameras[nameCam].id);
     });
+    return ids;
+};
+
+const getNameCams = (id) => {
+    for(let nameCam in states.SurveillanceStation.cameras) {
+        if (!states.SurveillanceStation.cameras.hasOwnProperty(nameCam)) continue;
+        if (states.SurveillanceStation.cameras[nameCam].id === id){
+            return nameCam;
+        }
+    }
+};
+
+function getLiveViewPathCamera(states){
+    adapter.log.debug('--------------------- getLiveViewPathCamera -----------------------');
+    const ids = getArrIdCams().join(',');
+    send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
+        if (res && !res.code && !res.message){
+            res.forEach((obj) => {
+                const nameCam = getNameCams(obj.id);
+                states.SurveillanceStation.cameras[nameCam]['linkMjpegHttpPath'] = obj.mjpegHttpPath;
+                states.SurveillanceStation.cameras[nameCam]['linkMulticstPath'] =obj.multicstPath;
+                states.SurveillanceStation.cameras[nameCam]['linkMxpegHttpPath'] =obj.mxpegHttpPath;
+                states.SurveillanceStation.cameras[nameCam]['linkRtspOverHttpPath'] =obj.rtspOverHttpPath;
+                states.SurveillanceStation.cameras[nameCam]['linkRtspPath'] =obj.rtspPath;
+            });
+        }
+    });
+    return states;
 }
 
 function getSnapshotCamera(camid, cb){
     adapter.log.debug('--------------------- getSnapshotCamera -----------------------');
-    //https://192.168.88.11:5001/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId=2&_sid=AG34IoOr9g6dE1790PDN236400
-    const param = {'cameraId': camid, "preview": true};
+    const param = {cameraId: camid, preview: true, version: 7};
     send('ss', 'getSnapshotCamera', param, (res) => {
         if (res && !res.code && !res.message){
             let buf = Buffer.from(res, 'binary');
@@ -290,6 +303,7 @@ function getSnapshotCamera(camid, cb){
                     cb && cb(dir + 'snapshotCam_' + camid + '.jpg');
                 } else {
                     cb && cb(false);
+                    adapter.log.error('Write snapshot file Error: ' + err);
                 }
             });
         }
@@ -323,6 +337,35 @@ function loadSnapShot(id, cb){
             cb && cb();
         });
     }
+}
+
+function listEvents(cb){
+    //{"events":[],"offset":0,"timestamp":"1507648068","total":0}
+    /*let param = {
+        camId: 2
+        //cameraIds:"2",
+        //blIncludeDeletedCam:true,
+        //deviceOutCap:true,
+        //streamInfo:true,
+        //ptz:true,
+        //basic:true,
+        //privCamType:3,
+        //camAppInfo:true,
+        //optimize:true,
+        //fisheye:true,
+        //eventDetection:true
+    };*/
+    let param = {
+        start: 0, limit: 100, version: 1
+    };
+    //send('ss', 'getInfoCamera', param, function (res){
+    send('ss', 'listHistoryActionRules', param, (res) => {
+        if (res){
+            states.SurveillanceStation.events = JSON.stringify(res);
+            adapter.log.error('****************** ' + JSON.stringify(res));
+        }
+        cb && cb();
+    });
 }
 
 /////////////////////////* DownloadStation */////////////////////////

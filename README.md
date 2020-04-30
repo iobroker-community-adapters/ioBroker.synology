@@ -25,9 +25,9 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 
 **commands.shutdown** - shutdown NAS
 
-***SurveillanceStation.cameras.{PLAYERID}***:
-* ***SurveillanceStation.cameras.{NAMECAM}.enabled*** - Current status and enable/disable camera
-* ***SurveillanceStation.cameras.{NAMECAM}.linkSnapshot*** - URL for snapshot
+***SurveillanceStation.cameras.{NAMECAM}***:
+* enabled - Current status and enable/disable camera
+* linkSnapshot - URL for snapshot
 
 ***SurveillanceStation.HomeMode.status_on*** - Current status and enable/disable homemode
 

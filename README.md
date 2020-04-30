@@ -13,20 +13,37 @@
 ## Description
 The driver allows you to receive data and manage your Synology NAS server.
 
+#### sendMethod
+
 You can send any command (method) by setting the sendMethod object, for example:
 Get the SurveillanceStation info is a getInfo method with no additional parameters.
 
 ```{"method": "getInfo", "params": {}}```
 
-## Описание
-Драйвер позволяет получать данные и управлять вашим NAS сервером фирмы Synology.
+#### Control
+**commands.reboot** - reboot NAS
 
-Можно отправить любую команду(метод) установив значение обьекта ```sendMethod```, например:
-Получить инфо SurveillanceStation это метод getInfo без дополнительных параметров.
+**commands.shutdown** - shutdown NAS
 
-```{"method":"getInfo", "params":{}}```
+***SurveillanceStation.cameras.{PLAYERID}***:
+* ***SurveillanceStation.cameras.{NAMECAM}.enabled*** - Current status and enable/disable camera
+* ***SurveillanceStation.cameras.{NAMECAM}.linkSnapshot*** - URL for snapshot
 
-### Messagebox
+***SurveillanceStation.HomeMode.status_on*** - Current status and enable/disable homemode
+
+***SurveillanceStation.getSnapshotCamera*** - Get snapshot by camera number, the file is saved in a directory *...iobroker-data\synology_0\snapshotCam_2.jpg*
+
+***AudioStation.players.{PLAYERID}***:
+* play, pause, stop, next, prev - Controlling playback (button, only true)
+* repeat - Repeat control (Off, All, One)
+* shuffle - Shuffle control (true/false)
+* volume - Volume remote player (0-100) 
+* seek - Controlling playback seek (0-100)
+* play_folder - Add tracks from the folder to the playlist (id folder e.g. *dir_5816*)
+* play_track - Play track by its id (e.g. *music_120847*)
+* current_play - Control and status of the current track by its number in the playlist (e.g. *14*)
+
+#### Messagebox
 ```
 sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
     if(res) sendTo('telegram.0', {text: res, caption: 'caption for image'});

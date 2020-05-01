@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "news": {
+      "0.1.2": {
+        "en": "fixed error",
+        "de": "fixed error",
+        "ru": "fixed error",
+        "pt": "fixed error",
+        "nl": "fixed error",
+        "fr": "fixed error",
+        "it": "fixed error",
+        "es": "fixed error",
+        "pl": "fixed error",
+        "zh-cn": "fixed error"
+      },
       "0.1.1": {
         "en": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
         "de": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",

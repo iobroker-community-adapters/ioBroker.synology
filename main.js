@@ -198,10 +198,10 @@ let PollCmd = {
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
         getStatusRemotePlayers,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
-        //{api: 'ss', method: 'listEvents', params: {reason: 2, limit: 10, cameraIds: '2'}, ParseFunction: parse.dIStsPollIngCameraEvent},
-        //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
+        //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.dIStsPollIngCameraEvent},
+        //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent},
-    ],//triggerAlert
+    ],
     "slowPoll":  [
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
@@ -376,8 +376,8 @@ function getStatusPlayer(playerid, cb){
                         }
                     });
                 } else {
-                    if(states.AudioStation.players[playerid].playlist_total !== 0){
-                        clearPlayerStates(playerid);   
+                    if (states.AudioStation.players[playerid].playlist_total !== 0){
+                        clearPlayerStates(playerid);
                     }
                 }
             }
@@ -564,14 +564,14 @@ function sendPolling(namePolling, cb){
             syno[api][method](params, (err, res) => {
                 adapter.log.debug(!err && res ? 'Ответ получен, парсим:' :'Нет ответа на команду, читаем следующую.');
                 if (!err && res){
+                    if (!connect) setInfoConnection(true);
                     connect = true;
-                    setInfoConnection(true);
                     states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
                 } else if (err){
-                    adapter.log.error('Error - ' + err);
+                    adapter.log.error('sendPolling Error - ' + err);
                 }
                 if (queueCmd){
-                    adapter.log.debug('* Get queueCmd *');
+                    adapter.log.debug('---------- Get queueCmd ----------');
                     states = queueCmd;
                     queueCmd = null;
                     iterator(namePolling, cb);
@@ -756,7 +756,8 @@ function main(){
 
     dir = utils.controllerDir + '/' + adapter.systemConfig.dataDir + adapter.namespace.replace('.', '_') + '/';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    fs.copyFile('admin/cover.png', dir + 'cover.png', ()=>{});
+    fs.copyFile('admin/cover.png', dir + 'cover.png', () => {
+    });
     try {
         syno = new Syno({
             ignoreCertificateErrors: true, /*rejectUnauthorized: false,*/
@@ -784,6 +785,8 @@ function setInfoConnection(val){
             } else if (state.val !== val){
                 adapter.setState('info.connection', val, true);
             }
+        } else if (!state && !err){
+            adapter.setState('info.connection', val, true);
         }
     });
 }

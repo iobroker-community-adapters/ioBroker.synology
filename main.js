@@ -43,10 +43,10 @@ function startAdapter(options){
                     return;
                 }
                 if (command === 'Browser'){  /*  /AS  */
-                    queueCmd = function (_states, cb){
-                        Browser(_states, name, val, (_states) => {
-                            cb && cb(_states);
-                        });
+                    if (name in states.AudioStation.players){
+                        queueCmd = Browser(states, name, val);
+                    } else {
+                        adapter.log.error('Error player ' + name + ' offline?');
                     }
                 } else if (command === 'play_folder'){
                     PlayFolder(states, name, val);
@@ -202,6 +202,7 @@ let PollCmd = {
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent},
     ],//triggerAlert
     "slowPoll":  [
+        {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         addLinkSnapShot,
         getLiveViewPathCamera
@@ -250,7 +251,7 @@ function addLinkSnapShot(states){
 function getLiveViewPathCamera(states){
     adapter.log.debug('--------------------- getLiveViewPathCamera -----------------------');
     const ids = getArrIdCams().join(',');
-    if(ids){
+    if (ids){
         send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
             if (res && !res.code && !res.message){
                 res.forEach((obj) => {
@@ -314,13 +315,14 @@ function getStatusRemotePlayers(states){
 }
 
 function clearPlayerStates(playerid){
+    adapter.log.debug('-------- clearPlayerStates ----------');
     states.AudioStation.players[playerid].playlist_total = '';
     states.AudioStation.players[playerid].volume = 0;
     states.AudioStation.players[playerid].album = '';
     states.AudioStation.players[playerid].artist = '';
     states.AudioStation.players[playerid].genre = '';
     states.AudioStation.players[playerid].year = 0;
-    states.AudioStation.players[playerid].song_id = '';
+    states.AudioStation.players[playerid].song_id = 0;
     states.AudioStation.players[playerid].title = '';
     states.AudioStation.players[playerid].path = '';
     states.AudioStation.players[playerid].repeat = '';
@@ -333,6 +335,7 @@ function clearPlayerStates(playerid){
     states.AudioStation.players[playerid].seek = 0;
     states.AudioStation.players[playerid].playlist = '';
     states.AudioStation.players[playerid].current_play = 0;
+    states.AudioStation.players[playerid].cover = '';
 }
 
 function getStatusPlayer(playerid, cb){
@@ -357,6 +360,7 @@ function getStatusPlayer(playerid, cb){
                             states = parse.PlayListRemotePlayer(playerid, states, res);
                             let track = states.AudioStation.players[playerid].song_id;
                             if (track !== old_states.AudioStation.players[playerid].song_id){
+                                old_states.AudioStation.players[playerid].song_id = track;
                                 send('as', 'getSongCover', {id: track}, (res) => {
                                     if (res && !res.message){
                                         let buf = Buffer.from(res, 'binary');
@@ -369,7 +373,9 @@ function getStatusPlayer(playerid, cb){
                         }
                     });
                 } else {
-                    clearPlayerStates(playerid);
+                    if(states.AudioStation.players[playerid].playlist_total !== 0){
+                        clearPlayerStates(playerid);   
+                    }
                 }
             }
             cb && cb(res);
@@ -377,7 +383,7 @@ function getStatusPlayer(playerid, cb){
     }
 }
 
-function Browser(_states, playerid, val, cb){
+function Browser(states, playerid, val){
     adapter.log.debug('--------------------- Browser -----------------------');
     let param = {};
     if (val && val !== '/'){
@@ -397,8 +403,8 @@ function Browser(_states, playerid, val, cb){
                 "title":    res.items[i].title
             });
         });
-        _states.AudioStation.players[playerid].Browser = JSON.stringify(arr);
-        cb && cb(_states);
+        states.AudioStation.players[playerid].Browser = JSON.stringify(arr);
+        return states;
     });
 }
 
@@ -538,7 +544,6 @@ function queuePolling(){
         }
         adapter.log.debug('slowPollingTime = ' + (endTime - startTime));
         sendPolling(namePolling);
-
     }
 }
 
@@ -564,12 +569,9 @@ function sendPolling(namePolling, cb){
                 }
                 if (queueCmd){
                     adapter.log.debug('* Get queueCmd *');
-                    queueCmd(states, (res) => {
-                        adapter.log.debug('queueCmd Response: '/* + JSON.stringify(res)*/);
-                        states = res;
-                        queueCmd = null;
-                        iterator(namePolling, cb);
-                    });
+                    states = queueCmd;
+                    queueCmd = null;
+                    iterator(namePolling, cb);
                 } else {
                     iterator(namePolling, cb);
                 }
@@ -608,6 +610,7 @@ function send(api, method, params, cb){
     }
     try {
         syno[api][method](params, (err, data) => {
+            adapter.log.debug('Send ' + api + ' ' + method + ' Error: ' + err + ' Response: ' + typeof data);
             data = data || '';
             if (!err){
                 cb && cb(data);
@@ -661,14 +664,6 @@ function setStates(){
     });
 }
 
-function setDev(ids, name, cb){
-    adapter.setObjectNotExists(ids, {
-        type:   'channel',
-        common: {name: name, type: 'state'},
-        native: {id: name}
-    });
-}
-
 function setObject(id, val){
     let type = 'string';
     let role = 'state';
@@ -697,14 +692,12 @@ function setObject(id, val){
             adapter.setObject(id, {
                 type: 'state', common: common, native: {}
             });
-            adapter.setState(id, {
-                val: val, ack: true
-            });
+            adapter.setState(id, {val: val, ack: true});
         } else {
             if (JSON.stringify(obj.common) !== JSON.stringify(common)){
                 adapter.extendObject(id, {common: common});
             }
-            if ( _id === 'player_name'){
+            if (_id === 'player_name'){
                 const ids = id.split('.').slice(0, -1).join('.');
                 adapter.extendObject(ids, {
                     type:   'channel',
@@ -712,7 +705,9 @@ function setObject(id, val){
                     native: {id: val}
                 });
             }
-            adapter.getState(id, function (err, state){
+            adapter.setState(id, {val: val, ack: true});
+            //adapter.log.debug('setState ' + id + ' { oldVal: ' + old_states[id] + ' != newVal: ' + val + ' }');
+            /*adapter.getState(id, function (err, state){
                 if (!err && state !== null){
                     if (!state.ack || state.val !== val){
                         adapter.setState(id, {val: val, ack: true});
@@ -721,62 +716,13 @@ function setObject(id, val){
                 } else {
                     adapter.log.debug('setState error ' + id);
                 }
-            });
+            });*/
         }
     });
 }
 
 function error(e, cb){
     let code = e.code;
-    let err = '';
-    if (code !== 'ECONNREFUSED'){
-        switch (code) {
-            case 100:
-                err = '100';
-                break;
-            case 101:
-                err = 'No parameter of API, method or version';
-                break;
-            case 102:
-                err = 'The requested API does not exist';
-                break;
-            case 103:
-                err = 'The requested method does not exist';
-                break;
-            case 104:
-                err = 'The requested version does not support the functionality';
-                break;
-            case 105:
-                err = 'The logged in session does not have permission';
-                break;
-            case 106:
-                err = 'Session timeout';
-                break;
-            case 107:
-                err = 'Session interrupted by duplicate login';
-                break;
-            case 119:
-                err = '119';
-                break;
-            case 400:
-                err = 'Error connection/Execution failed (error password?)';
-                break;
-            case 401:
-                err = 'Parameter invalid';
-                break;
-            case 405:
-                err = '{"error":{"code":405},"success":false}';
-                break;
-            case 450:
-                err = '450';
-                break;
-            case 500:
-                err = '500'; //controlRemotePlayer
-                break;
-            /*default:
-                return 'Unknown error';*/
-        }
-    }
     if (code === 400 || code === 500 || code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutRecconect && clearTimeout(timeOutRecconect);
         setInfoConnection(false);

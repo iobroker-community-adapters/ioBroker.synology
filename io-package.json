@@ -58,7 +58,8 @@
     "keywords": [
       "synology NAS control"
     ],
-    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md"
+    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
+    "installedFrom": "https://github.com/instalator/ioBroker.synology/tarball/master"
   },
   "native": {
     "host": "localhost",
@@ -70,8 +71,7 @@
     "polling": 100,
     "slowPollingTime": 60000
   },
-  "objects": [
-  ],
+  "objects": [],
   "instanceObjects": [
     {
       "_id": "info.connection",
@@ -84,8 +84,7 @@
         "write": false,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "commands.reboot",
@@ -98,8 +97,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "commands.shutdown",
@@ -112,8 +110,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "DiskStationManager.sendMethod",
@@ -126,8 +123,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "FileStation.sendMethod",
@@ -140,8 +136,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "DownloadStation.sendMethod",
@@ -154,8 +149,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "AudioStation.sendMethod",
@@ -168,8 +162,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "VideoStation.sendMethod",
@@ -182,8 +175,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "VideoStation_DTV.sendMethod",
@@ -196,8 +188,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "SurveillanceStation.sendMethod",
@@ -210,8 +201,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "SurveillanceStation.getSnapshotCamera",
@@ -224,8 +214,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "DownloadStation.add_url_download",
@@ -238,8 +227,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     },
     {
       "_id": "DownloadStation.folder",
@@ -252,8 +240,7 @@
         "write": true,
         "def": false
       },
-      "native": {
-      }
+      "native": {}
     }
   ]
 }

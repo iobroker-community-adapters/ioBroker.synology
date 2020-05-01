@@ -189,15 +189,18 @@ let PollCmd = {
         {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
-        {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers}
+        {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
     ],
     "fastPoll":  [
         {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parse.SystemUtilization},
         {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parse.SystemStatus},
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
         getStatusRemotePlayers,
-        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode}
-    ],
+        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
+        //{api: 'ss', method: 'listEvents', params: {reason: 2, limit: 10, cameraIds: '2'}, ParseFunction: parse.dIStsPollIngCameraEvent},
+        //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
+        //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    ],//triggerAlert
     "slowPoll":  [
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         addLinkSnapShot,
@@ -209,7 +212,7 @@ let PollCmd = {
 const getArrIdCams = () => {
     let ids = [];
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
-        if (nameCam) ids.push(states.SurveillanceStation.cameras[nameCam].id);
+        if (nameCam !== undefined) ids.push(states.SurveillanceStation.cameras[nameCam].id);
     });
     return ids;
 };
@@ -247,18 +250,20 @@ function addLinkSnapShot(states){
 function getLiveViewPathCamera(states){
     adapter.log.debug('--------------------- getLiveViewPathCamera -----------------------');
     const ids = getArrIdCams().join(',');
-    send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
-        if (res && !res.code && !res.message){
-            res.forEach((obj) => {
-                const nameCam = getNameCams(obj.id);
-                states.SurveillanceStation.cameras[nameCam]['linkMjpegHttpPath'] = obj.mjpegHttpPath;
-                states.SurveillanceStation.cameras[nameCam]['linkMulticstPath'] = obj.multicstPath;
-                states.SurveillanceStation.cameras[nameCam]['linkMxpegHttpPath'] = obj.mxpegHttpPath;
-                states.SurveillanceStation.cameras[nameCam]['linkRtspOverHttpPath'] = obj.rtspOverHttpPath;
-                states.SurveillanceStation.cameras[nameCam]['linkRtspPath'] = obj.rtspPath;
-            });
-        }
-    });
+    if(ids){
+        send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
+            if (res && !res.code && !res.message){
+                res.forEach((obj) => {
+                    const nameCam = getNameCams(obj.id);
+                    states.SurveillanceStation.cameras[nameCam]['linkMjpegHttpPath'] = obj.mjpegHttpPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkMulticstPath'] = obj.multicstPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkMxpegHttpPath'] = obj.mxpegHttpPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkRtspOverHttpPath'] = obj.rtspOverHttpPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkRtspPath'] = obj.rtspPath;
+                });
+            }
+        });
+    }
     return states;
 }
 

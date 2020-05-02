@@ -2,6 +2,7 @@
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
 const fs = require('fs');
+const http = require('http');
 const parse = require('./lib/parsers.js');
 let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
     firstStart = true, slowPollingTime, dir, old_states;
@@ -202,6 +203,8 @@ let PollCmd = {
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent},
+        {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
+        //            api=SYNO.DownloadStation.Task&version=1&method=list&additional=detail,file
     ],
     "slowPoll":  [
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
@@ -294,16 +297,16 @@ function addDownload(url, cb){
     let param = {
         type: "url", create_list: true, uri: [url], version: 2
     };
-    adapter.getState('AudioStation.folder', (err, state) => {
+    adapter.getState('DownloadStation.folder', (err, state) => {
         if (!err || state){
             param.destination = state.val;
         }
-    });
-    send('dl', 'createTask', param, (res) => {
-        if (res){
-            adapter.log.error('****************** ' + JSON.stringify(res));
-        }
-        cb && cb();
+        send('dl', 'createTask', param, (res) => {
+            if (res){
+                adapter.log.error('****************** ' + JSON.stringify(res));
+            }
+            cb && cb();
+        });
     });
 }
 
@@ -582,7 +585,11 @@ function sendPolling(namePolling, cb){
                 if (!err && res){
                     if (!connect) setInfoConnection(true);
                     connect = true;
-                    states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                    try {
+                        states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                    } catch (e) {
+
+                    }
                 } else if (err){
                     adapter.log.error('sendPolling Error - ' + err);
                 }
@@ -594,14 +601,6 @@ function sendPolling(namePolling, cb){
                 } else {
                     iterator(namePolling, cb);
                 }
-                /*if (typeof queueCmd === 'function'){
-                    adapter.log.debug('---------- Get queueCmd ----------');
-                    states = queueCmd();
-                    queueCmd = null;
-                    iterator(namePolling, cb);
-                } else {
-                    iterator(namePolling, cb);
-                }*/
             });
         } catch (e) {
             error(e);
@@ -791,7 +790,7 @@ function main(){
             passwd:                  adapter.config.password || '',
             protocol:                adapter.config.https ? 'https' :'http',
             apiVersion:              adapter.config.version || '6.2.2',
-            otp:                     adapter.config['2fa_code'] || 'ASE32YJSBKUOIDPB',
+            otp:                     adapter.config['2fa_checkbox'] ? (adapter.config['2fa_code'] || 'ASE32YJSBKUOIDPB') :null,
             debug:                   false
         });
         //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));

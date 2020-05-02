@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "news": {
+      "0.1.3": {
+        "en": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "de": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "ru": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "pt": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "nl": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "fr": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "it": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "es": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "pl": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
+        "zh-cn": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list"
+      },
       "0.1.2": {
         "en": "fixed error",
         "de": "fixed error",

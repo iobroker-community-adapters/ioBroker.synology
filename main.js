@@ -44,7 +44,8 @@ function startAdapter(options){
                 }
                 if (command === 'Browser'){  /*  /AS  */
                     if (name in states.AudioStation.players){
-                        queueCmd = Browser(states, name, val);
+                        queueCmd = true;
+                        Browser(states, name, val);
                     } else {
                         adapter.log.error('Error player ' + name + ' offline?');
                     }
@@ -170,8 +171,8 @@ const objects = {
     total_size:       {role: "state", name: "Total size", type: "number", unit: "GB", read: true, write: false},
     used_size:        {role: "state", name: "Used size", type: "number", unit: "GB", read: true, write: false},
     temperature:      {role: "state", name: "Temperature", type: "number", unit: "°C", read: true, write: false},
-    Browser:          {role: "state", name: "AudioStation Browser Files", type: "object", read: true, write: true},
-    play_folder:      {role: "state", name: "Add tracks from the folder to the playlist", type: "string", read: true, write: true},
+    Browser:          {role: "media.browser", name: "AudioStation Browser Files", type: "string", read: true, write: true},
+    play_folder:      {role: "media.add", name: "Add tracks from the folder to the playlist", type: "string", read: true, write: true},
     play_track:       {role: "state", name: "Play track by its id", type: "string", read: true, write: true},
     status_on:        {role: "state", name: "HomeMode status", type: "boolean", read: true, write: true},
     enabled:          {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
@@ -386,20 +387,35 @@ function getStatusPlayer(playerid, cb){
     }
 }
 
-function Browser(states, playerid, val){
+function Browser(_states, playerid, val){
     adapter.log.debug('--------------------- Browser -----------------------');
     let param = {};
     if (val && val !== '/'){
-        param = {id: val};
+        if (~val.indexOf('dir_')){
+            param = {id: val};
+        } else {
+            try {
+                const obj = JSON.parse(states.AudioStation.players[playerid].Browser);
+                for (let dir_id in obj.files) {
+                    if (!obj.files.hasOwnProperty(dir_id)) continue;
+                    if (obj.files[dir_id].file === val){
+                        param = {id: obj.files[dir_id].id};
+                    }
+                }
+            } catch (e) {
+                param = {};
+                states.AudioStation.players[playerid].Browser = ''
+            }
+        }
     }
     send('as', 'listFolders', param, (res) => {
-        let arr = [];
+        let arr = {files: []};
         res.items.forEach((k, i) => {
             let filetype = 'file';
             if (res.items[i].type === 'folder'){
                 filetype = 'directory';
             }
-            arr.push({
+            arr.files.push({
                 "id":       res.items[i].id,
                 "file":     res.items[i].path,
                 "filetype": filetype,
@@ -407,7 +423,7 @@ function Browser(states, playerid, val){
             });
         });
         states.AudioStation.players[playerid].Browser = JSON.stringify(arr);
-        return states;
+        old_states.AudioStation.players[playerid].Browser = '';
     });
 }
 
@@ -571,13 +587,21 @@ function sendPolling(namePolling, cb){
                     adapter.log.error('sendPolling Error - ' + err);
                 }
                 if (queueCmd){
+                    queueCmd = false;
+                    setTimeout(() => {
+                        iterator(namePolling, cb);
+                    }, 1000);
+                } else {
+                    iterator(namePolling, cb);
+                }
+                /*if (typeof queueCmd === 'function'){
                     adapter.log.debug('---------- Get queueCmd ----------');
-                    states = queueCmd;
+                    states = queueCmd();
                     queueCmd = null;
                     iterator(namePolling, cb);
                 } else {
                     iterator(namePolling, cb);
-                }
+                }*/
             });
         } catch (e) {
             error(e);

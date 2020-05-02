@@ -18,7 +18,14 @@
                 if ($key.attr('type') === 'checkbox'){
                     $key.prop('checked', settings[id])
                         .on('change', () => onChange());
-                    if($key.prop('checked')){
+                    if($key.prop('id') === '2fa_checkbox'){
+                        if($key.prop('checked')) {
+                            $('#div_2fa_code').show();
+                        } else {
+                            $('#div_2fa_code').hide();
+                        }
+                    }
+                    if($key.prop('id') === 'https'){
                         $('.translate').each(function() {
                             var text = $(this).text();
                             $(this).text(text.replace('5000', '5001'));
@@ -60,6 +67,13 @@
                     });
                 }
             });
+            $('#2fa_checkbox').change(function() {
+                if(this.checked) {
+                    $('#div_2fa_code').show();
+                } else {
+                    $('#div_2fa_code').hide();
+                }
+            });
         });
     </script>
 
@@ -86,6 +100,10 @@
                 <input type="checkbox" class="value" id="https"/>
                 <label for="https" class="translate">https</label>
             </div>
+            <div class="col s5 input-field">
+                <input type="checkbox" class="value" id="2fa_checkbox"/>
+                <label for="2fa_checkbox" class="translate">2fa_checkbox</label>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -97,6 +115,10 @@
             <div class="col s4 input-field">
                 <input type="password" class="value" id="password"/>
                 <label for="password" class="translate">password</label>
+            </div>
+            <div id="div_2fa_code" class="col s4 input-field">
+                <input type="text" class="value" id="2fa_code"/>
+                <label for="2fa_code" class="translate">2fa_code</label>
             </div>
         </div>
     </div>

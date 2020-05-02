@@ -78,6 +78,8 @@
     "port": "5000",
     "login": "admin",
     "password": "",
+    "2fa_checkbox": false,
+    "2fa_code": "",
     "https": false,
     "version": "6.2.2",
     "polling": 100,

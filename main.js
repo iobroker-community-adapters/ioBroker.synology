@@ -791,7 +791,7 @@ function main(){
             passwd:                  adapter.config.password || '',
             protocol:                adapter.config.https ? 'https' :'http',
             apiVersion:              adapter.config.version || '6.2.2',
-            otp:                     'ASE32YJSBKUOIDPB',
+            otp:                     adapter.config['2fa_code'] || 'ASE32YJSBKUOIDPB',
             debug:                   false
         });
         //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));

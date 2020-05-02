@@ -61,6 +61,30 @@ systemDictionary = {
         "pl": "Hasło",
         "zh-cn": "密码"
     },
+    "2fa_checkbox":                                               {
+        "en": "2-step verification",
+        "de": "2-stufige Überprüfung",
+        "ru": "Двухэтапная авторизация",
+        "pt": "Verificação em duas etapas",
+        "nl": "Authenticatie in twee stappen",
+        "fr": "Vérification en 2 étapes",
+        "it": "Verifica in due passaggi",
+        "es": "Verificación en 2 pasos",
+        "pl": "Weryfikacja dwuetapowa",
+        "zh-cn": "两步验证"
+    },
+    "2fa_code":                                               {
+        "en": "Secret key for 2-step verification",
+        "de": "Geheimschlüssel für die Bestätigung in zwei Schritten",
+        "ru": "Секретный ключ для двухэтапной проверки",
+        "pt": "Chave secreta para verificação em duas etapas",
+        "nl": "Geheime sleutel voor authenticatie in twee stappen",
+        "fr": "Clé secrète pour la vérification en 2 étapes",
+        "it": "Chiave segreta per la verifica in due passaggi",
+        "es": "Clave secreta para la verificación en dos pasos",
+        "pl": "Tajny klucz do weryfikacji dwuetapowej",
+        "zh-cn": "两步验证的密钥"
+    },
     "version":                                           {
         "en": "api Version",
         "de": "API-Version",

@@ -24,9 +24,9 @@
     "url": "https://github.com/instalator/ioBroker.synology"
   },
   "dependencies": {
-    "syno": "https://github.com/homeinstalator/syno/tarball/master/",
+    "@iobroker/adapter-core": "^2.2.1",
     "moment": "^2.24.0",
-    "@iobroker/adapter-core": "^2.2.1"
+    "syno": "https://github.com/homeinstalator/syno/tarball/master/"
   },
   "devDependencies": {
     "@iobroker/testing": "^2.1.0",

@@ -203,12 +203,11 @@ let PollCmd = {
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent},
-        {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
-        //            api=SYNO.DownloadStation.Task&version=1&method=list&additional=detail,file
     ],
     "slowPoll":  [
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
+        {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
         addLinkSnapShot,
         getLiveViewPathCamera
     ]
@@ -302,8 +301,8 @@ function addDownload(url, cb){
             param.destination = state.val;
         }
         send('dl', 'createTask', param, (res) => {
-            if (res){
-                adapter.log.error('****************** ' + JSON.stringify(res));
+            if (res && res.message){
+                adapter.log.error('addDownload Error: ' + res.message);
             }
             cb && cb();
         });

@@ -14,8 +14,8 @@ systemDictionary = {
         "zh-cn": "IP地址"
     },
     "port":                                                 {
-        "en": "port",
-        "de": "Hafen",
+        "en": "Port",
+        "de": "Port",
         "ru": "Порт",
         "pt": "porta",
         "nl": "haven",

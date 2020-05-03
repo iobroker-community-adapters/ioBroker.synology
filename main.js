@@ -826,7 +826,7 @@ function main(){
             passwd:                  adapter.config.password || '',
             protocol:                adapter.config.https ? 'https' :'http',
             apiVersion:              adapter.config.version || '6.2.2',
-            otp:                     adapter.config['2fa_checkbox'] ? (adapter.config['2fa_code'] || 'ASE32YJSBKUOIDPB') :null,
+            otp:                     adapter.config['2fa_checkbox'] ? (adapter.config['2fa_code'] || 'ASE32YJSBKUOIDPB') :false,
             debug:                   false
         });
         //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));

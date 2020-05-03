@@ -127,7 +127,7 @@ let states = {
     DiskStationManager:  {info: {}, hdd_info: {}, vol_info: {}},
     FileStation:         {info: {}},
     DownloadStation:     {info: {}},
-    AudioStation:        {info: {}, players: {}/*, radio:{}*/},
+    AudioStation:        {info: {}, players: {}},
     VideoStation:        {info: {}},
     VideoStation_DTV:    {info: {}},
     SurveillanceStation: {info: {}, cameras: {}, HomeMode: {}},
@@ -235,8 +235,7 @@ function switchCam(states, name, command, val){
     let method = !!val ? 'enableCamera' :'disableCamera';
     if (name !== 'undefined'){
         let camId = states.SurveillanceStation.cameras[name].id.toString();
-        send('ss', method, {cameraIds: camId, blIncludeDeletedCam: false}, (res) => {
-        });
+        send('ss', method, {cameraIds: camId, blIncludeDeletedCam: false});
     }
 }
 
@@ -364,7 +363,7 @@ function clearPlaylist(states, playerid, cb){
         limit:         states.AudioStation.players[playerid].playlist_total || 10000,
         updated_index: -1
     };
-    send('as', 'updatePlayListRemotePlayer', param, (res) => {
+    send('as', 'updatePlayListRemotePlayer', param, () => {
         cb && cb();
     });
 }
@@ -441,7 +440,7 @@ function getSongCover(playerid){
         send('as', 'getSongCover', {id: track}, (res) => {
             if (res && !res.message){
                 let buf = Buffer.from(res, 'binary');
-                fs.writeFile(dir + 'cover.jpg', buf, (err) => {
+                fs.writeFile(dir + 'cover.jpg', buf, () => {
                     states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
                 });
             } else if (res.response.statusCode === 404){
@@ -501,7 +500,7 @@ function Browser(_states, playerid, val){
     });
 }
 
-function PlayControl(states, playerid, cmd, val, cb){
+function PlayControl(states, playerid, cmd, val){
     //adapter.log.debug('--------------------- PlayControl -----------------------');
     let param = {
         id:     playerid,
@@ -528,7 +527,7 @@ function PlayControl(states, playerid, cmd, val, cb){
     }
 }
 
-function PlayFolder(states, playerid, folder, cb){
+function PlayFolder(states, playerid, folder){
     adapter.log.debug('--------------------- PlayFolder -----------------------');
     let param = {};
     if (playerid){
@@ -543,7 +542,7 @@ function PlayFolder(states, playerid, folder, cb){
                     play:               true,
                     containers_json:    JSON.stringify([{"type": "folder", "id": folder, "recursive": true, "sort_by": "title", "sort_direction": "ASC"}])
                 };
-                send('as', 'updatePlayListRemotePlayer', param, (res) => { //add folder to playlist
+                send('as', 'updatePlayListRemotePlayer', param, () => { //add folder to playlist
                     send('as', 'controlRemotePlayer', {id: playerid, action: 'play'});
                 });
             });
@@ -551,7 +550,7 @@ function PlayFolder(states, playerid, folder, cb){
     }
 }
 
-function PlayTrack(states, playerid, val, cb){
+function PlayTrack(states, playerid, val){
     adapter.log.debug('--------------------- PlayTrack -----------------------');
     let param = {};
     if (playerid){
@@ -571,14 +570,14 @@ function PlayTrack(states, playerid, val, cb){
     }
 }
 
-function PlayTrackNum(states, playerid, val, cb){
+function PlayTrackNum(states, playerid, val){
     adapter.log.debug('--------------------- PlayTrackNum -----------------------');
     if (playerid){
         send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: val});
     }
 }
 
-function PlayTrackId(states, playerid, val, cb){
+function PlayTrackId(states, playerid, val){
     adapter.log.debug('--------------------- PlayTrack -----------------------');
     try {
         let arr = JSON.parse(states.AudioStation.players[playerid].playlist);

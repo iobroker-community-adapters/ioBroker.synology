@@ -60,6 +60,12 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 
+### 0.1.4
+* (instalator) change for DownloadStation
+* (instalator) added playlist favorite radio
+* (instalator) added clearPlaylist button
+* (instalator) refactoring
+
 ### 0.1.3
 * (instalator) change obj for ss info fix for cover song 
 * (instalator) fix for info.connection 

@@ -231,15 +231,6 @@ const getArrIdCams = () => {
     return ids;
 };
 
-const getNameCams = (id) => {
-    for (let nameCam in states.SurveillanceStation.cameras) {
-        if (!states.SurveillanceStation.cameras.hasOwnProperty(nameCam)) continue;
-        if (states.SurveillanceStation.cameras[nameCam].id === id){
-            return nameCam;
-        }
-    }
-};
-
 function switchCam(states, name, command, val){
     let method = !!val ? 'enableCamera' :'disableCamera';
     if (name !== 'undefined'){
@@ -267,14 +258,7 @@ function getLiveViewPathCamera(states){
     if (ids){
         send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
             if (res && !res.code && !res.message){
-                res.forEach((obj) => {
-                    const nameCam = getNameCams(obj.id);
-                    states.SurveillanceStation.cameras[nameCam]['linkMjpegHttpPath'] = obj.mjpegHttpPath;
-                    states.SurveillanceStation.cameras[nameCam]['linkMulticstPath'] = obj.multicstPath;
-                    states.SurveillanceStation.cameras[nameCam]['linkMxpegHttpPath'] = obj.mxpegHttpPath;
-                    states.SurveillanceStation.cameras[nameCam]['linkRtspOverHttpPath'] = obj.rtspOverHttpPath;
-                    states.SurveillanceStation.cameras[nameCam]['linkRtspPath'] = obj.rtspPath;
-                });
+                states = parse.LiveViewPathCamera(states, res);
             }
         });
     }
@@ -386,7 +370,7 @@ function clearPlaylist(states, playerid, cb){
 }
 
 function getStatusRemotePlayers(states){
-    adapter.log.debug('--------------------- getStatusPlayer -----------------------');
+    //adapter.log.debug('--------------------- getStatusRemotePlayers -----------------------');
     Object.keys(states.AudioStation.players).forEach((playerid) => {
         getStatusPlayer(playerid);
     });
@@ -418,10 +402,11 @@ function clearPlayerStates(playerid){
 }
 
 function getStatusPlayer(playerid, cb){
+    //adapter.log.debug('--------------------- getStatusPlayer -----------------------');
     let param = {};
     if (playerid){
         param = {
-            id: playerid, additional: 'song_tag, song_audio, subplayer_volume, song_rating'
+            id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
         };
         send('as', 'getStatusRemotePlayerStatus', param, (res) => {
             if (res && res.state){
@@ -434,24 +419,8 @@ function getStatusPlayer(playerid, cb){
                 states.AudioStation.players[playerid].state_playing = state;
                 if ((res.state === 'playing' || res.state === 'pause') && res.song){
                     states = parse.RemotePlayerStatus(playerid, states, res);
-                    send('as', 'getPlayListRemotePlayer', param, (res) => {
-                        if (res){
-                            states = parse.PlayListRemotePlayer(playerid, states, res);
-                            let track = states.AudioStation.players[playerid].song_id;
-                            if (track !== old_states.AudioStation.players[playerid].song_id){
-                                old_states.AudioStation.players[playerid].song_id = track;
-                                send('as', 'getSongCover', {id: track}, (res) => {
-                                    if (res && !res.message){
-                                        let buf = Buffer.from(res, 'binary');
-                                        fs.writeFile(dir + 'cover.jpg', buf, (err) => {
-                                            states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
-                                        });
-                                    } else if (res.response.statusCode === 404){
-                                        states.AudioStation.players[playerid].cover = dir + 'cover.png';
-                                    }
-                                });
-                            }
-                        }
+                    getPlaylist(playerid, () => {
+                        getSongCover(playerid);
                     });
                 } else {
                     if (states.AudioStation.players[playerid].playlist_total !== 0){
@@ -462,6 +431,34 @@ function getStatusPlayer(playerid, cb){
             cb && cb(res);
         });
     }
+}
+
+function getSongCover(playerid){
+    adapter.log.debug('--------------------- getSongCover -----------------------');
+    const track = states.AudioStation.players[playerid].song_id;
+    if (track !== old_states.AudioStation.players[playerid].song_id){
+        old_states.AudioStation.players[playerid].song_id = track;
+        send('as', 'getSongCover', {id: track}, (res) => {
+            if (res && !res.message){
+                let buf = Buffer.from(res, 'binary');
+                fs.writeFile(dir + 'cover.jpg', buf, (err) => {
+                    states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
+                });
+            } else if (res.response.statusCode === 404){
+                states.AudioStation.players[playerid].cover = dir + 'cover.png';
+            }
+        });
+    }
+}
+
+function getPlaylist(playerid, cb){
+    adapter.log.debug('--------------------- getPlaylist -----------------------');
+    send('as', 'getPlayListRemotePlayer', {id: playerid}, (res) => {
+        if (res){
+            states = parse.PlayListRemotePlayer(playerid, states, res);
+            cb && cb();
+        }
+    });
 }
 
 function Browser(_states, playerid, val){
@@ -532,10 +529,10 @@ function PlayControl(states, playerid, cmd, val, cb){
 }
 
 function PlayFolder(states, playerid, folder, cb){
-    //adapter.log.debug('--------------------- PlayFolder -----------------------');
+    adapter.log.debug('--------------------- PlayFolder -----------------------');
     let param = {};
     if (playerid){
-        send('as', 'controlRemotePlayer', {id: playerid, action: 'stop'}, (res) => {
+        send('as', 'controlRemotePlayer', {id: playerid, action: 'stop'}, () => {
             clearPlaylist(states, playerid, () => {
                 param = {
                     id:                 playerid,
@@ -547,12 +544,7 @@ function PlayFolder(states, playerid, folder, cb){
                     containers_json:    JSON.stringify([{"type": "folder", "id": folder, "recursive": true, "sort_by": "title", "sort_direction": "ASC"}])
                 };
                 send('as', 'updatePlayListRemotePlayer', param, (res) => { //add folder to playlist
-                    param = {
-                        id:     playerid,
-                        action: 'play'
-                    };
-                    send('as', 'controlRemotePlayer', param, (res) => {
-                    });
+                    send('as', 'controlRemotePlayer', {id: playerid, action: 'play'});
                 });
             });
         });
@@ -573,30 +565,16 @@ function PlayTrack(states, playerid, val, cb){
             keep_shuffle_order: false
             //containers_json: JSON.stringify([])
         };
-        send('as', 'updatePlayListRemotePlayer', param, (res) => { // updatesongsPlaylist
-            param = {
-                id:     playerid,
-                action: 'play',
-                value:  0
-            };
-            send('as', 'controlRemotePlayer', param, (res) => {
-            });
+        send('as', 'updatePlayListRemotePlayer', param, () => { // updatesongsPlaylist
+            send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: 0});
         });
     }
 }
 
 function PlayTrackNum(states, playerid, val, cb){
     adapter.log.debug('--------------------- PlayTrackNum -----------------------');
-    //action: play value: 2005
-    let param = {};
     if (playerid){
-        param = {
-            id:     playerid,
-            action: 'play',
-            value:  val
-        };
-        send('as', 'controlRemotePlayer', param, (res) => {
-        });
+        send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: val});
     }
 }
 
@@ -606,8 +584,7 @@ function PlayTrackId(states, playerid, val, cb){
         let arr = JSON.parse(states.AudioStation.players[playerid].playlist);
         let track = arr.findIndex(item => item.id === val);
         if (track){
-            send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: track}, (res) => {
-            });
+            send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: track});
         } else {
             adapter.log.error('PlayTrackId: Error track not found');
         }
@@ -763,8 +740,6 @@ function setStates(){
 }
 
 function setObject(id, val){
-    let type = 'string';
-    let role = 'state';
     adapter.log.debug('setObject ' + JSON.stringify(id));
     adapter.getObject(id, function (err, obj){
         let common = {
@@ -803,17 +778,6 @@ function setObject(id, val){
                 });
             }
             adapter.setState(id, {val: val, ack: true});
-            //adapter.log.debug('setState ' + id + ' { oldVal: ' + old_states[id] + ' != newVal: ' + val + ' }');
-            /*adapter.getState(id, function (err, state){
-                if (!err && state !== null){
-                    if (!state.ack || state.val !== val){
-                        adapter.setState(id, {val: val, ack: true});
-                        adapter.log.debug('setState ' + id + ' { oldVal: ' + state.val + ' != newVal: ' + val + ' }');
-                    }
-                } else {
-                    adapter.log.debug('setState error ' + id);
-                }
-            });*/
         }
     });
 }
@@ -842,6 +806,7 @@ function main(){
     endTime = new Date().getTime();
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
+
     parse.on('debug', (msg) => {
         adapter.log.debug('* ' + msg);
     });

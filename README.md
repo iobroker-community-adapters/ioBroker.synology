@@ -42,6 +42,15 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 * play_track - Play track by its id (e.g. *music_120847*)
 * current_play - Control and status of the current track by its number in the playlist (e.g. *14*)
 
+***DownloadStation***:
+*activeTask - number of incomplete downloads
+*listTasks - an array with incomplete downloads
+*shedule_enabled, shedule_emule_enabled - Status and management of scheduled or immediate downloads
+*add_hash_download - add to Hash Downloads (e.g. 8BD3CAD02FC9ECB661A12378414FA310D3F3FE03)
+*add_url_download - add download URL or magnet link
+*folder - The folder to download, set before adding the download, otherwise it is loaded into the default folder
+*pause_task, resume_task - Pause the download and resume. (e.g. ``dbid_170`` or ``170`` or ``all``)
+
 ### Messagebox
 ```
 sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {

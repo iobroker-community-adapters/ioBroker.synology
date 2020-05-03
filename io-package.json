@@ -256,6 +256,45 @@
       "native": {}
     },
     {
+      "_id": "DownloadStation.add_hash_download",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "DownloadStation add url download",
+        "type": "string",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "DownloadStation.pause_task",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Pause task",
+        "type": "string",
+        "read": false,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "DownloadStation.resume_task",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Resume task",
+        "type": "string",
+        "read": false,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
       "_id": "DownloadStation.folder",
       "type": "state",
       "common": {

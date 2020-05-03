@@ -30,7 +30,7 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 
 ***SurveillanceStation.HomeMode.status_on*** - Current status and enable/disable homemode
 
-***SurveillanceStation.getSnapshotCamera*** - Get snapshot by camera number, the file is saved in a directory *...iobroker-data\synology_0\snapshotCam_2.jpg*
+***SurveillanceStation.getSnapshotCamera*** - Get snapshot by camera number, the file is saved in a directory ``...iobroker-data\synology_0\snapshotCam_2.jpg``
 
 ***AudioStation.players.{PLAYERID}***:
 * play, pause, stop, next, prev - Controlling playback (button, only true)
@@ -38,18 +38,18 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 * shuffle - Shuffle control (true/false)
 * volume - Volume remote player (0-100) 
 * seek - Controlling playback seek (0-100)
-* play_folder - Add tracks from the folder to the playlist (id folder e.g. *dir_5816*)
-* play_track - Play track by its id (e.g. *music_120847*)
-* current_play - Control and status of the current track by its number in the playlist (e.g. *14*)
+* play_folder - Add tracks from the folder to the playlist (id folder e.g. ``dir_5816``)
+* play_track - Play track by its id (e.g. ``music_120847``)
+* current_play - Control and status of the current track by its number in the playlist (e.g. ``14``)
 
 ***DownloadStation***:
-*activeTask - number of incomplete downloads
-*listTasks - an array with incomplete downloads
-*shedule_enabled, shedule_emule_enabled - Status and management of scheduled or immediate downloads
-*add_hash_download - add to Hash Downloads (e.g. 8BD3CAD02FC9ECB661A12378414FA310D3F3FE03)
-*add_url_download - add download URL or magnet link
-*folder - The folder to download, set before adding the download, otherwise it is loaded into the default folder
-*pause_task, resume_task - Pause the download and resume. (e.g. ``dbid_170`` or ``170`` or ``all``)
+* activeTask - number of incomplete downloads
+* listTasks - an array with incomplete downloads
+* shedule_enabled, shedule_emule_enabled - Status and control of scheduled or immediate downloads
+* add_hash_download - add to Hash Downloads (e.g. ``8BD3CAD02FC9ECB661A12378414FA310D3F3FE03``)
+* add_url_download - add download URL or magnet link
+* folder - The folder to download, set before adding the download, otherwise it is loaded into the default folder
+* pause_task, resume_task - Pause the download and resume. (e.g. ``dbid_170`` or ``170`` or ``all``)
 
 ### Messagebox
 ```

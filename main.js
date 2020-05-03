@@ -181,8 +181,6 @@ const objects = {
     play_track:            {role: "state", name: "Play track by its id", type: "string", read: true, write: true},
     status_on:             {role: "state", name: "HomeMode status", type: "boolean", read: true, write: true},
     enabled:               {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
-    shedule_enabled:       {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
-    shedule_emule_enabled: {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
 };
 
 let PollCmd = {
@@ -210,8 +208,6 @@ let PollCmd = {
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent},
-        //GET /webapi/DownloadStation/schedule.cgi?
-        //api=SYNO.DownloadStation.Schedule&version=1&method=getconfig
     ],
     "slowPoll":  [
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},

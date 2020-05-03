@@ -247,9 +247,9 @@
       "type": "state",
       "common": {
         "role": "state",
-        "name": "DownloadStation add url download",
+        "name": "Add download URL or magnet link",
         "type": "string",
-        "read": true,
+        "read": false,
         "write": true,
         "def": false
       },
@@ -260,9 +260,9 @@
       "type": "state",
       "common": {
         "role": "state",
-        "name": "DownloadStation add url download",
+        "name": "Add to Hash Downloads",
         "type": "string",
-        "read": true,
+        "read": false,
         "write": true,
         "def": false
       },
@@ -273,7 +273,7 @@
       "type": "state",
       "common": {
         "role": "state",
-        "name": "Pause task",
+        "name": "Pause the download",
         "type": "string",
         "read": false,
         "write": true,
@@ -286,7 +286,7 @@
       "type": "state",
       "common": {
         "role": "state",
-        "name": "Resume task",
+        "name": "Resume the download",
         "type": "string",
         "read": false,
         "write": true,
@@ -299,11 +299,63 @@
       "type": "state",
       "common": {
         "role": "state",
-        "name": "DownloadStation folder for download",
+        "name": "The folder to download",
         "type": "string",
         "read": true,
         "write": true,
         "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "DownloadStation.shedule_enabled",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Status and control of scheduled",
+        "type": "boolean",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "DownloadStation.shedule_emule_enabled",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Status and control of scheduled",
+        "type": "boolean",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "DownloadStation.activeTask",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Number of incomplete downloads",
+        "type": "number",
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "DownloadStation.listTasks",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "An array with incomplete downloads",
+        "type": "string",
+        "read": true,
+        "write": false,
+        "def": ""
       },
       "native": {}
     }

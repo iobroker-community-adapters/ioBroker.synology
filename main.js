@@ -125,7 +125,7 @@ let states = {
     DiskStationManager:  {info: {}, hdd_info: {}, vol_info: {}},
     FileStation:         {info: {}},
     DownloadStation:     {info: {}},
-    AudioStation:        {info: {}, players: {}},
+    AudioStation:        {info: {}, players: {}/*, radio:{}*/},
     VideoStation:        {info: {}},
     VideoStation_DTV:    {info: {}},
     SurveillanceStation: {info: {}, cameras: {}, HomeMode: {}},
@@ -213,6 +213,7 @@ let PollCmd = {
         {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
+        {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parse.listRadios},
         addLinkSnapShot,
         getLiveViewPathCamera
     ]
@@ -556,15 +557,17 @@ function PlayTrack(states, playerid, val, cb){
             id:              playerid,
             library:         'shared',
             offset:          0,
-            limit:           1,
+            limit:           0,
             play:            true,
             songs:           val,
-            containers_json: JSON.stringify([])
+            keep_shuffle_order: false
+            //containers_json: JSON.stringify([])
         };
-        send('as', 'updatePlayListRemotePlayer', param, (res) => { //updatesongsPlaylist
+        send('as', 'updatePlayListRemotePlayer', param, (res) => { // updatesongsPlaylist
             param = {
                 id:     playerid,
-                action: 'play'
+                action: 'play',
+                value:  0
             };
             send('as', 'controlRemotePlayer', param, (res) => {
             });

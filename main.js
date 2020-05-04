@@ -604,6 +604,7 @@ function isInstalled(fullname){
     }
     return false;
 }
+
 function queuePolling(){
     if (pollAllowed){
         iteration = 0;
@@ -642,17 +643,19 @@ function sendPolling(namePolling, cb){
                     if (!connect) setInfoConnection(true);
                     connect = true;
                     try {
-                        states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                        if (typeof PollCmd[namePolling][iteration].ParseFunction === "function"){
+                            states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                        }
                     } catch (e) {
-                        error('ParseFunction', e);
+                        error('ParseFunction', 'syno[' + api + '][' + method + '] Error -' + e);
                     }
                 } else if (err){
                     if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
                         adapter.log.warn('sendPolling Error -' + err + ' You are using a hacked version of SS?');
                     } else if (~err.toString().indexOf('No such account or incorrect password')){
-                        adapter.log.error('sendPolling - syno[' + api + '][' + method + '] Error -' + err + ' To use the adapter, the user must be in the Administrators group!');
+                        error('sendPolling', 'syno[' + api + '][' + method + '] Error -' + err + ' To use the adapter, the user must be in the Administrators group!');
                     } else {
-                        adapter.log.error('sendPolling - syno[' + api + '][' + method + '] Error -' + err);
+                        error('sendPolling', 'syno[' + api + '][' + method + '] Error -' + err);
                     }
                     if (method === 'getPollingData'){
                         iteration = -1;

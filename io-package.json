@@ -94,8 +94,7 @@
     "keywords": [
       "synology NAS control"
     ],
-    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
-    "installedFrom": "https://github.com/instalator/ioBroker.synology/tarball/master"
+    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md"
   },
   "native": {
     "host": "localhost",

@@ -647,7 +647,7 @@ function sendPolling(namePolling, cb){
                         error('ParseFunction', e);
                     }
                 } else if (err){
-                    if (api === 'ss' && method === 'getInfo' && ~err.indexOf('version does not support')){
+                    if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
                         adapter.log.warn('sendPolling Error -' + err + ' You are using a hacked version of SS?');
                     } else if (~err.indexOf('No such account or incorrect password')){
                         adapter.log.error('sendPolling - syno[' + api + '][' + method + '] Error -' + err + ' To use the adapter, the user must be in the Administrators group!');

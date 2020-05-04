@@ -294,7 +294,7 @@ function setConfigSchedule(command, val){
 function pauseTask(command, val){
     debug('--------------------- pauseTask -----------------------');
     let param, method, ids = [];
-    if (!~val.indexOf('dbid_') && val !== 'all'){
+    if (!~val.toString().indexOf('dbid_') && val !== 'all'){
         param = {id: 'dbid_' + val};
     } else if (val === 'all'){
         try {
@@ -435,7 +435,7 @@ function Browser(_states, playerid, val){
     debug('--------------------- Browser -----------------------');
     let param = {};
     if (val && val !== '/'){
-        if (~val.indexOf('dir_')){
+        if (~val.toString().indexOf('dir_')){
             param = {id: val};
         } else {
             try {
@@ -649,7 +649,7 @@ function sendPolling(namePolling, cb){
                 } else if (err){
                     if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
                         adapter.log.warn('sendPolling Error -' + err + ' You are using a hacked version of SS?');
-                    } else if (~err.indexOf('No such account or incorrect password')){
+                    } else if (~err.toString().indexOf('No such account or incorrect password')){
                         adapter.log.error('sendPolling - syno[' + api + '][' + method + '] Error -' + err + ' To use the adapter, the user must be in the Administrators group!');
                     } else {
                         adapter.log.error('sendPolling - syno[' + api + '][' + method + '] Error -' + err);

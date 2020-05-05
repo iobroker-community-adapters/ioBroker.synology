@@ -799,7 +799,13 @@ function setObject(id, val){
 
 function error(src, e, cb){
     let code = e.code;
-    adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + e.message || e);
+    let message;
+    if (e.message === undefined){
+        message = e;
+    } else {
+        message = e.message
+    }
+    adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutRecconect && clearTimeout(timeOutRecconect);
         setInfoConnection(false);

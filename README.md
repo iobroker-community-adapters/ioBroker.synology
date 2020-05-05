@@ -14,7 +14,7 @@ The driver allows you to receive data and manage your Synology NAS server.
 
 ### 2FA Settings
 
-See [here](docs/en/template.md)
+If you use 2FA see instructions [here](docs/en/template.md)
 
 ### sendMethod
 

@@ -803,7 +803,7 @@ function error(src, e, cb){
     if (e.message === undefined){
         message = e;
     } else {
-        message = e.message
+        message = e.message;
     }
     adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){

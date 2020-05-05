@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "news": {
-      "0.1.5": {
+      "0.1.6": {
         "en": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
         "de": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
         "ru": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",

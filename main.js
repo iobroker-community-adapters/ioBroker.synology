@@ -4,7 +4,7 @@ let Syno = require('syno');
 const fs = require('fs');
 const parse = require('./lib/parsers.js');
 let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
-    firstStart = true, slowPollingTime, dir, old_states;
+    firstStart = true, slowPollingTime, dir, old_states, timeOut;
 
 function startAdapter(options){
     return adapter = utils.adapter(Object.assign({}, options, {
@@ -14,6 +14,7 @@ function startAdapter(options){
         unload:       callback => {
             timeOutPoll && clearTimeout(timeOutPoll);
             timeOutRecconect && clearTimeout(timeOutRecconect);
+            timeOut && clearTimeout(timeOut);
             try {
                 debug('cleaned everything up...');
                 callback();
@@ -652,9 +653,13 @@ function sendPolling(namePolling, cb){
                 }
                 if (queueCmd){
                     queueCmd = false;
-                    setTimeout(() => {
+                    timeOut = setTimeout(() => {
                         iterator(namePolling, cb);
                     }, 1000);
+                } else if(adapter.config['2fa_checkbox'] && firstStart){
+                    timeOut = setTimeout(() => {
+                        iterator(namePolling, cb);
+                    }, 30000);
                 } else {
                     iterator(namePolling, cb);
                 }

@@ -176,7 +176,6 @@ let PollCmd = {
         {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parse.SystemStatus},
         {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parse.TempInfo},
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
-        //getStatusRemotePlayers,
         getStatusPlayer,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
@@ -212,7 +211,7 @@ function switchCam(states, name, command, val){
 }
 
 function addLinkSnapShot(states){
-    debug('--------------------- addLinkSnapShot -----------------------');
+    debug('addLinkSnapShot');
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined){
             const camId = states.SurveillanceStation.cameras[nameCam].id;
@@ -224,7 +223,7 @@ function addLinkSnapShot(states){
 }
 
 function getLiveViewPathCamera(states){
-    debug('--------------------- getLiveViewPathCamera -----------------------');
+    debug('getLiveViewPathCamera');
     const ids = getArrIdCams().join(',');
     if (ids){
         send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
@@ -237,7 +236,7 @@ function getLiveViewPathCamera(states){
 }
 
 function getSnapshotCamera(camid, cb){
-    debug('--------------------- getSnapshotCamera -----------------------');
+    debug('getSnapshotCamera');
     const param = {cameraId: camid, preview: true, version: 7};
     send('ss', 'getSnapshotCamera', param, (res) => {
         if (res && !res.code && !res.message){
@@ -256,7 +255,7 @@ function getSnapshotCamera(camid, cb){
 
 /////////////////////////* DownloadStation */////////////////////////
 function addDownload(command, url, cb){
-    debug('--------------------- addDownload -----------------------');
+    debug('addDownload');
     if (command === 'add_hash_download'){
         url = 'magnet:?xt=urn:btih:' + url;
     }
@@ -277,7 +276,7 @@ function addDownload(command, url, cb){
 }
 
 function setConfigSchedule(command, val){
-    debug('--------------------- setConfigSchedule -----------------------');
+    debug('setConfigSchedule');
     let param;
     if (command === 'shedule_enabled'){
         param = {enabled: val};
@@ -293,7 +292,7 @@ function setConfigSchedule(command, val){
 }
 
 function pauseTask(command, val){
-    debug('--------------------- pauseTask -----------------------');
+    debug('pauseTask');
     let param, method, ids = [];
     if (!~val.toString().indexOf('dbid_') && val !== 'all'){
         param = {id: 'dbid_' + val};
@@ -340,16 +339,6 @@ function clearPlaylist(states, playerid, cb){
     });
 }
 
-/*function getStatusRemotePlayers(states){
-    debug('getStatusRemotePlayers');
-     Object.keys(states.AudioStation.players).forEach((playerid) => {
-     if (states.AudioStation.players[playerid].online){
-         getStatusPlayer(states, playerid);
-     }
-    });
-     return states;
-}*/
-
 function clearPlayerStates(playerid){
     debug(`Clearing the player status ${playerid}`);
     states.AudioStation.players[playerid].playlist_total = 0;
@@ -374,7 +363,7 @@ function clearPlayerStates(playerid){
     states.AudioStation.players[playerid].cover = '';
 }
 
-function getStatusPlayer(states/*, playerid, cb*/){
+function getStatusPlayer(states){
     let param = {};
     Object.keys(states.AudioStation.players).forEach((playerid) => {
         if (playerid && states.AudioStation.players[playerid].online){
@@ -442,7 +431,7 @@ function getPlaylist(playerid, cb){
 }
 
 function Browser(_states, playerid, val){
-    debug('--------------------- Browser -----------------------');
+    debug('Browser');
     let param = {};
     if (val && val !== '/'){
         if (~val.toString().indexOf('dir_')){
@@ -482,7 +471,7 @@ function Browser(_states, playerid, val){
 }
 
 function PlayControl(states, playerid, cmd, val){
-    //DEBUG('--------------------- PlayControl -----------------------');
+    debug('PlayControl');
     let param = {
         id:     playerid,
         action: cmd,
@@ -509,7 +498,7 @@ function PlayControl(states, playerid, cmd, val){
 }
 
 function PlayFolder(states, playerid, folder){
-    debug('--------------------- PlayFolder -----------------------');
+    debug('PlayFolder');
     let param = {};
     if (playerid){
         send('as', 'controlRemotePlayer', {id: playerid, action: 'stop'}, () => {
@@ -532,7 +521,7 @@ function PlayFolder(states, playerid, folder){
 }
 
 function PlayTrack(states, playerid, val){
-    debug('--------------------- PlayTrack -----------------------');
+    debug('PlayTrack');
     let param = {};
     if (playerid){
         param = {
@@ -552,14 +541,14 @@ function PlayTrack(states, playerid, val){
 }
 
 function PlayTrackNum(states, playerid, val){
-    debug('--------------------- PlayTrackNum -----------------------');
+    debug('PlayTrackNum');
     if (playerid){
         send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: val});
     }
 }
 
 function PlayTrackId(states, playerid, val){
-    debug('--------------------- PlayTrack -----------------------');
+    debug('PlayTrack');
     try {
         let arr = JSON.parse(states.AudioStation.players[playerid].playlist);
         let track = arr.findIndex(item => item.id === val);
@@ -603,16 +592,6 @@ function sendMethod(name, val){
     } else {
         error('sendMethod', name + ' Not installed!');
     }
-}
-
-function isInstalled(fullname){
-    for (let api in states.api) {
-        if (!states.api.hasOwnProperty(api)) continue;
-        if (states.api[api].name === fullname){
-            return api;
-        }
-    }
-    return false;
 }
 
 function queuePolling(){
@@ -735,7 +714,7 @@ function send(api, method, params, cb){
 }
 
 function setStates(){
-    debug('--------------------- setStates -----------------------');
+    debug('setStates');
     let ids = '';
     Object.keys(states).forEach((_api) => {
         if (_api !== 'api'){
@@ -898,6 +877,16 @@ function rePollAfterCmd(){
     connect = false;
     endTime = new Date().getTime();
     queuePolling();
+}
+
+function isInstalled(fullname){
+    for (let api in states.api) {
+        if (!states.api.hasOwnProperty(api)) continue;
+        if (states.api[api].name === fullname){
+            return api;
+        }
+    }
+    return false;
 }
 
 function debug(msg){

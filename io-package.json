@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "news": {
+      "0.1.5": {
+        "en": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "de": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "ru": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "pt": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "nl": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "fr": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "it": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "es": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "pl": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
+        "zh-cn": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player"
+      },
       "0.1.4": {
         "en": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
         "de": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",

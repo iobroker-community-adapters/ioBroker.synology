@@ -2,7 +2,6 @@
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
 const fs = require('fs');
-const http = require('http');
 const parse = require('./lib/parsers.js');
 let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
     firstStart = true, slowPollingTime, dir, old_states;
@@ -141,6 +140,7 @@ const objects = {
     play:             {role: "button.play", name: "Controlling playback play", type: "boolean", read: false, write: true},
     clearPlaylist:    {role: "button", name: "Clear current playlist", type: "boolean", read: false, write: true},
     state_playing:    {role: "media.state", name: "Status Play, stop, or pause", type: "string", read: true, write: false},
+    online:           {role: "state", name: "Is player online", type: "boolean", read: true, write: false},
     memory_usage:     {role: "state", name: "Memory usage", type: "number", unit: "%", read: true, write: false},
     cpu_load:         {role: "state", name: "Cpu load", type: "number", unit: "%", read: true, write: false},
     used:             {role: "state", name: "Used", type: "number", unit: "%", read: true, write: false},
@@ -169,14 +169,15 @@ let PollCmd = {
         {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
-        {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
+        {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parse.ListRemotePlayers},
     ],
     "fastPoll":  [
         {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parse.SystemUtilization},
         {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parse.SystemStatus},
         {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parse.TempInfo},
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
-        getStatusRemotePlayers,
+        //getStatusRemotePlayers,
+        getStatusPlayer,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.test},
@@ -184,7 +185,7 @@ let PollCmd = {
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
     ],
     "slowPoll":  [
-        {api: 'as', method: 'listRemotePlayers', params: {}, ParseFunction: parse.ListRemotePlayers},
+        {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parse.ListRemotePlayers},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
         {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parse.listRadios},
@@ -339,13 +340,15 @@ function clearPlaylist(states, playerid, cb){
     });
 }
 
-function getStatusRemotePlayers(states){
+/*function getStatusRemotePlayers(states){
     debug('getStatusRemotePlayers');
-    Object.keys(states.AudioStation.players).forEach((playerid) => {
-        getStatusPlayer(playerid);
+     Object.keys(states.AudioStation.players).forEach((playerid) => {
+     if (states.AudioStation.players[playerid].online){
+         getStatusPlayer(states, playerid);
+     }
     });
-    return states;
-}
+     return states;
+}*/
 
 function clearPlayerStates(playerid){
     debug(`Clearing the player status ${playerid}`);
@@ -371,36 +374,43 @@ function clearPlayerStates(playerid){
     states.AudioStation.players[playerid].cover = '';
 }
 
-function getStatusPlayer(playerid, cb){
-    //DEBUG('--------------------- getStatusPlayer -----------------------');
+function getStatusPlayer(states/*, playerid, cb*/){
     let param = {};
-    if (playerid){
-        param = {
-            id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
-        };
-        send('as', 'getStatusRemotePlayerStatus', param, (res) => {
-            if (res && res.state){
-                let state = res.state;
-                if (state === 'playing'){
-                    state = 'play';
-                } else if (state === 'stopped' || state === 'none' || state === 'no-media' || state === 'transition'){
-                    state = 'stop';
-                }
-                states.AudioStation.players[playerid].state_playing = state;
-                if ((res.state === 'playing' || res.state === 'pause') && res.song){
-                    states = parse.RemotePlayerStatus(playerid, states, res);
-                    getPlaylist(playerid, () => {
-                        getSongCover(playerid);
-                    });
-                } else {
-                    if (states.AudioStation.players[playerid].playlist_total !== 0){
-                        clearPlayerStates(playerid);
+    Object.keys(states.AudioStation.players).forEach((playerid) => {
+        if (playerid && states.AudioStation.players[playerid].online){
+            debug('* getStatusPlayer ' + playerid);
+            param = {
+                id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
+            };
+            send('as', 'getStatusRemotePlayerStatus', param, (res) => {
+                if (res && res.state){
+                    let state = res.state;
+                    if (state === 'playing'){
+                        state = 'play';
+                    } else if (state === 'stopped' || state === 'none' || state === 'no-media' || state === 'transition'){
+                        state = 'stop';
                     }
+                    states.AudioStation.players[playerid].state_playing = state;
+                    states.AudioStation.players[playerid].online = true;
+                    if ((res.state === 'playing' || res.state === 'pause') && res.song){
+                        states = parse.RemotePlayerStatus(playerid, states, res);
+                        getPlaylist(playerid, () => {
+                            getSongCover(playerid);
+                        });
+                    } else {
+                        if (states.AudioStation.players[playerid].playlist_total !== 0){
+                            clearPlayerStates(playerid);
+                        }
+                    }
+                } else {
+                    states.AudioStation.players[playerid].online = false;
+                    states.AudioStation.players[playerid].state_playing = 'stop';
+                    clearPlayerStates(playerid);
                 }
-            }
-            cb && cb(res);
-        });
-    }
+            });
+        }
+    });
+    return states;
 }
 
 function getSongCover(playerid){
@@ -710,9 +720,13 @@ function send(api, method, params, cb){
             if (!err){
                 cb && cb(data);
             } else if (err){
-                error('function send: [' + api + '][' + method + ']', err, () => {
-                    cb && cb();
-                });
+                if (method === 'getStatusRemotePlayerStatus'){
+                    cb && cb(false);
+                } else {
+                    error('function send: [' + api + '][' + method + ']', err, () => {
+                        cb && cb(false);
+                    });
+                }
             }
         });
     } catch (e) {
@@ -806,13 +820,14 @@ function setObject(id, val){
 
 function error(src, e, cb){
     let code = e.code;
-    adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + e.message);
-    if (code === 400 || code === 500 || code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
+    adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + e.message || e);
+    if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutRecconect && clearTimeout(timeOutRecconect);
         setInfoConnection(false);
         connect = false;
         timeOutRecconect = setTimeout(() => {
-            queuePolling()
+            //queuePolling();
+            newSyno();
         }, 10000);
     } else {
         cb && cb(e)
@@ -824,8 +839,6 @@ function main(){
     adapter.subscribeStates('*');
     setInfoConnection(false);
     old_states = JSON.parse(JSON.stringify(states));
-    startTime = new Date().getTime();
-    endTime = new Date().getTime();
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
 
@@ -840,6 +853,13 @@ function main(){
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
     fs.copyFile('admin/cover.png', dir + 'cover.png', () => {
     });
+    newSyno();
+}
+
+function newSyno(){
+    timeOutPoll && clearTimeout(timeOutPoll);
+    startTime = new Date().getTime();
+    endTime = new Date().getTime();
     try {
         syno = new Syno({
             ignoreCertificateErrors: true, /*rejectUnauthorized: false,*/
@@ -853,7 +873,6 @@ function main(){
             debug:                   false
         });
         //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));
-        timeOutPoll && clearTimeout(timeOutPoll);
         queuePolling();
     } catch (e) {
         error('new Syno Error: ', e.message);

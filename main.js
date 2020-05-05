@@ -23,7 +23,7 @@ function startAdapter(options){
             }
         },
         stateChange:  (id, state) => {
-            if (id && state && !state.ack){
+            if (id && state && !state.ack && !firstStart){
                 debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
                 let ids = id.split(".");
                 let name = ids[ids.length - 2].toString();
@@ -264,7 +264,7 @@ function addDownload(command, url, cb){
         type: "url", create_list: true, uri: [url], version: 2
     };
     adapter.getState('DownloadStation.folder', (err, state) => {
-        if (!err || state){
+        if (!err && state){
             param.destination = state.val;
         }
         send('dl', 'createTask', param, (res) => {

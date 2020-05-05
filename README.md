@@ -12,6 +12,10 @@
 ## Description
 The driver allows you to receive data and manage your Synology NAS server.
 
+### 2FA Settings
+
+See [here](docs/en/template.md)
+
 ### sendMethod
 
 You can send any command (method) by setting the sendMethod object, for example:
@@ -62,6 +66,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ### 0.1.7
 * (instalator) fixed 2FA
+* (instalator) Added setup guide 2FA
 
 ### 0.1.6
 * (instalator) fix for 2fa

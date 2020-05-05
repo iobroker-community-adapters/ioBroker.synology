@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "news": {
+      "0.1.7": {
+        "en": "fixed 2FA",
+        "de": "fixed 2FA",
+        "ru": "fixed 2FA",
+        "pt": "fixed 2FA",
+        "nl": "fixed 2FA",
+        "fr": "fixed 2FA",
+        "it": "fixed 2FA",
+        "es": "fixed 2FA",
+        "pl": "fixed 2FA",
+        "zh-cn": "fixed 2FA"
+      },
       "0.1.6": {
         "en": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
         "de": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",

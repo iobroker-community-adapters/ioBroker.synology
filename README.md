@@ -60,6 +60,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 
+### 0.1.7
+* (instalator) fixed 2FA
+
 ### 0.1.6
 * (instalator) fix for 2fa
 * (instalator) fix error

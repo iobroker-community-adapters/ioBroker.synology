@@ -256,24 +256,28 @@ function getSnapshotCamera(camid, cb){
 
 /////////////////////////* DownloadStation */////////////////////////
 function addDownload(command, url, cb){
-    debug('addDownload');
-    if (command === 'add_hash_download'){
-        url = 'magnet:?xt=urn:btih:' + url;
-    }
-    let param = {
-        type: "url", create_list: true, uri: [url], version: 2
-    };
-    adapter.getState('DownloadStation.folder', (err, state) => {
-        if (!err && state){
-            param.destination = state.val;
+    if(url){
+        debug('addDownload');
+        if (command === 'add_hash_download'){
+            url = 'magnet:?xt=urn:btih:' + url;
         }
-        send('dl', 'createTask', param, (res) => {
-            if (res && res.message){
-                error('addDownload Error: ', res.message);
+        let param = {
+            type: "url", create_list: true, uri: [url], version: 2
+        };
+        adapter.getState('DownloadStation.folder', (err, state) => {
+            if (!err && state){
+                param.destination = state.val;
             }
-            cb && cb();
+            send('dl', 'createTask', param, (res) => {
+                if (res && res.message){
+                    error('addDownload Error: ', res.message);
+                }
+                cb && cb();
+            });
         });
-    });
+    } else {
+        error('addDownload', 'Link not set');
+    }
 }
 
 function setConfigSchedule(command, val){

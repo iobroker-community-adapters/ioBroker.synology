@@ -4,16 +4,16 @@
     "version": "0.1.8",
     "news": {
       "0.1.8": {
-        "en": "",
-        "de": "",
-        "ru": "",
-        "pt": "",
-        "nl": "",
-        "fr": "",
-        "it": "",
-        "es": "",
-        "pl": "",
-        "zh-cn": ""
+        "en": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "de": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "ru": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "pt": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "nl": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "fr": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "it": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "es": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "pl": "fix error addDownload\nfixed listRadios\nfixed get cover",
+        "zh-cn": "fix error addDownload\nfixed listRadios\nfixed get cover"
       },
       "0.1.7": {
         "en": "fixed 2FA",

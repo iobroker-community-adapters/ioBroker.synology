@@ -418,7 +418,7 @@ function getSongCover(playerid){
                 fs.writeFile(dir + 'cover.jpg', buf, () => {
                     states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
                 });
-            } else if (~res.message.indexOf('404')){
+            } else {
                 states.AudioStation.players[playerid].cover = dir + 'cover.png';
             }
         });

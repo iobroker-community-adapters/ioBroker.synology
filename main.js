@@ -160,7 +160,8 @@ const objects = {
 
 let PollCmd = {
     "firstPoll": [
-        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets},
+        //{api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets},
+        {api: 'dsm', method: 'listPackages', params: {}, ParseFunction: parse.InstallingPackets},
         {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'fs', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'dl', method: 'getInfo', params: {}, ParseFunction: parse.Info},
@@ -180,6 +181,7 @@ let PollCmd = {
         getStatusPlayer,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
+        //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.test},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},

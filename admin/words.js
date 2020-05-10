@@ -138,43 +138,42 @@ systemDictionary = {
         "ru": "Сразу после сохранения настроек драйвер перезапуститься с новыми значениями"
     },
     "ss":                                                   {
-        "en":    "SurveillanceStation",
-        "de":    "SurveillanceStation",
-        "ru":    "SurveillanceStation",
-        "pt":    "SurveillanceStation",
-        "nl":    "SurveillanceStation",
-        "fr":    "SurveillanceStation",
-        "it":    "SurveillanceStation",
-        "es":    "SurveillanceStation",
-        "pl":    "SurveillanceStation",
+        "en":    "Surveillance Station",
+        "de":    "Surveillance Station",
+        "ru":    "Surveillance Station",
+        "pt":    "Surveillance Station",
+        "nl":    "Surveillance Station",
+        "fr":    "Surveillance Station",
+        "it":    "Surveillance Station",
+        "es":    "Surveillance Station",
+        "pl":    "Surveillance Station",
         "zh-cn": "监控站"
     },
     "as":                                                   {
-        "en":    "AudioStation",
-        "de":    "AudioStation",
-        "ru":    "AudioStation",
-        "pt":    "AudioStation",
-        "nl":    "AudioStation",
-        "fr":    "AudioStation",
-        "it":    "AudioStation",
-        "es":    "AudioStation",
-        "pl":    "AudioStation",
-        "zh-cn": "AudioStation"
+        "en":    "Audio Station",
+        "de":    "Audio Station",
+        "ru":    "Audio Station",
+        "pt":    "Audio Station",
+        "nl":    "Audio Station",
+        "fr":    "Audio Station",
+        "it":    "Audio Station",
+        "es":    "Audio Station",
+        "pl":    "Audio Station",
+        "zh-cn": "Audio Station"
     },
     "dl":                                                   {
-        "en":    "DownloadStation",
-        "de":    "DownloadStation",
-        "ru":    "DownloadStation",
-        "pt":    "DownloadStation",
-        "nl":    "DownloadStation",
-        "fr":    "DownloadStation",
-        "it":    "DownloadStation",
-        "es":    "DownloadStation",
-        "pl":    "DownloadStation",
+        "en":    "Download Station",
+        "de":    "Download Station",
+        "ru":    "Download Station",
+        "pt":    "Download Station",
+        "nl":    "Download Station",
+        "fr":    "Download Station",
+        "it":    "Download Station",
+        "es":    "Download Station",
+        "pl":    "Download Station",
         "zh-cn": "下载站"
     },
-    
-    "getservices": {
+    "getservices":                                          {
         "en":    "Receive data from services",
         "de":    "Daten von Diensten empfangen",
         "ru":    "Получать данные от сервисов",
@@ -185,5 +184,17 @@ systemDictionary = {
         "es":    "Recibir datos de servicios",
         "pl":    "Otrzymuj dane z usług",
         "zh-cn": "从服务接收数据"
+    },
+    "getservicesdesc":                                      {
+        "en":    "If the package is not installed on the NAS, it will still be skipped.",
+        "de":    "Wenn das Paket nicht auf dem NAS installiert ist, wird es trotzdem übersprungen.",
+        "ru":    "Если пакет не установлен на NAS, он все равно будет пропущен.",
+        "pt":    "Se o pacote não estiver instalado no NAS, ele ainda será ignorado.",
+        "nl":    "Als het pakket niet op de NAS is geïnstalleerd, wordt het nog steeds overgeslagen.",
+        "fr":    "Si le package n'est pas installé sur le NAS, il sera toujours ignoré.",
+        "it":    "Se il pacchetto non è installato sul NAS, verrà comunque ignorato.",
+        "es":    "Si el paquete no está instalado en el NAS, aún se omitirá.",
+        "pl":    "Jeśli pakiet nie zostanie zainstalowany na serwerze NAS, nadal będzie pomijany.",
+        "zh-cn": "如果该程序包未安装在NAS上，仍将被跳过。"
     }
 };

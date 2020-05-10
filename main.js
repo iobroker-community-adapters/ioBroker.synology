@@ -160,8 +160,7 @@ const objects = {
 
 let PollCmd = {
     "firstPoll": [
-        //{api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets},
-        {api: 'dsm', method: 'listPackages', params: {}, ParseFunction: parse.InstallingPackets},
+        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets}, // OR listPackages if < 6 in main function
         {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'fs', method: 'getInfo', params: {}, ParseFunction: parse.Info},
         {api: 'dl', method: 'getInfo', params: {}, ParseFunction: parse.Info},
@@ -653,7 +652,7 @@ function sendPolling(namePolling, cb){
                     } else {
                         error('sendPolling', 'syno[' + api + '][' + method + '] Error -' + err);
                     }
-                    if (method === 'getPollingData'){
+                    if (method === 'getPollingData' || method === 'listPackages'){
                         iteration = -1;
                     }
                 }
@@ -671,7 +670,7 @@ function sendPolling(namePolling, cb){
                 }
             });
         } catch (e) {
-            error('sendPolling - syno[' + api + '][' + method + ']', e);
+            error('sendPolling catch - syno[' + api + '][' + method + ']', e);
         }
     } else {
         debug(`* Packet ${PollCmd[namePolling][iteration].api.toUpperCase()} non installed, skipped`);
@@ -837,6 +836,9 @@ function main(){
     old_states = JSON.parse(JSON.stringify(states));
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
+    if(parseInt(adapter.config.version, 10) < 6){
+        PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parse.InstallingPackets};
+    }
 
     parse.on('debug', (msg) => {
         debug('* PARSE debug: ' + msg);

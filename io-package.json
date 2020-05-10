@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "news": {
+      "0.1.9": {
+        "en": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "de": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "ru": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "pt": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "nl": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "fr": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "it": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "es": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "pl": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "zh-cn": "fix get packages for DSM 5.x\nAdded option to select services for receiving data"
+      },
       "0.1.8": {
         "en": "fix error addDownload\nfixed listRadios\nfixed get cover",
         "de": "fix error addDownload\nfixed listRadios\nfixed get cover",
@@ -26,78 +38,6 @@
         "es": "fixed 2FA",
         "pl": "fixed 2FA",
         "zh-cn": "fixed 2FA"
-      },
-      "0.1.6": {
-        "en": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "de": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "ru": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "pt": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "nl": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "fr": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "it": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "es": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "pl": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player",
-        "zh-cn": "fix for 2fa\nfix error\nchange error log\nfix io-package\nfix error status player"
-      },
-      "0.1.4": {
-        "en": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "de": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "ru": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "pt": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "nl": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "fr": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "it": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "es": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "pl": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring",
-        "zh-cn": "change for DownloadStation\nadded playlist favorite radio\nadded clearPlaylist button\nrefactoring"
-      },
-      "0.1.3": {
-        "en": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "de": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "ru": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "pt": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "nl": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "fr": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "it": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "es": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "pl": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list",
-        "zh-cn": "change obj for ss info fix for cover song \nfix for info.connection \nadd 6.2.3 fix for player browser files \nfix for 2FA\nfixed error add download \nadded DownloadStation task list"
-      },
-      "0.1.2": {
-        "en": "fixed error",
-        "de": "fixed error",
-        "ru": "fixed error",
-        "pt": "fixed error",
-        "nl": "fixed error",
-        "fr": "fixed error",
-        "it": "fixed error",
-        "es": "fixed error",
-        "pl": "fixed error",
-        "zh-cn": "fixed error"
-      },
-      "0.1.1": {
-        "en": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "de": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "ru": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "pt": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "nl": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "fr": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "it": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "es": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "pl": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring",
-        "zh-cn": "added messagebox for snapshot\nupdate readme\nadded ss link for different streams\nfix error\nrefactoring"
-      },
-      "0.1.0": {
-        "en": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "de": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "ru": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "pt": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "nl": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "fr": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "it": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "es": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "pl": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error",
-        "zh-cn": "added HomeMode switch \nchange for audiostation \nchange for as and ss\nadded snapshot functional \nfixed systemConfig \nfixed many error"
       }
     },
     "title": "Synology NAS",

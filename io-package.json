@@ -142,7 +142,10 @@
     "https": false,
     "version": "6.2.2",
     "polling": 100,
-    "slowPollingTime": 60000
+    "slowPollingTime": 60000,
+    "ss": true,
+    "as": true,
+    "dl": true
   },
   "objects": [],
   "instanceObjects": [

@@ -179,6 +179,7 @@ let PollCmd = {
         {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
         getStatusPlayer,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
+        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
         //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.test},
@@ -187,7 +188,6 @@ let PollCmd = {
     ],
     "slowPoll":  [
         {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parse.ListRemotePlayers},
-        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
         {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parse.listRadios},
         addLinkSnapShot,
@@ -257,7 +257,7 @@ function getSnapshotCamera(camid, cb){
 
 /////////////////////////* DownloadStation */////////////////////////
 function addDownload(command, url, cb){
-    if(url){
+    if (url){
         debug('addDownload');
         if (command === 'add_hash_download'){
             url = 'magnet:?xt=urn:btih:' + url;
@@ -416,9 +416,8 @@ function getSongCover(playerid){
         send('as', 'getSongCover', {id: track}, (res) => {
             if (res && !res.message){
                 let buf = Buffer.from(res, 'binary');
-                fs.writeFile(dir + 'cover.jpg', buf, () => {
-                    states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
-                });
+                fs.writeFileSync(dir + 'cover.jpg', buf);
+                states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
             } else {
                 states.AudioStation.players[playerid].cover = dir + 'cover.png';
             }
@@ -661,7 +660,7 @@ function sendPolling(namePolling, cb){
                     timeOut = setTimeout(() => {
                         iterator(namePolling, cb);
                     }, 1000);
-                } else if(adapter.config['2fa_checkbox'] && firstStart){
+                } else if (adapter.config['2fa_checkbox'] && firstStart){
                     timeOut = setTimeout(() => {
                         iterator(namePolling, cb);
                     }, 30000);
@@ -813,7 +812,7 @@ function error(src, e, cb){
     if (e.message === undefined){
         message = e;
     } else {
-        message = e.message; 
+        message = e.message;
     }
     adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
@@ -836,21 +835,32 @@ function main(){
     old_states = JSON.parse(JSON.stringify(states));
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
-    if(parseInt(adapter.config.version, 10) < 6){
+    if (parseInt(adapter.config.version, 10) < 6){
         PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parse.InstallingPackets};
     }
-
+    
+    if(!adapter.config.ss || !adapter.config.dl || !adapter.config.as){
+        let result;
+        result = PollCmd.fastPoll.filter(item => {
+            return !((item.api === 'ss' && !adapter.config.ss) || (item.api === 'dl' && !adapter.config.dl) || ((item.api === 'as' || (typeof item === 'function' && item.name === 'getStatusPlayer')) && !adapter.config.as));
+        });
+        PollCmd.fastPoll = result;
+        
+         result = PollCmd.slowPoll.filter(item => {
+            return !((item.api === 'ss'  || (typeof item === 'function' && (item.name === 'addLinkSnapShot' || item.name === 'getLiveViewPathCamera')) && !adapter.config.ss) || (item.api === 'dl' && !adapter.config.dl) || (item.api === 'as' && !adapter.config.as));
+        });
+        PollCmd.slowPoll = result;
+    }
+    
     parse.on('debug', (msg) => {
         debug('* PARSE debug: ' + msg);
     });
     parse.on('info', (msg) => {
         debug('* PARSE: info' + msg);
     });
-
     dir = utils.controllerDir + '/' + adapter.systemConfig.dataDir + adapter.namespace.replace('.', '_') + '/';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    fs.copyFile('admin/cover.png', dir + 'cover.png', () => {
-    });
+    fs.copyFileSync('admin/cover.png', dir + 'cover.png');
     newSyno();
 }
 

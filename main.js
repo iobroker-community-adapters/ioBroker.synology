@@ -860,7 +860,7 @@ function main(){
     });
     dir = utils.controllerDir + '/' + adapter.systemConfig.dataDir + adapter.namespace.replace('.', '_') + '/';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    fs.copyFile('admin/cover.png', dir + 'cover.png',()=>{});
+    fs.copyFileSync(__dirname + '/admin/cover.png', dir + 'cover.png');
     newSyno();
 }
 

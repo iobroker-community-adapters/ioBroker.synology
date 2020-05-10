@@ -1,19 +1,19 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "news": {
       "0.1.9": {
-        "en": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "de": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "ru": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "pt": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "nl": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "fr": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "it": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "es": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "pl": "fix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "zh-cn": "fix get packages for DSM 5.x\nAdded option to select services for receiving data"
+        "en": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "de": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "ru": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "pt": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "nl": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "fr": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "it": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "es": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "pl": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
+        "zh-cn": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data"
       },
       "0.1.8": {
         "en": "fix error addDownload\nfixed listRadios\nfixed get cover",

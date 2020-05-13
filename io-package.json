@@ -348,6 +348,45 @@
         "def": ""
       },
       "native": {}
+    },
+    {
+      "_id": "FileStation.sharing.create",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Generate one or more sharing link(s) by file/folder path(s).",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "FileStation.sharing.delete",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Delete one or more sharing links.",
+        "type": "object",
+        "read": true,
+        "write": true,
+        "def": ""
+      },
+      "native": {}
+    },
+    {
+      "_id": "FileStation.sharing.clear_invalid",
+      "type": "state",
+      "common": {
+        "role": "button",
+        "name": "Remove all expired and broken sharing links.",
+        "type": "boolean",
+        "read": false,
+        "write": true,
+        "def": false
+      },
+      "native": {}
     }
   ]
 }

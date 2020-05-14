@@ -34,13 +34,11 @@ function startAdapter(options){
                         debug('System reboot');
                         rePollAfterCmd();
                     });
-                    return;
                 } else if (command === 'shutdown'){
                     send('dsm', 'shutdownSystem', (res) => {
                         debug('System shutdown');
                         rePollAfterCmd();
                     });
-                    return;
                 } else if (command === 'Browser'){  /*  /AS  */
                     if (name in states.AudioStation.players){
                         queueCmd = true;
@@ -74,11 +72,11 @@ function startAdapter(options){
                     send('ss', 'switchHomeMode', {on: val});
                 } else if (command === 'sendMethod'){
                     sendMethod(name, val);
-                } else if (name === 'sharing' && command === 'create') {
+                } else if (name === 'sharing' && command === 'create'){
                     CreateSharing(command, val);
-                } else if (name === 'sharing' && command === 'delete') {
+                } else if (name === 'sharing' && command === 'delete'){
                     DeleteSharing(command, val);
-                } else if (name === 'sharing' && command === 'clear_invalid') {
+                } else if (name === 'sharing' && command === 'clear_invalid'){
                     send('fs', 'Clear_invalidSharing', {}, () => {
                         debug('Remove all expired and broken sharing links.');
                     });
@@ -102,7 +100,7 @@ function startAdapter(options){
 
 let states = {
     DiskStationManager:  {info: {}, hdd_info: {}, vol_info: {}},
-    FileStation:         {info: {}, sharing{}},
+    FileStation:         {info: {}, sharing: {}},
     DownloadStation:     {info: {}},
     AudioStation:        {info: {}, players: {}},
     VideoStation:        {info: {}},
@@ -577,46 +575,36 @@ function PlayTrackId(states, playerid, val){
 }
 
 //////////////////////////* FileStation Sharing */////////////////////
-function CreateSharing(command, link, cb){
+function CreateSharing(command, link){
     debug('CreateSharings');
     let params_set = {};
     if (link){
-        //try {
-        //    let path_to_file = link.split('\\')
-        //}
-        //catch(e) {
-        //    error('CreateSharings', 'Error path parse command ' + link);
-        //}
         try {
             params_set = JSON.parse(link);
-        }
-        catch(e) {
+        } catch (e) {
             error('CreateSharings', 'Error JSON parse command ' + link);
         }
-        if (!('path' in params_set)) {
-            params_set.path = link
+        if (!('path' in params_set)){
+            params_set.path = link;
         }
-        if (!('password' in params_set)) {
-            params_set.password = ''
+        if (!('password' in params_set)){
+            params_set.password = '';
         }
         send('fs', 'createSharing', params_set, (res) => {
             if (res){
                 states = parse.parseCreateSharings(states, res);
             }
         });
-    }
-    else {
+    } else {
         error('CreateSharings', 'Link not set');
     }
-    return states;
 }
 
 function DeleteSharing(command, id){
     debug('DeleteSharings');
     if (id){
         send('fs', 'deleteSharing', {'id': id});
-    }
-    else {
+    } else {
         error('DeleteSharings', 'ID not set');
     }
 }
@@ -892,20 +880,20 @@ function main(){
     if (parseInt(adapter.config.version, 10) < 6){
         PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parse.InstallingPackets};
     }
-    
-    if(!adapter.config.ss || !adapter.config.dl || !adapter.config.as){
+
+    if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as){
         let result;
         result = PollCmd.fastPoll.filter(item => {
             return !((item.api === 'ss' && !adapter.config.ss) || (item.api === 'dl' && !adapter.config.dl) || ((item.api === 'as' || (typeof item === 'function' && item.name === 'getStatusPlayer')) && !adapter.config.as));
         });
         PollCmd.fastPoll = result;
-        
-         result = PollCmd.slowPoll.filter(item => {
-            return !((item.api === 'ss'  || (typeof item === 'function' && (item.name === 'addLinkSnapShot' || item.name === 'getLiveViewPathCamera')) && !adapter.config.ss) || (item.api === 'dl' && !adapter.config.dl) || (item.api === 'as' && !adapter.config.as));
+
+        result = PollCmd.slowPoll.filter(item => {
+            return !((item.api === 'ss' || (typeof item === 'function' && (item.name === 'addLinkSnapShot' || item.name === 'getLiveViewPathCamera')) && !adapter.config.ss) || (item.api === 'dl' && !adapter.config.dl) || (item.api === 'as' && !adapter.config.as));
         });
         PollCmd.slowPoll = result;
     }
-    
+
     parse.on('debug', (msg) => {
         debug('* PARSE debug: ' + msg);
     });

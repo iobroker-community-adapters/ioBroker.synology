@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "news": {
+      "0.1.11": {
+        "en": "Adding to FS Sharing",
+        "de": "Adding to FS Sharing",
+        "ru": "Adding to FS Sharing",
+        "pt": "Adding to FS Sharing",
+        "nl": "Adding to FS Sharing",
+        "fr": "Adding to FS Sharing",
+        "it": "Adding to FS Sharing",
+        "es": "Adding to FS Sharing",
+        "pl": "Adding to FS Sharing",
+        "zh-cn": "Adding to FS Sharing"
+      },
       "0.1.9": {
         "en": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
         "de": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",

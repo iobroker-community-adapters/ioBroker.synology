@@ -74,6 +74,14 @@ function startAdapter(options){
                     send('ss', 'switchHomeMode', {on: val});
                 } else if (command === 'sendMethod'){
                     sendMethod(name, val);
+                } else if (name === 'sharing' && command === 'create') {
+                    CreateSharing(command, val);
+                } else if (name === 'sharing' && command === 'delete') {
+                    DeleteSharing(command, val);
+                } else if (name === 'sharing' && command === 'clear_invalid') {
+                    send('fs', 'Clear_invalidSharing', {}, () => {
+                        debug('Remove all expired and broken sharing links.');
+                    });
                 }
             }
         },
@@ -94,7 +102,7 @@ function startAdapter(options){
 
 let states = {
     DiskStationManager:  {info: {}, hdd_info: {}, vol_info: {}},
-    FileStation:         {info: {}},
+    FileStation:         {info: {}, sharing{}},
     DownloadStation:     {info: {}},
     AudioStation:        {info: {}, players: {}},
     VideoStation:        {info: {}},
@@ -181,6 +189,7 @@ let PollCmd = {
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
+        {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parse.parseListSharings},
         //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.test},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
@@ -564,6 +573,51 @@ function PlayTrackId(states, playerid, val){
         }
     } catch (e) {
         error('PlayTrackId:', 'Error parse playlist');
+    }
+}
+
+//////////////////////////* FileStation Sharing */////////////////////
+function CreateSharing(command, link, cb){
+    debug('CreateSharings');
+    let params_set = {};
+    if (link){
+        //try {
+        //    let path_to_file = link.split('\\')
+        //}
+        //catch(e) {
+        //    error('CreateSharings', 'Error path parse command ' + link);
+        //}
+        try {
+            params_set = JSON.parse(link);
+        }
+        catch(e) {
+            error('CreateSharings', 'Error JSON parse command ' + link);
+        }
+        if (!('path' in params_set)) {
+            params_set.path = link
+        }
+        if (!('password' in params_set)) {
+            params_set.password = ''
+        }
+        send('fs', 'createSharing', params_set, (res) => {
+            if (res){
+                states = parse.parseCreateSharings(states, res);
+            }
+        });
+    }
+    else {
+        error('CreateSharings', 'Link not set');
+    }
+    return states;
+}
+
+function DeleteSharing(command, id){
+    debug('DeleteSharings');
+    if (id){
+        send('fs', 'deleteSharing', {'id': id});
+    }
+    else {
+        error('DeleteSharings', 'ID not set');
     }
 }
 

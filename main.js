@@ -162,6 +162,7 @@ const objects = {
     status_on:        {role: "state", name: "HomeMode status", type: "boolean", read: true, write: true},
     enabled:          {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
     favoriteRadio:    {role: "state", name: "Favorite playlist Radio", type: "string", read: true, write: false},
+    motionDetected:   {role: "state", name: "Motion detected", type: "boolean", read: true, write: false},
 };
 
 let PollCmd = {
@@ -188,8 +189,8 @@ let PollCmd = {
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
         {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parse.parseListSharings},
+        //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents},
         //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
-        //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2', version: 4}, ParseFunction: parse.test},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
     ],

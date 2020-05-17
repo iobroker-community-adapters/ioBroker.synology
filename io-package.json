@@ -4,16 +4,16 @@
     "version": "0.1.11",
     "news": {
       "0.1.11": {
-        "en": "Adding to FS Sharing",
-        "de": "Adding to FS Sharing",
-        "ru": "Adding to FS Sharing",
-        "pt": "Adding to FS Sharing",
-        "nl": "Adding to FS Sharing",
-        "fr": "Adding to FS Sharing",
-        "it": "Adding to FS Sharing",
-        "es": "Adding to FS Sharing",
-        "pl": "Adding to FS Sharing",
-        "zh-cn": "Adding to FS Sharing"
+        "en": "added motionDetected state\nAdding to FS Sharing",
+        "de": "added motionDetected state\nAdding to FS Sharing",
+        "ru": "added motionDetected state\nAdding to FS Sharing",
+        "pt": "added motionDetected state\nAdding to FS Sharing",
+        "nl": "added motionDetected state\nAdding to FS Sharing",
+        "fr": "added motionDetected state\nAdding to FS Sharing",
+        "it": "added motionDetected state\nAdding to FS Sharing",
+        "es": "added motionDetected state\nAdding to FS Sharing",
+        "pl": "added motionDetected state\nAdding to FS Sharing",
+        "zh-cn": "added motionDetected state\nAdding to FS Sharing"
       },
       "0.1.9": {
         "en": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",

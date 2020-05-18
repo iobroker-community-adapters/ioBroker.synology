@@ -65,7 +65,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## Changelog
 
 ### 0.1.12
-* (instalator) fixed missing [datapoints](https://github.com/instalator/ioBroker.synology/issues)
+* (instalator) fixed missing [datapoints](https://github.com/instalator/ioBroker.synology/issues/43)
 * (instalator) refactoring
 
 

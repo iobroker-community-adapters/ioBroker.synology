@@ -47,16 +47,6 @@ const stateSS = {
     }
 };
 
-function parseTest(res){
-    debug('test - Response: ' + JSON.stringify(res));
-
-    //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
-    //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent},
-    //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2'}, ParseFunction: parse.dIStsPollIngCameraEvent},
-    //{api: 'ss', method: 'enumAlert', params: {camIdList: '2', typeList: '0,1,2,3,4,5,6,7', lock: '0' }, ParseFunction: parse.dIStsPollIngCameraEvent},
-    //{api: 'ss', method: 'listLogs', params: {cameraIds: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent}, //События
-}
-
 function startAdapter(options){
     return adapter = utils.adapter(Object.assign({}, options, {
         systemConfig: true,
@@ -241,7 +231,7 @@ let PollCmd = {
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parsegetConfigSchedule},
         {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parseListSharings},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents},
-        
+
         //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
@@ -254,8 +244,8 @@ let PollCmd = {
         getLiveViewPathCamera
     ]
 };
+/************************ SurveillanceStation ***********************/
 
-//////////////////////////* SurveillanceStation */////////////////////
 const getIdsCams = () => {
     let ids = [];
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
@@ -390,24 +380,17 @@ function parseSSInfo(res){
     states.DiskStationManager.info.productName = res.productName;
 }
 
-/////////////////////////* DownloadStation */////////////////////////
+/*********************** DownloadStation ************************/
+
 function addDownload(command, url, cb){
     if (url){
         debug('addDownload');
-        if (command === 'add_hash_download'){
-            url = 'magnet:?xt=urn:btih:' + url;
-        }
-        let param = {
-            type: "url", create_list: true, uri: [url], version: 2
-        };
+        if (command === 'add_hash_download') url = 'magnet:?xt=urn:btih:' + url;
+        let param = {type: "url", create_list: true, uri: [url], version: 2};
         adapter.getState('DownloadStation.folder', (err, state) => {
-            if (!err && state){
-                param.destination = state.val;
-            }
+            if (!err && state) param.destination = state.val;
             send('dl', 'createTask', param, (res) => {
-                if (res && res.message){
-                    error('addDownload Error: ', res.message);
-                }
+                if (res && res.message) error('addDownload Error: ', res.message);
                 cb && cb();
             });
         });
@@ -487,7 +470,7 @@ function parselistTasks(res){
     }
 }
 
-////////////////////////* AudioStation *////////////////////////////
+/************************* AudioStation *************************/
 
 function clearPlaylist(playerid, cb){
     const param = {
@@ -837,7 +820,8 @@ function parselistRadios(res){
     }
 }
 
-//////////////////////////* FileStation Sharing */////////////////////
+/*********************** FileStation ************************/
+
 function CreateSharing(command, link){
     debug('CreateSharings');
     let params_set = {};
@@ -908,14 +892,14 @@ function CreateSharings(res){
     states.FileStation.sharing['last_qrcode'] = JSON.stringify(arr[0].qrcode);
 }
 
-////////////////////////* dsm */////////////////////////////////
+/************************** DSM ****************************/
 
 function parseInfoSystem(res){
     debug('InfoSystem - Response: ' + JSON.stringify(res));
     try {
         if (res && res.hdd_info){
             res.hdd_info.forEach((key) => {
-                let diskname = key.diskno.toLowerCase().replace(' ', '_');
+                const diskname = key.diskno.toLowerCase().replace(' ', '_');
                 states.DiskStationManager.hdd_info[diskname] = {
                     'diskno':          key.diskno,
                     'model':           key.model.replace(/\s{2,}/g, ''),
@@ -990,40 +974,41 @@ function parseInfo(res){
 
 function parseTempInfo(res){
     debug('TempInfo - Response: ' + JSON.stringify(res));
-    try {
-        states.DiskStationManager.info.temperature = res.temperature;
-        states.DiskStationManager.info.temperature_warn = res.temperature_warn;
-        states.DiskStationManager.info.time = res.time;
-    } catch (e) {
-
-    }
+    states.DiskStationManager.info.temperature = res.temperature;
+    states.DiskStationManager.info.temperature_warn = res.temperature_warn;
+    states.DiskStationManager.info.time = res.time;
 }
 
 function parseSystemUtilization(res){
     debug('SystemUtilization - Response: ' + JSON.stringify(res));
-    try {
-        if (res && res.cpu){
-            states.DiskStationManager.info['cpu_load'] = /*parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + */parseInt(res.cpu.user_load);
-            states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
-            states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
-        }
-    } catch (e) {
-
+    if (res && res.cpu){
+        states.DiskStationManager.info['cpu_load'] = /*parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + */parseInt(res.cpu.user_load);
+        states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
+        states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
     }
 }
 
 function parseSystemStatus(res){
     debug('SystemStatus - Response: ' + JSON.stringify(res));
-    try {
-        states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
-        states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
-        states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
-    } catch (e) {
-
-    }
+    states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
+    states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
+    states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
 }
 
-/****************************************************************/
+/** **************************************************************/
+
+function parseTest(res){
+    debug('test - Response: ' + JSON.stringify(res));
+
+    //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2'}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'enumAlert', params: {camIdList: '2', typeList: '0,1,2,3,4,5,6,7', lock: '0' }, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'listLogs', params: {cameraIds: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent}, //События
+}
+
+/** **************************************************************/
+
 function sendMethod(name, val){
     debug('sendMethod to ' + name + ' cmd:' + val);
     const api = isInstalled(name);

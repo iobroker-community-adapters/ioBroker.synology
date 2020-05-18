@@ -68,7 +68,6 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 * (instalator) fixed missing [datapoints](https://github.com/instalator/ioBroker.synology/issues/43)
 * (instalator) refactoring
 
-
 ### 0.1.11
 * (instalator) added motionDetected state
 * (SpectreKr*) Adding to FS Sharing

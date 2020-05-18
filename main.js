@@ -241,6 +241,7 @@ let PollCmd = {
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parsegetConfigSchedule},
         {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parseListSharings},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents},
+        
         //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},

@@ -2,9 +2,60 @@
 const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
 const fs = require('fs');
-const parse = require('./lib/parsers.js');
+const moment = require('moment');
 let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
     firstStart = true, slowPollingTime, dir, old_states, timeOut;
+const stateSS = {
+    recStatus:  {
+        0: 'None recording schedule',
+        1: 'Continue recording schedule',
+        2: 'Motion detect recording schedule',
+        3: 'Digital input recording schedule',
+        4: 'Digital input recording schedule',
+        5: 'Manual recording schedule',
+        6: 'External',
+        7: 'Analytics'
+    },
+    videoCodec: {
+        0: 'Unknown',
+        1: 'MJPEG',
+        2: 'MPEG4',
+        3: 'H264',
+        5: 'MXPEG',
+        6: 'H265',
+        7: 'H264+'
+    },
+    camStatus:  {
+        1:  'Normal',
+        2:  'Deleted',
+        3:  'Disconnected',
+        4:  'Unavailable',
+        5:  'Ready',
+        6:  'Inaccessible',
+        7:  'Disabled',
+        8:  'Unrecognized',
+        9:  'Setting',
+        10: 'Server disconnected',
+        11: 'Migrating',
+        12: 'Others',
+        13: 'Storage removed',
+        14: 'Stopping',
+        15: 'Connect hist failed',
+        16: 'Unauthorized',
+        17: 'RTSP error',
+        18: 'No video'
+    }
+};
+
+function parseTest(res){
+    debug('test - Response: ' + JSON.stringify(res));
+
+    //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2'}, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'enumAlert', params: {camIdList: '2', typeList: '0,1,2,3,4,5,6,7', lock: '0' }, ParseFunction: parse.dIStsPollIngCameraEvent},
+    //{api: 'ss', method: 'listLogs', params: {cameraIds: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent}, //События
+}
 
 function startAdapter(options){
     return adapter = utils.adapter(Object.assign({}, options, {
@@ -42,22 +93,22 @@ function startAdapter(options){
                 } else if (command === 'Browser'){  /*  /AS  */
                     if (name in states.AudioStation.players){
                         queueCmd = true;
-                        Browser(states, name, val);
+                        Browser(name, val);
                     } else {
                         error('Browser', 'Error player ' + name + ' offline?');
                     }
                 } else if (command === 'play_folder'){
-                    PlayFolder(states, name, val);
+                    PlayFolder(name, val);
                 } else if (command === 'play_track'){
-                    PlayTrack(states, name, val);
+                    PlayTrack(name, val);
                 } else if (command === 'song_id'){
-                    PlayTrackId(states, name, val);
+                    PlayTrackId(name, val);
                 } else if (command === 'current_play'){
-                    PlayTrackNum(states, name, val);
+                    PlayTrackNum(name, val);
                 } else if (command === 'clearPlaylist'){
-                    clearPlaylist(states, name);
+                    clearPlaylist(name);
                 } else if (command === 'stop' || command === 'next' || command === 'prev' || command === 'volume' || command === 'seek' || command === 'pause' || command === 'play' || command === 'repeat' || command === 'shuffle'){
-                    PlayControl(states, name, command, val);
+                    PlayControl(name, command, val);
                 } else if (command === 'getSnapshotCamera'){
                     getSnapshotCamera(val);
                 } else if (command === 'add_url_download' || command === 'add_hash_download'){
@@ -67,7 +118,7 @@ function startAdapter(options){
                 } else if (command === 'pause_task' || command === 'resume_task'){
                     pauseTask(command, val);
                 } else if (command === 'enabled'){
-                    switchCam(states, name, command, val);
+                    switchCam(name, command, val);
                 } else if (command === 'status_on'){
                     send('ss', 'switchHomeMode', {on: val});
                 } else if (command === 'sendMethod'){
@@ -167,52 +218,61 @@ const objects = {
 
 let PollCmd = {
     "firstPoll": [
-        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parse.InstallingPackets}, // OR listPackages if < 6 in main function
-        {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parse.Info},
-        {api: 'fs', method: 'getInfo', params: {}, ParseFunction: parse.Info},
-        {api: 'dl', method: 'getInfo', params: {}, ParseFunction: parse.Info},
-        {api: 'as', method: 'getInfo', params: {}, ParseFunction: parse.Info},
-        {api: 'vs', method: 'getInfo', params: {}, ParseFunction: parse.Info},
-        {api: 'dtv', method: 'GetInfoTuner', params: {}, ParseFunction: parse.Info},
-        {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parse.Info},
-        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
-        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
-        {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parse.ListRemotePlayers},
+        {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parseInstallingPackets}, // OR listPackages if < 6 in main function
+        {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'fs', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'dl', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'as', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'vs', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'dtv', method: 'GetInfoTuner', params: {}, ParseFunction: parseInfo},
+        {api: 'ss', method: 'getInfo', params: {}, ParseFunction: parseInfo},
+        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parseInfoHomeMode},
+        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parselistCameras},
+        {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
     ],
     "fastPoll":  [
-        {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parse.SystemUtilization},
-        {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parse.SystemStatus},
-        {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parse.TempInfo},
-        {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parse.InfoSystem},
+        {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parseSystemUtilization},
+        {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parseSystemStatus},
+        {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parseTempInfo},
+        {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parseInfoSystem},
         getStatusPlayer,
-        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parse.InfoHomeMode},
-        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parse.listCameras},
-        {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parse.getConfigSchedule},
-        {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parse.parseListSharings},
+        {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parseInfoHomeMode},
+        {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parselistCameras},
+        {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parsegetConfigSchedule},
+        {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parseListSharings},
         //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents},
         //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
         //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
         //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
     ],
     "slowPoll":  [
-        {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parse.ListRemotePlayers},
-        {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parse.listTasks},
-        {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parse.listRadios},
+        {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
+        {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parselistTasks},
+        {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parselistRadios},
         addLinkSnapShot,
         getLiveViewPathCamera
     ]
 };
 
 //////////////////////////* SurveillanceStation */////////////////////
-const getArrIdCams = () => {
+const getIdsCams = () => {
     let ids = [];
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined) ids.push(states.SurveillanceStation.cameras[nameCam].id);
     });
-    return ids;
+    return ids.join(',');
 };
 
-function switchCam(states, name, command, val){
+const getNameCams = (id) => {
+    for (let nameCam in states.SurveillanceStation.cameras) {
+        if (!states.SurveillanceStation.cameras.hasOwnProperty(nameCam)) continue;
+        if (states.SurveillanceStation.cameras[nameCam].id === id){
+            return nameCam;
+        }
+    }
+};
+
+function switchCam(name, command, val){
     let method = !!val ? 'enableCamera' :'disableCamera';
     if (name !== 'undefined'){
         let camId = states.SurveillanceStation.cameras[name].id.toString();
@@ -220,7 +280,7 @@ function switchCam(states, name, command, val){
     }
 }
 
-function addLinkSnapShot(states){
+function addLinkSnapShot(){
     debug('addLinkSnapShot');
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined){
@@ -229,20 +289,25 @@ function addLinkSnapShot(states){
             states.SurveillanceStation.cameras[nameCam]['linkSnapshot'] = syno.protocol + '://' + syno.host + ':' + syno.port + '/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId= ' + camId + '&_sid=' + _sid;
         }
     });
-    return states;
 }
 
-function getLiveViewPathCamera(states){
+function getLiveViewPathCamera(){
     debug('getLiveViewPathCamera');
-    const ids = getArrIdCams().join(',');
+    const ids = getIdsCams();
     if (ids){
         send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
             if (res && !res.code && !res.message){
-                states = parse.LiveViewPathCamera(states, res);
+                res.forEach((obj) => {
+                    const nameCam = getNameCams(obj.id);
+                    states.SurveillanceStation.cameras[nameCam]['linkMjpegHttpPath'] = obj.mjpegHttpPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkMulticstPath'] = obj.multicstPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkMxpegHttpPath'] = obj.mxpegHttpPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkRtspOverHttpPath'] = obj.rtspOverHttpPath;
+                    states.SurveillanceStation.cameras[nameCam]['linkRtspPath'] = obj.rtspPath;
+                });
             }
         });
     }
-    return states;
 }
 
 function getSnapshotCamera(camid, cb){
@@ -261,6 +326,67 @@ function getSnapshotCamera(camid, cb){
             });
         }
     });
+}
+
+function parselistEvents(res){
+    debug('test - Response: ' + JSON.stringify(res));
+    if (res.events.length > 0){
+        res.events.forEach((event) => {
+            states.SurveillanceStation.cameras[event.camera_name].motionDetected = true;
+        });
+    }
+}
+
+function parselistCameras(res){
+    debug('listCameras - Response: ' + JSON.stringify(res));
+    let arr = res.cameras;
+    arr.forEach((k, i) => {
+        if (arr[i].name){
+            if (states.SurveillanceStation.cameras[arr[i].name] === undefined){
+                states.SurveillanceStation.cameras[arr[i].name] = {};
+            }
+            states.SurveillanceStation.cameras[arr[i].name].host = arr[i].host || arr[i].ip;
+            states.SurveillanceStation.cameras[arr[i].name].id = arr[i].id;
+            states.SurveillanceStation.cameras[arr[i].name].port = arr[i].port;
+            states.SurveillanceStation.cameras[arr[i].name].model = arr[i].model;
+            states.SurveillanceStation.cameras[arr[i].name].vendor = arr[i].vendor;
+            states.SurveillanceStation.cameras[arr[i].name].videoCodec = stateSS.videoCodec[arr[i].videoCodec];
+            states.SurveillanceStation.cameras[arr[i].name].status = stateSS.camStatus[arr[i].status];
+            states.SurveillanceStation.cameras[arr[i].name].recStatus = stateSS.recStatus[arr[i].recStatus];
+            states.SurveillanceStation.cameras[arr[i].name].enabled = arr[i].enabled;
+            states.SurveillanceStation.cameras[arr[i].name].motionDetected = false;
+            states.SurveillanceStation.cameras[arr[i].name].motionDetected = arr[i].recStatus === 2;
+        }
+    });
+}
+
+function parseInfoHomeMode(res){
+    debug('InfoHomeMode - Response: ' + JSON.stringify(res));
+    states.SurveillanceStation.HomeMode['status_on'] = res.on;
+    states.SurveillanceStation.HomeMode['notify_on'] = res.notify_on;
+    states.SurveillanceStation.HomeMode['onetime_disable_on'] = res.onetime_disable_on;
+    states.SurveillanceStation.HomeMode['onetime_disable_time'] = unixToDate(res.onetime_disable_time);
+    states.SurveillanceStation.HomeMode['onetime_enable_on'] = res.onetime_enable_on;
+    states.SurveillanceStation.HomeMode['onetime_enable_time'] = unixToDate(res.onetime_enable_time);
+    states.SurveillanceStation.HomeMode['geo_lat'] = res.geo_lat;
+    states.SurveillanceStation.HomeMode['geo_lng'] = res.geo_lng;
+    states.SurveillanceStation.HomeMode['geo_radius'] = res.geo_radius;
+    states.SurveillanceStation.HomeMode['wifi_ssid'] = res.wifi_ssid;
+}
+
+function parseSSInfo(res){
+    states.SurveillanceStation.info.CMSMinVersion = res.CMSMinVersion;
+    states.SurveillanceStation.info.cameraNumber = res.cameraNumber;
+    states.SurveillanceStation.info.isLicenseEnough = res.isLicenseEnough;
+    states.SurveillanceStation.info.liscenseNumber = res.liscenseNumber;
+    states.SurveillanceStation.info.maxCameraSupport = res.maxCameraSupport;
+    states.SurveillanceStation.info.enableVideoRelay = res.enableVideoRelay;
+    states.SurveillanceStation.info.remindQuickconnectTunnel = res.remindQuickconnectTunnel;
+    states.DiskStationManager.info.hostname = res.hostname;
+    states.DiskStationManager.info.timezone = res.timezone;
+    states.DiskStationManager.info.unique = res.unique;
+    states.DiskStationManager.info.serviceVolSize = res.serviceVolSize;
+    states.DiskStationManager.info.productName = res.productName;
 }
 
 /////////////////////////* DownloadStation */////////////////////////
@@ -338,9 +464,31 @@ function pauseTask(command, val){
     });
 }
 
+function parsegetConfigSchedule(res){
+    debug('getConfigSchedule - Response: ' + JSON.stringify(res));
+    if (res && !res.message){
+        states.DownloadStation['shedule_emule_enabled'] = res.emule_enabled;
+        states.DownloadStation['shedule_enabled'] = res.enabled;
+    }
+}
+
+function parselistTasks(res){
+    debug('listTasks - Response: ' + JSON.stringify(res));
+    if (res && !res.message){
+        let task = [];
+        res.tasks.forEach((obj) => {
+            if (obj.status !== 'finished'){
+                task.push(obj);
+            }
+        });
+        states.DownloadStation['listTasks'] = JSON.stringify(task);
+        states.DownloadStation['activeTask'] = task.length;
+    }
+}
+
 ////////////////////////* AudioStation *////////////////////////////
 
-function clearPlaylist(states, playerid, cb){
+function clearPlaylist(playerid, cb){
     const param = {
         id:            playerid,
         offset:        0,
@@ -353,7 +501,7 @@ function clearPlaylist(states, playerid, cb){
     });
 }
 
-function clearPlayerStates(playerid){
+function clearPlayerStates(playerid, cb){
     debug(`Clearing the player status ${playerid}`);
     states.AudioStation.players[playerid].playlist_total = 0;
     states.AudioStation.players[playerid].volume = 0;
@@ -375,11 +523,12 @@ function clearPlayerStates(playerid){
     states.AudioStation.players[playerid].playlist = '';
     states.AudioStation.players[playerid].current_play = 0;
     states.AudioStation.players[playerid].cover = '';
+    cb && cb();
 }
 
-function getStatusPlayer(states){
-    let param = {};
-    Object.keys(states.AudioStation.players).forEach((playerid) => {
+function getStatusPlayer(cb){
+    for (const playerid of Object.keys(states.AudioStation.players)) {
+        let param = {};
         if (playerid && states.AudioStation.players[playerid].online){
             debug('* getStatusPlayer ' + playerid);
             param = {
@@ -396,7 +545,7 @@ function getStatusPlayer(states){
                     states.AudioStation.players[playerid].state_playing = state;
                     states.AudioStation.players[playerid].online = true;
                     if ((res.state === 'playing' || res.state === 'pause') && res.song){
-                        states = parse.RemotePlayerStatus(playerid, states, res);
+                        parseRemotePlayerStatus(playerid, res);
                         getPlaylist(playerid, () => {
                             getSongCover(playerid);
                         });
@@ -412,11 +561,10 @@ function getStatusPlayer(states){
                 }
             });
         }
-    });
-    return states;
+    }
 }
 
-function getSongCover(playerid){
+function getSongCover(playerid, cb){
     debug('getSongCover');
     const track = states.AudioStation.players[playerid].song_id;
     if (track !== old_states.AudioStation.players[playerid].song_id){
@@ -429,6 +577,7 @@ function getSongCover(playerid){
             } else {
                 states.AudioStation.players[playerid].cover = dir + 'cover.png';
             }
+            cb && cb();
         });
     }
 }
@@ -437,13 +586,13 @@ function getPlaylist(playerid, cb){
     debug('getPlaylist');
     send('as', 'getPlayListRemotePlayer', {id: playerid}, (res) => {
         if (res){
-            states = parse.PlayListRemotePlayer(playerid, states, res);
+            parsePlayListRemotePlayer(playerid, res);
             cb && cb();
         }
     });
 }
 
-function Browser(_states, playerid, val){
+function Browser(playerid, val){
     debug('Browser');
     let param = {};
     if (val && val !== '/'){
@@ -483,7 +632,7 @@ function Browser(_states, playerid, val){
     });
 }
 
-function PlayControl(states, playerid, cmd, val){
+function PlayControl(playerid, cmd, val){
     debug('PlayControl');
     let param = {
         id:     playerid,
@@ -510,12 +659,12 @@ function PlayControl(states, playerid, cmd, val){
     }
 }
 
-function PlayFolder(states, playerid, folder){
+function PlayFolder(playerid, folder){
     debug('PlayFolder');
     let param = {};
     if (playerid){
         send('as', 'controlRemotePlayer', {id: playerid, action: 'stop'}, () => {
-            clearPlaylist(states, playerid, () => {
+            clearPlaylist(playerid, () => {
                 param = {
                     id:                 playerid,
                     library:            'shared',
@@ -533,7 +682,7 @@ function PlayFolder(states, playerid, folder){
     }
 }
 
-function PlayTrack(states, playerid, val){
+function PlayTrack(playerid, val){
     debug('PlayTrack');
     let param = {};
     if (playerid){
@@ -553,14 +702,14 @@ function PlayTrack(states, playerid, val){
     }
 }
 
-function PlayTrackNum(states, playerid, val){
+function PlayTrackNum(playerid, val){
     debug('PlayTrackNum');
     if (playerid){
         send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: val});
     }
 }
 
-function PlayTrackId(states, playerid, val){
+function PlayTrackId(playerid, val){
     debug('PlayTrack');
     try {
         let arr = JSON.parse(states.AudioStation.players[playerid].playlist);
@@ -572,6 +721,118 @@ function PlayTrackId(states, playerid, val){
         }
     } catch (e) {
         error('PlayTrackId:', 'Error parse playlist');
+    }
+}
+
+function parseListRemotePlayers(res){
+    debug('ListRemotePlayers - Response: ' + JSON.stringify(res));
+    //states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
+    res.players.forEach((player) => {
+        const playerid = player.id;
+        if (states.AudioStation.players[playerid] === undefined){
+            states.AudioStation.players[playerid] = {};
+            states.AudioStation.players[playerid].online = true;
+            states.AudioStation.players[playerid].player_name = player.name;
+            states.AudioStation.players[playerid].stop = '';
+            states.AudioStation.players[playerid].pause = '';
+            states.AudioStation.players[playerid].play = '';
+            states.AudioStation.players[playerid].prev = '';
+            states.AudioStation.players[playerid].next = '';
+            states.AudioStation.players[playerid].play_folder = '';
+            states.AudioStation.players[playerid].play_track = '';
+            states.AudioStation.players[playerid].Browser = '';
+            states.AudioStation.players[playerid].clearPlaylist = false;
+        }
+    });
+}
+
+function parseRemotePlayerStatus(playerid, res){
+    debug('RemotePlayerStatus - Response: ' + JSON.stringify(res));
+    try {
+        if (res && res.index !== undefined){
+            let seek = parseFloat((res.position / res.song.additional.song_audio.duration) * 100).toFixed(4);
+            states.AudioStation.players[playerid].current_play = res.index;
+            states.AudioStation.players[playerid].playlist_total = res.playlist_total;
+            states.AudioStation.players[playerid].volume = res.volume;
+            states.AudioStation.players[playerid].subplayer_volume = res.subplayer_volume;
+            states.AudioStation.players[playerid].album = res.song.additional.song_tag.album;
+            states.AudioStation.players[playerid].artist = res.song.additional.song_tag.artist;
+            states.AudioStation.players[playerid].genre = res.song.additional.song_tag.genre;
+            states.AudioStation.players[playerid].year = res.song.additional.song_tag.year;
+            states.AudioStation.players[playerid].song_id = res.song.id;
+            states.AudioStation.players[playerid].title = res.song.title;
+            states.AudioStation.players[playerid].path = res.song.path;
+            states.AudioStation.players[playerid].repeat = res.play_mode.repeat;
+            states.AudioStation.players[playerid].shuffle = res.play_mode.shuffle;
+            states.AudioStation.players[playerid].bitrate = res.song.additional.song_audio.bitrate / 1000;
+            states.AudioStation.players[playerid].duration = SecToText(res.song.additional.song_audio.duration);
+            states.AudioStation.players[playerid].duration_sec = res.song.additional.song_audio.duration;
+            states.AudioStation.players[playerid].current_duration = SecToText(res.position);
+            states.AudioStation.players[playerid].current_elapsed = res.song.additional.song_audio.duration > 0 ? SecToText(res.song.additional.song_audio.duration - res.position) :0;
+            states.AudioStation.players[playerid].seek = isFinite(seek) ? seek :0;
+        }
+    } catch (e) {
+        debug('RemotePlayerStatus - Error: ' + JSON.stringify(e));
+    }
+}
+
+function parsePlayListRemotePlayer(playerid, res){
+    debug('PlayListRemotePlayer - Response: ' + JSON.stringify(res));
+    try {
+        let playlist = [];
+        if (res && res.songs){
+            let arr = res.songs;
+            arr.forEach((k, i) => {
+                playlist[i] = {
+                    "id":      arr[i].id,
+                    "artist":  "",
+                    "album":   "",
+                    "bitrate": 0,
+                    "title":   arr[i].title,
+                    "file":    arr[i].path,
+                    "genre":   "",
+                    "year":    0,
+                    "len":     "00:00",
+                    "rating":  "",
+                    "cover":   ""
+                }
+            });
+        }
+        states.AudioStation.players[playerid].playlist = JSON.stringify(playlist);
+    } catch (e) {
+
+    }
+}
+
+function parselistRadios(res){
+    debug('listRadios - Response: ' + JSON.stringify(res));
+    if (res && !res.message){
+        try {
+            let radio_playlist = [];
+            if (res.radios){
+                let arr = res.radios;
+                arr.forEach((k, i) => {
+                    radio_playlist[i] = {
+                        "id":      arr[i].id,
+                        "artist":  "",
+                        "album":   "",
+                        "bitrate": arr[i].desc ? arr[i].desc.match(/\(.*?(\d+)/)[1] :"",
+                        "title":   arr[i].title,
+                        "file":    arr[i].url,
+                        "genre":   "",
+                        "year":    0,
+                        "len":     "00:00",
+                        "rating":  "",
+                        "cover":   ""
+                    }
+                });
+                Object.keys(states.AudioStation.players).forEach((playerid) => {
+                    states.AudioStation.players[playerid].favoriteRadio = JSON.stringify(radio_playlist);
+                });
+            }
+        } catch (e) {
+            debug('listRadios - Error: ' + JSON.stringify(res));
+        }
     }
 }
 
@@ -593,7 +854,7 @@ function CreateSharing(command, link){
         }
         send('fs', 'createSharing', params_set, (res) => {
             if (res){
-                states = parse.parseCreateSharings(states, res);
+                CreateSharings(res);
             }
         });
     } else {
@@ -607,6 +868,157 @@ function DeleteSharing(command, id){
         send('fs', 'deleteSharing', {'id': id});
     } else {
         error('DeleteSharings', 'ID not set');
+    }
+}
+
+function parseListSharings(res){
+    debug('parseListSharings - Response: ' + JSON.stringify(res));
+    let arr = res.links;
+    let temp_array = [];
+    arr.forEach((k, i) => {
+        if (arr[i].id){
+            temp_array[i] = {
+                'name':           arr[i].name,
+                'date_available': arr[i].date_available,
+                'date_expired':   arr[i].date_expired,
+                'expire_times':   arr[i].expire_times,
+                'enable_upload':  arr[i].enable_upload,
+                'has_password':   arr[i].has_password,
+                'id':             arr[i].id,
+                'isFolder':       arr[i].isFolder,
+                'link_owner':     arr[i].link_owner,
+                'limit_size':     arr[i].limit_size,
+                'path':           arr[i].path,
+                'qrcode':         arr[i].qrcode,
+                'status':         arr[i].status,
+                'url':            arr[i].url,
+                'request_info':   arr[i].request_info,
+                'request_name':   arr[i].request_name
+            }
+        }
+    });
+    states.FileStation.sharing['list'] = JSON.stringify(temp_array);
+}
+
+function CreateSharings(res){
+    debug('parseCreateSharings - Response: ' + JSON.stringify(res));
+    let arr = res.links;
+    states.FileStation.sharing['last_url'] = JSON.stringify(arr[0].url);
+    states.FileStation.sharing['last_qrcode'] = JSON.stringify(arr[0].qrcode);
+}
+
+////////////////////////* dsm */////////////////////////////////
+
+function parseInfoSystem(res){
+    debug('InfoSystem - Response: ' + JSON.stringify(res));
+    try {
+        if (res && res.hdd_info){
+            res.hdd_info.forEach((key) => {
+                let diskname = key.diskno.toLowerCase().replace(' ', '_');
+                states.DiskStationManager.hdd_info[diskname] = {
+                    'diskno':          key.diskno,
+                    'model':           key.model.replace(/\s{2,}/g, ''),
+                    'overview_status': key.status,
+                    'ebox_order':      key.ebox_order,
+                    'temperature':     key.temp,
+                    'storage_pool':    key.volume,
+                    'capacity':        (key.capacity / 1073741824).toFixed(2, 10)
+                };
+            });
+            res.vol_info.forEach((key) => {
+                const volname = key.name.toLowerCase();
+                states.DiskStationManager.vol_info[volname] = {
+                    'name':       key.name,
+                    'status':     key.status,
+                    'total_size': (key.total_size / 1073741824).toFixed(2, 10),
+                    'used_size':  (key.used_size / 1073741824).toFixed(2, 10),
+                    'used':       ((key.used_size / key.total_size) * 100).toFixed(2, 10),
+                    'desc':       key.desc
+                };
+            });
+        }
+    } catch (e) {
+
+    }
+}
+
+function parseInstallingPackets(res){
+    debug('InstallingPackets - Response: ' + JSON.stringify(res));
+    if (res && res.packages){
+        if (!Array.isArray(res.packages)){
+            for (let fullname in res.packages) { // for getPollingData
+                if (!res.packages.hasOwnProperty(fullname)) continue;
+                for (let name in states.api) {
+                    if (!states.api.hasOwnProperty(name)) continue;
+                    if (states.api[name].name === fullname){
+                        states.api[name]['installed'] = res.packages[fullname];
+                    }
+                }
+            }
+        } else {
+            let arr = res.packages; // for listPackages
+            arr.forEach((obj) => {
+                for (let name in states.api) {
+                    if (!states.api.hasOwnProperty(name)) continue;
+                    if (states.api[name].name === obj.id){
+                        states.api[name]['installed'] = true;
+                    }
+                }
+            });
+        }
+    }
+}
+
+function parseInfo(res){
+    debug('Info - Response: ' + JSON.stringify(res));
+    try {
+        if (states.api[api].installed){
+            const apiName = states.api[api].name;
+            if (apiName !== 'SurveillanceStation'){
+                Object.keys(res).forEach((key) => {
+                    states[apiName].info[key] = res[key];
+                });
+            } else {
+                parseSSInfo(res);
+            }
+        }
+    } catch (e) {
+
+    }
+}
+
+function parseTempInfo(res){
+    debug('TempInfo - Response: ' + JSON.stringify(res));
+    try {
+        states.DiskStationManager.info.temperature = res.temperature;
+        states.DiskStationManager.info.temperature_warn = res.temperature_warn;
+        states.DiskStationManager.info.time = res.time;
+    } catch (e) {
+
+    }
+}
+
+function parseSystemUtilization(res){
+    debug('SystemUtilization - Response: ' + JSON.stringify(res));
+    try {
+        if (res && res.cpu){
+            states.DiskStationManager.info['cpu_load'] = /*parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + */parseInt(res.cpu.user_load);
+            states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
+            states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
+        }
+    } catch (e) {
+
+    }
+}
+
+function parseSystemStatus(res){
+    debug('SystemStatus - Response: ' + JSON.stringify(res));
+    try {
+        states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
+        states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
+        states.DiskStationManager.info['upgrade_ready'] = res.upgrade_ready;
+    } catch (e) {
+
     }
 }
 
@@ -666,7 +1078,7 @@ function queuePolling(){
 function sendPolling(namePolling, cb){
     debug('-----------------------------------------------------------------------------------------------------');
     if (typeof PollCmd[namePolling][iteration] === 'function'){
-        states = PollCmd[namePolling][iteration](states);
+        eval(PollCmd[namePolling][iteration]());
         iterator(namePolling, cb);
     } else if (states.api[PollCmd[namePolling][iteration].api].installed){
         const api = PollCmd[namePolling][iteration].api;
@@ -681,7 +1093,7 @@ function sendPolling(namePolling, cb){
                     connect = true;
                     try {
                         if (typeof PollCmd[namePolling][iteration].ParseFunction === "function"){
-                            states = PollCmd[namePolling][iteration].ParseFunction(api, states, res);
+                            eval(PollCmd[namePolling][iteration].ParseFunction(res));
                         }
                     } catch (e) {
                         error('ParseFunction', 'syno[' + api + '][' + method + '] Error -' + e);
@@ -879,9 +1291,8 @@ function main(){
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
     if (parseInt(adapter.config.version, 10) < 6){
-        PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parse.InstallingPackets};
+        PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parseInstallingPackets};
     }
-
     if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as){
         let result;
         result = PollCmd.fastPoll.filter(item => {
@@ -894,13 +1305,6 @@ function main(){
         });
         PollCmd.slowPoll = result;
     }
-
-    parse.on('debug', (msg) => {
-        debug('* PARSE debug: ' + msg);
-    });
-    parse.on('info', (msg) => {
-        debug('* PARSE: info' + msg);
-    });
     dir = utils.controllerDir + '/' + adapter.systemConfig.dataDir + adapter.namespace.replace('.', '_') + '/';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
     fs.copyFileSync(__dirname + '/admin/cover.png', dir + 'cover.png');
@@ -963,6 +1367,33 @@ function isInstalled(fullname){
 
 function debug(msg){
     adapter.log.debug(msg);
+}
+
+const unixToDate = (timestamp) => {
+    return moment.unix(timestamp).format("DD/MM/YYYY, HH:mm");
+};
+const dateToUnix = (date) => {
+    let ts = moment(date).unix();
+    return moment.unix(ts);
+};
+
+function SecToText(sec){
+    let res;
+    let m = Math.floor(sec / 60);
+    let s = sec % 60;
+    let h = Math.floor(m / 60);
+    m = m % 60;
+    if (h > 0){
+        res = pad2(h) + ":" + pad2(m) + ":" + pad2(s);
+    } else {
+        res = pad2(m) + ":" + pad2(s);
+    }
+    return res;
+}
+
+function pad2(num){
+    let s = num.toString();
+    return (s.length < 2) ? "0" + s :s;
 }
 
 if (module.parent){

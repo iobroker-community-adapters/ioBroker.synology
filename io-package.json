@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "news": {
+      "0.1.12": {
+        "en": "fixed missing [datapoints]\nrefactoring",
+        "de": "fixed missing [datapoints]\nrefactoring",
+        "ru": "fixed missing [datapoints]\nrefactoring",
+        "pt": "fixed missing [datapoints]\nrefactoring",
+        "nl": "fixed missing [datapoints]\nrefactoring",
+        "fr": "fixed missing [datapoints]\nrefactoring",
+        "it": "fixed missing [datapoints]\nrefactoring",
+        "es": "fixed missing [datapoints]\nrefactoring",
+        "pl": "fixed missing [datapoints]\nrefactoring",
+        "zh-cn": "fixed missing [datapoints]\nrefactoring"
+      },
       "0.1.11": {
         "en": "added motionDetected state\nAdding to FS Sharing",
         "de": "added motionDetected state\nAdding to FS Sharing",
@@ -14,42 +26,6 @@
         "es": "added motionDetected state\nAdding to FS Sharing",
         "pl": "added motionDetected state\nAdding to FS Sharing",
         "zh-cn": "added motionDetected state\nAdding to FS Sharing"
-      },
-      "0.1.9": {
-        "en": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "de": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "ru": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "pt": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "nl": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "fr": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "it": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "es": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "pl": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data",
-        "zh-cn": "fixed copy cover file\nfix get packages for DSM 5.x\nAdded option to select services for receiving data"
-      },
-      "0.1.8": {
-        "en": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "de": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "ru": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "pt": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "nl": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "fr": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "it": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "es": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "pl": "fix error addDownload\nfixed listRadios\nfixed get cover",
-        "zh-cn": "fix error addDownload\nfixed listRadios\nfixed get cover"
-      },
-      "0.1.7": {
-        "en": "fixed 2FA",
-        "de": "fixed 2FA",
-        "ru": "fixed 2FA",
-        "pt": "fixed 2FA",
-        "nl": "fixed 2FA",
-        "fr": "fixed 2FA",
-        "it": "fixed 2FA",
-        "es": "fixed 2FA",
-        "pl": "fixed 2FA",
-        "zh-cn": "fixed 2FA"
       }
     },
     "title": "Synology NAS",

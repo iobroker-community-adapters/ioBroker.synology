@@ -1094,7 +1094,7 @@ function sendPolling(namePolling){
                 if (adapter.config['2fa_checkbox'] && firstStart){
                     timeOut && clearTimeout(timeOut);
                     timeOut = setTimeout(() => {
-                        iterator(namePolling, cb);
+                        iterator(namePolling);
                     }, 30000);
                 } else {
                     iterator(namePolling);

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.12",
+    "version": "0.1.14",
     "news": {
       "0.1.12": {
         "en": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",

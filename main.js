@@ -1063,6 +1063,7 @@ function queuePolling(){
 
 function sendPolling(namePolling, cb){
     debug('-----------------------------------------------------------------------------------------------------');
+    debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration);
     if (typeof PollCmd[namePolling][iteration] === 'function'){
         eval(PollCmd[namePolling][iteration]());
         iterator(namePolling, cb);

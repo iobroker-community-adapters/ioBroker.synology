@@ -1063,7 +1063,7 @@ function queuePolling(){
 
 function sendPolling(namePolling, cb){
     debug('-----------------------------------------------------------------------------------------------------');
-    debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration);
+    debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | typeof = ' + typeof PollCmd[namePolling][iteration]);
     if (typeof PollCmd[namePolling][iteration] === 'function'){
         eval(PollCmd[namePolling][iteration]());
         iterator(namePolling, cb);
@@ -1097,12 +1097,12 @@ function sendPolling(namePolling, cb){
                         iteration = -1;
                     }
                 }
-                if (queueCmd){
+               /* if (queueCmd){
                     queueCmd = false;
                     timeOut = setTimeout(() => {
                         iterator(namePolling, cb);
                     }, 1000);
-                } else if (adapter.config['2fa_checkbox'] && firstStart){
+                } else */if (adapter.config['2fa_checkbox'] && firstStart){
                     timeOut = setTimeout(() => {
                         iterator(namePolling, cb);
                     }, 30000);

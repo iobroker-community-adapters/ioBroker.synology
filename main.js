@@ -1097,12 +1097,8 @@ function sendPolling(namePolling, cb){
                         iteration = -1;
                     }
                 }
-               /* if (queueCmd){
-                    queueCmd = false;
-                    timeOut = setTimeout(() => {
-                        iterator(namePolling, cb);
-                    }, 1000);
-                } else */if (adapter.config['2fa_checkbox'] && firstStart){
+                if (adapter.config['2fa_checkbox'] && firstStart){
+                    timeOut && clearTimeout(timeOut);
                     timeOut = setTimeout(() => {
                         iterator(namePolling, cb);
                     }, 30000);
@@ -1123,6 +1119,7 @@ function iterator(namePolling, cb){
     iteration++;
     if (iteration > PollCmd[namePolling].length - 1){
         iteration = 0;
+        timeOutPoll && clearTimeout(timeOutPoll);
         if (namePolling === 'firstPoll') firstStart = false;
         pollAllowed = true;
         debug('-----------------------------------------------------------------------------------------------------');

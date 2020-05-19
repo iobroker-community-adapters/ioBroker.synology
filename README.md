@@ -67,6 +67,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ### 0.1.12
 * (instalator) fixed missing [datapoints](https://github.com/instalator/ioBroker.synology/issues/43)
 * (instalator) refactoring
+* (instalator) Changed the logging of some errors
+* (instalator) Changed format session in syno package
 
 ### 0.1.11
 * (instalator) added motionDetected state

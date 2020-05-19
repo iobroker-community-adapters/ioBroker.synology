@@ -4,16 +4,16 @@
     "version": "0.1.12",
     "news": {
       "0.1.12": {
-        "en": "fixed missing [datapoints]\nrefactoring",
-        "de": "fixed missing [datapoints]\nrefactoring",
-        "ru": "fixed missing [datapoints]\nrefactoring",
-        "pt": "fixed missing [datapoints]\nrefactoring",
-        "nl": "fixed missing [datapoints]\nrefactoring",
-        "fr": "fixed missing [datapoints]\nrefactoring",
-        "it": "fixed missing [datapoints]\nrefactoring",
-        "es": "fixed missing [datapoints]\nrefactoring",
-        "pl": "fixed missing [datapoints]\nrefactoring",
-        "zh-cn": "fixed missing [datapoints]\nrefactoring"
+        "en": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "de": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "ru": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "pt": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "nl": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "fr": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "it": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "es": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "pl": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
+        "zh-cn": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package"
       },
       "0.1.11": {
         "en": "added motionDetected state\nAdding to FS Sharing",

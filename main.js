@@ -1303,7 +1303,6 @@ function newSyno(){
             otp:                     adapter.config['2fa_checkbox'] ? (adapter.config['2fa_code'] || 'ASE32YJSBKUOIDPB') :false,
             debug:                   false
         });
-        //console.warn('response[\'sid\'] = ' + response['sid'] + ' OPTIONS - ' + JSON.stringify(options));
         queuePolling();
     } catch (e) {
         error('new Syno Error: ', e.message);

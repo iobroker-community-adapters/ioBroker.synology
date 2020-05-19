@@ -1063,7 +1063,7 @@ function sendPolling(namePolling){
     if (typeof poll === 'function'){
         eval(poll());
         iterator(namePolling);
-    } else if (states.api[poll.api].installed){
+    } else if (poll.api && states.api[poll.api].installed){
         const api = poll.api;
         const method = poll.method;
         const params = poll.params;

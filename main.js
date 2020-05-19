@@ -3,7 +3,7 @@ const utils = require('@iobroker/adapter-core');
 let Syno = require('syno');
 const fs = require('fs');
 const moment = require('moment');
-let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, isPoll = false, queueCmd = null, startTime, endTime, pollAllowed = true,
+let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, queueCmd = null, startTime, endTime,
     firstStart = true, slowPollingTime, dir, old_states, timeOut;
 const stateSS = {
     recStatus:  {
@@ -1041,36 +1041,32 @@ function sendMethod(name, val){
 }
 
 function queuePolling(){
-    if (pollAllowed){
-        iteration = 0;
-        isPoll = true;
-        let namePolling = '';
-        if (endTime - startTime > slowPollingTime){
-            startTime = new Date().getTime();
-            namePolling = 'slowPoll';
+    iteration = 0;
+    let namePolling = '';
+    if (endTime - startTime > slowPollingTime){
+        startTime = new Date().getTime();
+        namePolling = 'slowPoll';
+    } else {
+        if (firstStart){
+            namePolling = 'firstPoll';
         } else {
-            if (firstStart){
-                pollAllowed = false;
-                namePolling = 'firstPoll';
-            } else {
-                namePolling = 'fastPoll';
-            }
+            namePolling = 'fastPoll';
         }
-        //DEBUG('slowPollingTime = ' + (endTime - startTime));
-        sendPolling(namePolling);
     }
+    sendPolling(namePolling);
 }
 
-function sendPolling(namePolling, cb){
+function sendPolling(namePolling){
+    const poll = PollCmd[namePolling][iteration];
     debug('-----------------------------------------------------------------------------------------------------');
-    debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | typeof = ' + typeof PollCmd[namePolling][iteration]);
-    if (typeof PollCmd[namePolling][iteration] === 'function'){
-        eval(PollCmd[namePolling][iteration]());
-        iterator(namePolling, cb);
-    } else if (states.api[PollCmd[namePolling][iteration].api].installed){
-        const api = PollCmd[namePolling][iteration].api;
-        const method = PollCmd[namePolling][iteration].method;
-        const params = PollCmd[namePolling][iteration].params;
+    debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | poll = ' + typeof poll);
+    if (typeof poll === 'function'){
+        eval(poll());
+        iterator(namePolling);
+    } else if (states.api[poll.api].installed){
+        const api = poll.api;
+        const method = poll.method;
+        const params = poll.params;
         debug(`* Get info from (${namePolling}) api: ${api.toUpperCase()} method: ${method} params: ${JSON.stringify(params)}`);
         try {
             syno[api][method](params, (err, res) => {
@@ -1078,20 +1074,18 @@ function sendPolling(namePolling, cb){
                 if (!err && res){
                     if (!connect) setInfoConnection(true);
                     connect = true;
-                    try {
-                        if (typeof PollCmd[namePolling][iteration].ParseFunction === "function"){
-                            eval(PollCmd[namePolling][iteration].ParseFunction(res));
-                        }
-                    } catch (e) {
-                        error('ParseFunction', 'syno[' + api + '][' + method + '] Error -' + e);
+                    if (typeof poll.ParseFunction === "function"){
+                        eval(poll.ParseFunction(res));
+                    } else {
+                        error('ParseFunction', 'syno[' + api + '][' + method + '] Error - Not Function!');
                     }
                 } else if (err){
                     if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
                         adapter.log.warn('sendPolling Error -' + err + ' You are using a hacked version of SS?');
                     } else if (~err.toString().indexOf('No such account or incorrect password')){
-                        error('sendPolling', 'syno[' + api + '][' + method + '] Error -' + err + ' To use the adapter, the user must be in the Administrators group!');
+                        error('sendPolling syno[' + api + '][' + method + '] To use the adapter, the user must be in the Administrators group!', err);
                     } else {
-                        error('sendPolling', 'syno[' + api + '][' + method + '] Error -' + err);
+                        error('*sendPolling syno[' + api + '][' + method + ']', err);
                     }
                     if (method === 'getPollingData' || method === 'listPackages'){
                         iteration = -1;
@@ -1103,35 +1097,33 @@ function sendPolling(namePolling, cb){
                         iterator(namePolling, cb);
                     }, 30000);
                 } else {
-                    iterator(namePolling, cb);
+                    iterator(namePolling);
                 }
             });
         } catch (e) {
             error('sendPolling catch - syno[' + api + '][' + method + ']', e);
         }
     } else {
-        debug(`* Packet ${PollCmd[namePolling][iteration].api.toUpperCase()} non installed, skipped`);
-        iterator(namePolling, cb);
+        debug(`* Packet ${poll.api.toUpperCase()} non installed, skipped`);
+        iterator(namePolling);
     }
 }
 
-function iterator(namePolling, cb){
+function iterator(namePolling){
     iteration++;
     if (iteration > PollCmd[namePolling].length - 1){
         iteration = 0;
         timeOutPoll && clearTimeout(timeOutPoll);
         if (namePolling === 'firstPoll') firstStart = false;
-        pollAllowed = true;
         debug('-----------------------------------------------------------------------------------------------------');
         debug('>>>>>>>>>>>>>>> Read all data, save received data.');
-        isPoll = false;
         setStates();
         timeOutPoll = setTimeout(() => {
             endTime = new Date().getTime();
             queuePolling();
         }, pollTime);
     } else {
-        sendPolling(namePolling, cb);
+        sendPolling(namePolling);
     }
 }
 

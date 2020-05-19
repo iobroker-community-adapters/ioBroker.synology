@@ -1255,7 +1255,7 @@ function error(src, e, cb){
             newSyno();
         }, 10000);
     } else {
-        cb && cb(e)
+        cb && cb(e);
     }
 }
 

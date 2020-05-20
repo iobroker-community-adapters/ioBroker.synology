@@ -73,12 +73,12 @@ function startAdapter(options){
                 if (command === 'reboot'){
                     send('dsm', 'rebootSystem', (res) => {
                         debug('System reboot');
-                        //rePollAfterCmd();
+                        rePollAfterCmd();
                     });
                 } else if (command === 'shutdown'){
                     send('dsm', 'shutdownSystem', (res) => {
                         debug('System shutdown');
-                        //rePollAfterCmd();
+                        rePollAfterCmd();
                     });
                 } else if (command === 'Browser'){  /*  /AS  */
                     if (name in states.AudioStation.players){
@@ -230,11 +230,6 @@ let PollCmd = {
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parselistCameras},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parsegetConfigSchedule},
         {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parseListSharings},
-        //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents},
-
-        //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
-        //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
-        //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
     ],
     "slowPoll":  [
         {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
@@ -991,10 +986,14 @@ function parseSystemStatus(res){
 
 function parseTest(res){
     debug('test - Response: ' + JSON.stringify(res));
-
+    
+    //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents}, // Рабочий вариант
+    //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
+    //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
+    //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
+    
     //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
     //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent},
-    //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, cameraIds: '2'}, ParseFunction: parse.dIStsPollIngCameraEvent},
     //{api: 'ss', method: 'enumAlert', params: {camIdList: '2', typeList: '0,1,2,3,4,5,6,7', lock: '0' }, ParseFunction: parse.dIStsPollIngCameraEvent},
     //{api: 'ss', method: 'listLogs', params: {cameraIds: "2"}, ParseFunction: parse.dIStsPollIngCameraEvent}, //События
 }
@@ -1046,11 +1045,10 @@ function queuePolling(){
 }
 
 function sendPolling(namePolling){
-    let poll = null;
-    poll = PollCmd[namePolling][iteration];
+    const poll = PollCmd[namePolling][iteration];
     debug('-----------------------------------------------------------------------------------------------------');
     if (poll !== undefined){
-        debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | poll = ' + typeof poll);
+        debug('* sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | poll = ' + JSON.stringify(poll));
         if (typeof poll === 'function'){
             eval(poll());
             iterator(namePolling);
@@ -1319,13 +1317,13 @@ function setInfoConnection(val){
     });
 }
 
-/*function rePollAfterCmd(){
+function rePollAfterCmd(){
     timeOutPoll && clearTimeout(timeOutPoll);
     setInfoConnection(false);
     connect = false;
     endTime = new Date().getTime();
     queuePolling();
-}*/
+}
 
 function isInstalled(fullname){
     for (let api in states.api) {

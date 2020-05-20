@@ -1048,9 +1048,9 @@ function sendPolling(namePolling){
     const poll = PollCmd[namePolling][iteration];
     debug('-----------------------------------------------------------------------------------------------------');
     if (poll !== undefined){
-        debug('* sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | poll = ' + JSON.stringify(poll));
+        debug('* sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | typeof poll = ' + typeof poll + ' | poll = ' + JSON.stringify(poll));
         if (typeof poll === 'function'){
-            eval(poll());
+            poll();
             iterator(namePolling);
         } else if (states.api[poll.api].installed){
             const api = poll.api;
@@ -1064,7 +1064,7 @@ function sendPolling(namePolling){
                         if (!connect) setInfoConnection(true);
                         connect = true;
                         if (typeof poll.ParseFunction === "function"){
-                            eval(poll.ParseFunction(res, api));
+                            poll.ParseFunction(res, api);
                         } else {
                             error('ParseFunction', 'syno[' + api + '][' + method + '] Error - Not Function!');
                         }

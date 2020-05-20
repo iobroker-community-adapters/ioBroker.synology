@@ -1101,7 +1101,7 @@ function sendPolling(namePolling){
             error('sendPolling catch - syno[' + api + '][' + method + ']', e);
         }
     } else if(poll){
-        debug(`Poll undefined`);
+        debug(`* Poll undefined`);
         iterator(namePolling);
     } else {
         debug(`* Packet ${poll.api.toUpperCase()} non installed, skipped`);

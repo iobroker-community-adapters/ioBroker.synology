@@ -4,16 +4,16 @@
     "version": "0.1.16",
     "news": {
       "0.1.16": {
-        "en": "",
-        "de": "",
-        "ru": "",
-        "pt": "",
-        "nl": "",
-        "fr": "",
-        "it": "",
-        "es": "",
-        "pl": "",
-        "zh-cn": ""
+        "en": "fixed error",
+        "de": "fixed error",
+        "ru": "fixed error",
+        "pt": "fixed error",
+        "nl": "fixed error",
+        "fr": "fixed error",
+        "it": "fixed error",
+        "es": "fixed error",
+        "pl": "fixed error",
+        "zh-cn": "fixed error"
       },
       "0.1.15": {
         "en": "fixed error in parse Info\nfixed api undefined",

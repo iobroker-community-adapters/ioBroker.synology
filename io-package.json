@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.15",
+    "version": "0.1.16",
     "news": {
+      "0.1.16": {
+        "en": "",
+        "de": "",
+        "ru": "",
+        "pt": "",
+        "nl": "",
+        "fr": "",
+        "it": "",
+        "es": "",
+        "pl": "",
+        "zh-cn": ""
+      },
       "0.1.15": {
         "en": "fixed error in parse Info\nfixed api undefined",
         "de": "fixed error in parse Info\nfixed api undefined",

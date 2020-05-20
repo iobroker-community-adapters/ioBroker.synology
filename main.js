@@ -73,12 +73,12 @@ function startAdapter(options){
                 if (command === 'reboot'){
                     send('dsm', 'rebootSystem', (res) => {
                         debug('System reboot');
-                        rePollAfterCmd();
+                        //rePollAfterCmd();
                     });
                 } else if (command === 'shutdown'){
                     send('dsm', 'shutdownSystem', (res) => {
                         debug('System shutdown');
-                        rePollAfterCmd();
+                        //rePollAfterCmd();
                     });
                 } else if (command === 'Browser'){  /*  /AS  */
                     if (name in states.AudioStation.players){
@@ -1046,57 +1046,60 @@ function queuePolling(){
 }
 
 function sendPolling(namePolling){
-    const poll = PollCmd[namePolling][iteration];
+    let poll = null;
+    poll = PollCmd[namePolling][iteration];
     debug('-----------------------------------------------------------------------------------------------------');
-    debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | poll = ' + typeof poll);
-    if (typeof poll === 'function'){
-        eval(poll());
-        iterator(namePolling);
-    } else if (poll && states.api[poll.api].installed){
-        const api = poll.api;
-        const method = poll.method;
-        const params = poll.params;
-        debug(`* Get info from (${namePolling}) api: ${api.toUpperCase()} method: ${method} params: ${JSON.stringify(params)}`);
-        try {
-            syno[api][method](params, (err, res) => {
-                debug(!err && res ? '* The response is received, parse:' :'* No response, read next.');
-                if (!err && res){
-                    if (!connect) setInfoConnection(true);
-                    connect = true;
-                    if (typeof poll.ParseFunction === "function"){
-                        eval(poll.ParseFunction(res, api));
+    if (poll !== undefined){
+        debug('sendPolling. namePolling = ' + namePolling + ' | iteration = ' + iteration + ' | poll = ' + typeof poll);
+        if (typeof poll === 'function'){
+            eval(poll());
+            iterator(namePolling);
+        } else if (states.api[poll.api].installed){
+            const api = poll.api;
+            const method = poll.method;
+            const params = poll.params;
+            debug(`* Get info from (${namePolling}) api: ${api.toUpperCase()} method: ${method} params: ${JSON.stringify(params)}`);
+            try {
+                syno[api][method](params, (err, res) => {
+                    debug(!err && res ? '* The response is received, parse:' :'* No response, read next.');
+                    if (!err && res){
+                        if (!connect) setInfoConnection(true);
+                        connect = true;
+                        if (typeof poll.ParseFunction === "function"){
+                            eval(poll.ParseFunction(res, api));
+                        } else {
+                            error('ParseFunction', 'syno[' + api + '][' + method + '] Error - Not Function!');
+                        }
+                    } else if (err){
+                        if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
+                            adapter.log.warn('sendPolling Error -' + err + ' You are using a hacked version of SS?');
+                        } else if (~err.toString().indexOf('No such account or incorrect password')){
+                            error('sendPolling syno[' + api + '][' + method + '] To use the adapter, the user must be in the Administrators group!', err);
+                        } else {
+                            error('*sendPolling syno[' + api + '][' + method + ']', err);
+                        }
+                        if (method === 'getPollingData' || method === 'listPackages'){
+                            iteration = -1;
+                        }
+                    }
+                    if (adapter.config['2fa_checkbox'] && firstStart){
+                        timeOut && clearTimeout(timeOut);
+                        timeOut = setTimeout(() => {
+                            iterator(namePolling);
+                        }, 30000);
                     } else {
-                        error('ParseFunction', 'syno[' + api + '][' + method + '] Error - Not Function!');
-                    }
-                } else if (err){
-                    if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
-                        adapter.log.warn('sendPolling Error -' + err + ' You are using a hacked version of SS?');
-                    } else if (~err.toString().indexOf('No such account or incorrect password')){
-                        error('sendPolling syno[' + api + '][' + method + '] To use the adapter, the user must be in the Administrators group!', err);
-                    } else {
-                        error('*sendPolling syno[' + api + '][' + method + ']', err);
-                    }
-                    if (method === 'getPollingData' || method === 'listPackages'){
-                        iteration = -1;
-                    }
-                }
-                if (adapter.config['2fa_checkbox'] && firstStart){
-                    timeOut && clearTimeout(timeOut);
-                    timeOut = setTimeout(() => {
                         iterator(namePolling);
-                    }, 30000);
-                } else {
-                    iterator(namePolling);
-                }
-            });
-        } catch (e) {
-            error('sendPolling catch - syno[' + api + '][' + method + ']', e);
+                    }
+                });
+            } catch (e) {
+                error('sendPolling catch - syno[' + api + '][' + method + ']', e);
+            }
+        } else {
+            debug(`* Packet ${poll.api.toUpperCase()} non installed, skipped`);
+            iterator(namePolling);
         }
-    } else if (poll){
-        debug(`* Poll undefined`);
-        iterator(namePolling);
     } else {
-        debug(`* Packet ${poll.api.toUpperCase()} non installed, skipped`);
+        debug('* Poll undefined > ' + JSON.stringify(poll));
         iterator(namePolling);
     }
 }
@@ -1240,10 +1243,10 @@ function error(src, e, cb){
     adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutRecconect && clearTimeout(timeOutRecconect);
+        timeOutPoll && clearTimeout(timeOutPoll);
         setInfoConnection(false);
         connect = false;
         timeOutRecconect = setTimeout(() => {
-            //queuePolling();
             newSyno();
         }, 10000);
     } else {
@@ -1258,7 +1261,7 @@ function main(){
     old_states = JSON.parse(JSON.stringify(states));
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
-    if(pollTime > slowPollingTime){
+    if (pollTime > slowPollingTime){
         adapter.log.warn('pollTime > slowPollingTime! It is necessary to fix the polling time in the settings');
     }
     if (parseInt(adapter.config.version, 10) < 6){
@@ -1283,7 +1286,6 @@ function main(){
 }
 
 function newSyno(){
-    timeOutPoll && clearTimeout(timeOutPoll);
     startTime = new Date().getTime();
     endTime = new Date().getTime();
     try {
@@ -1317,13 +1319,13 @@ function setInfoConnection(val){
     });
 }
 
-function rePollAfterCmd(){
+/*function rePollAfterCmd(){
     timeOutPoll && clearTimeout(timeOutPoll);
     setInfoConnection(false);
     connect = false;
     endTime = new Date().getTime();
     queuePolling();
-}
+}*/
 
 function isInstalled(fullname){
     for (let api in states.api) {

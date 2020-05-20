@@ -64,6 +64,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 
+### 0.1.16
+* (instalator)
+
 ### 0.1.15
 * (instalator) fixed error in parse Info
 * (instalator) fixed api undefined

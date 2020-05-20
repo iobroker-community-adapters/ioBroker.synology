@@ -1047,12 +1047,9 @@ function queuePolling(){
         startTime = new Date().getTime();
         namePolling = 'slowPoll';
     } else {
-        if (firstStart){
-            namePolling = 'firstPoll';
-        } else {
-            namePolling = 'fastPoll';
-        }
+        namePolling = 'fastPoll';
     }
+    if (firstStart) namePolling = 'firstPoll';
     sendPolling(namePolling);
 }
 
@@ -1063,7 +1060,7 @@ function sendPolling(namePolling){
     if (typeof poll === 'function'){
         eval(poll());
         iterator(namePolling);
-    } else if (poll.api && states.api[poll.api].installed){
+    } else if (poll && states.api[poll.api].installed){
         const api = poll.api;
         const method = poll.method;
         const params = poll.params;
@@ -1103,6 +1100,9 @@ function sendPolling(namePolling){
         } catch (e) {
             error('sendPolling catch - syno[' + api + '][' + method + ']', e);
         }
+    } else if(poll){
+        debug(`Poll undefined`);
+        iterator(namePolling);
     } else {
         debug(`* Packet ${poll.api.toUpperCase()} non installed, skipped`);
         iterator(namePolling);

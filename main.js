@@ -896,34 +896,30 @@ function CreateSharings(res){
 
 function parseInfoSystem(res){
     debug('InfoSystem - Response: ' + JSON.stringify(res));
-    try {
-        if (res && res.hdd_info){
-            res.hdd_info.forEach((key) => {
-                const diskname = key.diskno.toLowerCase().replace(' ', '_');
-                states.DiskStationManager.hdd_info[diskname] = {
-                    'diskno':          key.diskno,
-                    'model':           key.model.replace(/\s{2,}/g, ''),
-                    'overview_status': key.status,
-                    'ebox_order':      key.ebox_order,
-                    'temperature':     key.temp,
-                    'storage_pool':    key.volume,
-                    'capacity':        (key.capacity / 1073741824).toFixed(2, 10)
-                };
-            });
-            res.vol_info.forEach((key) => {
-                const volname = key.name.toLowerCase();
-                states.DiskStationManager.vol_info[volname] = {
-                    'name':       key.name,
-                    'status':     key.status,
-                    'total_size': (key.total_size / 1073741824).toFixed(2, 10),
-                    'used_size':  (key.used_size / 1073741824).toFixed(2, 10),
-                    'used':       ((key.used_size / key.total_size) * 100).toFixed(2, 10),
-                    'desc':       key.desc
-                };
-            });
-        }
-    } catch (e) {
-
+    if (res && res.hdd_info){
+        res.hdd_info.forEach((key) => {
+            const diskname = key.diskno.toLowerCase().replace(' ', '_');
+            states.DiskStationManager.hdd_info[diskname] = {
+                'diskno':          key.diskno,
+                'model':           key.model.replace(/\s{2,}/g, ''),
+                'overview_status': key.status,
+                'ebox_order':      key.ebox_order,
+                'temperature':     key.temp,
+                'storage_pool':    key.volume,
+                'capacity':        (key.capacity / 1073741824).toFixed(2, 10)
+            };
+        });
+        res.vol_info.forEach((key) => {
+            const volname = key.name.toLowerCase();
+            states.DiskStationManager.vol_info[volname] = {
+                'name':       key.name,
+                'status':     key.status,
+                'total_size': (key.total_size / 1073741824).toFixed(2, 10),
+                'used_size':  (key.used_size / 1073741824).toFixed(2, 10),
+                'used':       ((key.used_size / key.total_size) * 100).toFixed(2, 10),
+                'desc':       key.desc
+            };
+        });
     }
 }
 
@@ -954,21 +950,17 @@ function parseInstallingPackets(res){
     }
 }
 
-function parseInfo(res){
+function parseInfo(res, api){
     debug('Info - Response: ' + JSON.stringify(res));
-    try {
-        if (states.api[api].installed){
-            const apiName = states.api[api].name;
-            if (apiName !== 'SurveillanceStation'){
-                Object.keys(res).forEach((key) => {
-                    states[apiName].info[key] = res[key];
-                });
-            } else {
-                parseSSInfo(res);
-            }
+    if (states.api[api].installed){
+        const apiName = states.api[api].name;
+        if (apiName !== 'SurveillanceStation'){
+            Object.keys(res).forEach((key) => {
+                states[apiName].info[key] = res[key];
+            });
+        } else {
+            parseSSInfo(res);
         }
-    } catch (e) {
-
     }
 }
 
@@ -982,7 +974,7 @@ function parseTempInfo(res){
 function parseSystemUtilization(res){
     debug('SystemUtilization - Response: ' + JSON.stringify(res));
     if (res && res.cpu){
-        states.DiskStationManager.info['cpu_load'] = /*parseInt(res.cpu.other_load) + parseInt(res.cpu.system_load) + */parseInt(res.cpu.user_load);
+        states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.user_load);
         states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
         states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
     }
@@ -1072,7 +1064,7 @@ function sendPolling(namePolling){
                     if (!connect) setInfoConnection(true);
                     connect = true;
                     if (typeof poll.ParseFunction === "function"){
-                        eval(poll.ParseFunction(res));
+                        eval(poll.ParseFunction(res, api));
                     } else {
                         error('ParseFunction', 'syno[' + api + '][' + method + '] Error - Not Function!');
                     }
@@ -1100,7 +1092,7 @@ function sendPolling(namePolling){
         } catch (e) {
             error('sendPolling catch - syno[' + api + '][' + method + ']', e);
         }
-    } else if(poll){
+    } else if (poll){
         debug(`* Poll undefined`);
         iterator(namePolling);
     } else {
@@ -1266,6 +1258,9 @@ function main(){
     old_states = JSON.parse(JSON.stringify(states));
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
+    if(pollTime > slowPollingTime){
+        adapter.log.warn('pollTime > slowPollingTime! It is necessary to fix the polling time in the settings');
+    }
     if (parseInt(adapter.config.version, 10) < 6){
         PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parseInstallingPackets};
     }

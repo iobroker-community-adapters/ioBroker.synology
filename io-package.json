@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "news": {
+      "0.1.15": {
+        "en": "fixed error in parse Info\nfixed api undefined",
+        "de": "fixed error in parse Info\nfixed api undefined",
+        "ru": "fixed error in parse Info\nfixed api undefined",
+        "pt": "fixed error in parse Info\nfixed api undefined",
+        "nl": "fixed error in parse Info\nfixed api undefined",
+        "fr": "fixed error in parse Info\nfixed api undefined",
+        "it": "fixed error in parse Info\nfixed api undefined",
+        "es": "fixed error in parse Info\nfixed api undefined",
+        "pl": "fixed error in parse Info\nfixed api undefined",
+        "zh-cn": "fixed error in parse Info\nfixed api undefined"
+      },
       "0.1.12": {
         "en": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
         "de": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",

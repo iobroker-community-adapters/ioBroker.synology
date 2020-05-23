@@ -6,5 +6,6 @@ devfile
 .git
 /node_modules
 test
+iob_npm.done
 .travis.yml
- appveyor.yml
+appveyor.yml

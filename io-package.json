@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "news": {
+      "0.1.17": {
+        "en": "added Sentry plugin support",
+        "de": "Unterstützung für Sentry-Plugins hinzugefügt",
+        "ru": "добавлена поддержка плагинов Sentry",
+        "pt": "adicionado suporte ao plugin Sentry",
+        "nl": "ondersteuning voor Sentry-plug-ins toegevoegd",
+        "fr": "ajout du support du plugin Sentry",
+        "it": "aggiunto il supporto del plugin Sentry",
+        "es": "Se agregó soporte para el complemento Sentry",
+        "pl": "dodano obsługę wtyczek Sentry",
+        "zh-cn": "添加了Sentry插件支持"
+      },
       "0.1.16": {
         "en": "fixed error",
         "de": "fixed error",
@@ -79,6 +91,11 @@
     "materialize": true,
     "type": "infrastructure",
     "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
+    "plugins": {
+      "sentry": {
+        "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
+      }
+    },
     "keywords": [
       "synology NAS control"
     ],

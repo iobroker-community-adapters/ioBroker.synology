@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.17",
+    "version": "0.1.18",
     "news": {
+      "0.1.18": {
+        "en": "change link for album cover",
+        "de": "change link for album cover",
+        "ru": "change link for album cover",
+        "pt": "change link for album cover",
+        "nl": "change link for album cover",
+        "fr": "change link for album cover",
+        "it": "change link for album cover",
+        "es": "change link for album cover",
+        "pl": "change link for album cover",
+        "zh-cn": "change link for album cover"
+      },
       "0.1.17": {
         "en": "added Sentry plugin support",
         "de": "Unterstützung für Sentry-Plugins hinzugefügt",
@@ -26,42 +38,6 @@
         "es": "fixed error",
         "pl": "fixed error",
         "zh-cn": "fixed error"
-      },
-      "0.1.15": {
-        "en": "fixed error in parse Info\nfixed api undefined",
-        "de": "fixed error in parse Info\nfixed api undefined",
-        "ru": "fixed error in parse Info\nfixed api undefined",
-        "pt": "fixed error in parse Info\nfixed api undefined",
-        "nl": "fixed error in parse Info\nfixed api undefined",
-        "fr": "fixed error in parse Info\nfixed api undefined",
-        "it": "fixed error in parse Info\nfixed api undefined",
-        "es": "fixed error in parse Info\nfixed api undefined",
-        "pl": "fixed error in parse Info\nfixed api undefined",
-        "zh-cn": "fixed error in parse Info\nfixed api undefined"
-      },
-      "0.1.12": {
-        "en": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "de": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "ru": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "pt": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "nl": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "fr": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "it": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "es": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "pl": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package",
-        "zh-cn": "fixed missing datapoints\nrefactoring\nChanged the logging of some errors\nChanged format session in syno package"
-      },
-      "0.1.11": {
-        "en": "added motionDetected state\nAdding to FS Sharing",
-        "de": "added motionDetected state\nAdding to FS Sharing",
-        "ru": "added motionDetected state\nAdding to FS Sharing",
-        "pt": "added motionDetected state\nAdding to FS Sharing",
-        "nl": "added motionDetected state\nAdding to FS Sharing",
-        "fr": "added motionDetected state\nAdding to FS Sharing",
-        "it": "added motionDetected state\nAdding to FS Sharing",
-        "es": "added motionDetected state\nAdding to FS Sharing",
-        "pl": "added motionDetected state\nAdding to FS Sharing",
-        "zh-cn": "added motionDetected state\nAdding to FS Sharing"
       }
     },
     "title": "Synology NAS",
@@ -118,6 +94,15 @@
   },
   "objects": [],
   "instanceObjects": [
+    {
+      "_id": "",
+      "type": "meta",
+      "common": {
+        "name": "Synology",
+        "type": "meta.user"
+      },
+      "native": {}
+    },
     {
       "_id": "info.connection",
       "type": "state",

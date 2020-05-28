@@ -4,7 +4,7 @@ let Syno = require('syno');
 const fs = require('fs');
 const moment = require('moment');
 let adapter, syno, timeOutPoll, timeOutRecconect, pollTime, connect = false, iteration = 0, queueCmd = null, startTime, endTime,
-    firstStart = true, slowPollingTime, dir, old_states, timeOut;
+    firstStart = true, slowPollingTime, dir, old_states, timeOut, pathInstance;
 const stateSS = {
     recStatus:  {
         0: 'None recording schedule',
@@ -166,7 +166,7 @@ const objects = {
     artist:           {role: "media.artist", name: "Artist", type: "string", read: true, write: false},
     album:            {role: "media.album", name: "Album", type: "string", read: true, write: false},
     title:            {role: "media.title", name: "Title", type: "string", read: true, write: false},
-    cover:            {role: "media.cover", name: "Media cover", type: "string", read: true, write: false},
+    cover:            {role: "media.cover", name: "Media cover (eg. http://{ip}:8082/{state})", type: "string", read: true, write: false},
     genre:            {role: "media.genre", name: "Genre", type: "string", read: true, write: false},
     year:             {role: "media.date", name: "Year", type: "number", read: true, write: false},
     path:             {role: "media", name: "Path track", type: "string", read: true, write: false},
@@ -551,10 +551,10 @@ function getSongCover(playerid, cb){
         send('as', 'getSongCover', {id: track}, (res) => {
             if (res && !res.message){
                 let buf = Buffer.from(res, 'binary');
-                fs.writeFileSync(dir + 'cover.jpg', buf);
-                states.AudioStation.players[playerid].cover = dir + 'cover.jpg';
+                adapter.writeFile(adapter.namespace, 'cover.jpg', buf);
+                states.AudioStation.players[playerid].cover = '../' + adapter.namespace + '/cover.jpg';
             } else {
-                states.AudioStation.players[playerid].cover = dir + 'cover.png';
+                states.AudioStation.players[playerid].cover = '../' + adapter.namespace + '/cover.png';
             }
             cb && cb();
         });
@@ -986,12 +986,12 @@ function parseSystemStatus(res){
 
 function parseTest(res){
     debug('test - Response: ' + JSON.stringify(res));
-    
+
     //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents}, // Рабочий вариант
     //{api: 'fs', method: 'listSharings', params: {offset: 0}, ParseFunction: parse.test},
     //{api: 'ss', method: 'getInfoCamera', params: {optimize: true, streamInfo: true, ptz: true, deviceOutCap: true, fisheye: true, basic: true, cameraIds: '2', eventDetection: true, privCamType: 1, camAppInfo: true, version: 8}, ParseFunction: parse.test},
     //{api: 'ss', method: 'OneTimeCameraStatus', params: {id_list: "2"}, ParseFunction: parse.test},
-    
+
     //{api: 'ss', method: 'getInfoCamera', params: {basic: true, cameraIds: '2', eventDetection: true, privCamType: 3, camAppInfo: true, version: 8}, ParseFunction: parse.dIStsPollIngCameraEvent},
     //{api: 'ss', method: 'motionEnumCameraEvent', params: {camId: 2}, ParseFunction: parse.dIStsPollIngCameraEvent},
     //{api: 'ss', method: 'enumAlert', params: {camIdList: '2', typeList: '0,1,2,3,4,5,6,7', lock: '0' }, ParseFunction: parse.dIStsPollIngCameraEvent},
@@ -1277,9 +1277,10 @@ function main(){
         });
         PollCmd.slowPoll = result;
     }
+    pathInstance = adapter.namespace.replace('.', '_') + '/';
     dir = utils.controllerDir + '/' + adapter.systemConfig.dataDir + adapter.namespace.replace('.', '_') + '/';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    fs.copyFileSync(__dirname + '/admin/cover.png', dir + 'cover.png');
+    adapter.writeFile(adapter.namespace, 'cover.png', fs.readFileSync(__dirname + '/admin/cover.png'));
     newSyno();
 }
 

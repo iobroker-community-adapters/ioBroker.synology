@@ -1238,7 +1238,9 @@ function error(src, e, cb){
     } else {
         message = e.message;
     }
-    adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
+    if(!~src.indexOf('getSongCover')){
+        adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
+    }
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutRecconect && clearTimeout(timeOutRecconect);
         timeOutPoll && clearTimeout(timeOutPoll);

@@ -904,6 +904,7 @@ function parseInfoSystem(res){
                 'capacity':        (key.capacity / 1073741824).toFixed(2, 10)
             };
         });
+        if(res.vol_info){
         res.vol_info.forEach((key) => {
             const volname = key.name.toLowerCase();
             states.DiskStationManager.vol_info[volname] = {
@@ -915,6 +916,7 @@ function parseInfoSystem(res){
                 'desc':       key.desc
             };
         });
+    }
     }
 }
 

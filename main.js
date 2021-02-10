@@ -594,20 +594,22 @@ function Browser(playerid, val){
     }
     send('as', 'listFolders', param, (res) => {
         let arr = {files: []};
-        res.items.forEach((k, i) => {
-            let filetype = 'file';
-            if (res.items[i].type === 'folder'){
-                filetype = 'directory';
-            }
-            arr.files.push({
-                "id":       res.items[i].id,
-                "file":     res.items[i].path,
-                "filetype": filetype,
-                "title":    res.items[i].title
+        if(res && res.items){
+            res.items.forEach((k, i) => {
+                let filetype = 'file';
+                if (res.items[i].type === 'folder'){
+                    filetype = 'directory';
+                }
+                arr.files.push({
+                    "id":       res.items[i].id,
+                    "file":     res.items[i].path,
+                    "filetype": filetype,
+                    "title":    res.items[i].title
+                });
             });
-        });
-        states.AudioStation.players[playerid].Browser = JSON.stringify(arr);
-        old_states.AudioStation.players[playerid].Browser = '';
+            states.AudioStation.players[playerid].Browser = JSON.stringify(arr);
+            old_states.AudioStation.players[playerid].Browser = '';
+        }
     });
 }
 
@@ -730,7 +732,7 @@ function parseRemotePlayerStatus(playerid, res){
     try {
         if (res && res.index !== undefined){
             let seek = parseFloat((res.position / res.song.additional.song_audio.duration) * 100).toFixed(4);
-            states.AudioStation.players[playerid].current_play = res.index;
+            states.AudioStation.players[playerid].current_play = parseInt(res.index, 10);
             states.AudioStation.players[playerid].playlist_total = res.playlist_total;
             states.AudioStation.players[playerid].volume = res.volume;
             states.AudioStation.players[playerid].subplayer_volume = res.subplayer_volume;
@@ -1129,7 +1131,7 @@ function send(api, method, params, cb){
     }
     try {
         syno[api][method](params, (err, data) => {
-            debug('Send [' + api.toUpperCase() + '] [' + method + '] Error: [' + (err || 'no error') + '] Response: [' + typeof data + ']');
+            debug('Send [' + api.toUpperCase() + '] [' + method + '] Error: [' + (err || 'no error') + '] Response: [' + JSON.stringify(data)/*typeof data*/ + ']');
             data = data || '';
             if (!err){
                 cb && cb(data);
@@ -1241,13 +1243,14 @@ function error(src, e, cb){
         message = e.message;
     }
     if(!~src.indexOf('getSongCover')){
-        adapter.log.error('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
+        adapter.log.debug('*** ERROR : src: ' + (src || 'unknown') + ' code: ' + code + ' message: ' + message);
     }
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
         timeOutRecconect && clearTimeout(timeOutRecconect);
         timeOutPoll && clearTimeout(timeOutPoll);
         setInfoConnection(false);
         connect = false;
+        adapter.log.debug('Error: Reconnection after 10s');
         timeOutRecconect = setTimeout(() => {
             newSyno();
         }, 10000);
@@ -1291,6 +1294,8 @@ function main(){
 function newSyno(){
     startTime = new Date().getTime();
     endTime = new Date().getTime();
+    adapter.log.info('Connecting to Synology ' + adapter.config.host + ':' + adapter.config.port);
+    syno = null;
     try {
         syno = new Syno({
             ignoreCertificateErrors: true, /*rejectUnauthorized: false,*/

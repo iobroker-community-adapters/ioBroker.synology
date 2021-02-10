@@ -77,6 +77,29 @@
             });
         });
     </script>
+    <style>
+        .adapter-body {
+            display: block;
+            position: relative;
+        }
+        .m .input-field>label {
+            color: #5a5a5a;
+        }
+        .adapter-body::after {
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            content: "";
+            background: url(background.jpg);
+            background-position: right;
+            background-repeat: no-repeat;
+            background-size: cover;
+            opacity: 0.3;
+            position: absolute;
+            z-index: -1;
+        }
+    </style>
 </head>
 <body>
 <div class="m adapter-container">

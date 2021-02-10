@@ -65,6 +65,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 
+### 0.1.19
+* (instalator) fixed error
+
 ### 0.1.18
 * (instalator) change link for album cover
 

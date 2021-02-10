@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.18",
+    "version": "0.1.19",
     "news": {
+      "0.1.19": {
+        "en": "fixed error",
+        "de": "fixed error",
+        "ru": "fixed error",
+        "pt": "fixed error",
+        "nl": "fixed error",
+        "fr": "fixed error",
+        "it": "fixed error",
+        "es": "fixed error",
+        "pl": "fixed error",
+        "zh-cn": "fixed error"
+      },
       "0.1.18": {
         "en": "change link for album cover",
         "de": "change link for album cover",
@@ -26,18 +38,6 @@
         "es": "Se agregó soporte para el complemento Sentry",
         "pl": "dodano obsługę wtyczek Sentry",
         "zh-cn": "添加了Sentry插件支持"
-      },
-      "0.1.16": {
-        "en": "fixed error",
-        "de": "fixed error",
-        "ru": "fixed error",
-        "pt": "fixed error",
-        "nl": "fixed error",
-        "fr": "fixed error",
-        "it": "fixed error",
-        "es": "fixed error",
-        "pl": "fixed error",
-        "zh-cn": "fixed error"
       }
     },
     "title": "Synology NAS",

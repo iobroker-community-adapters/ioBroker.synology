@@ -26,18 +26,6 @@
         "es": "change link for album cover",
         "pl": "change link for album cover",
         "zh-cn": "change link for album cover"
-      },
-      "0.1.17": {
-        "en": "added Sentry plugin support",
-        "de": "Unterstützung für Sentry-Plugins hinzugefügt",
-        "ru": "добавлена поддержка плагинов Sentry",
-        "pt": "adicionado suporte ao plugin Sentry",
-        "nl": "ondersteuning voor Sentry-plug-ins toegevoegd",
-        "fr": "ajout du support du plugin Sentry",
-        "it": "aggiunto il supporto del plugin Sentry",
-        "es": "Se agregó soporte para el complemento Sentry",
-        "pl": "dodano obsługę wtyczek Sentry",
-        "zh-cn": "添加了Sentry插件支持"
       }
     },
     "title": "Synology NAS",

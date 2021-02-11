@@ -77,10 +77,20 @@
             });
         });
     </script>
+    <script>
+        $(function(){
+            $(".adapter-body").append("" +
+                "<div class=\"m row\" style='display:block;position:absolute;bottom:130px;right:0;'>" +
+                "<div class=\"col right\">" +
+                "<div class=\"col\" style=\"margin-top:10px;float:right;margin-right:20px;\">" +
+                "<a target=\"_blank\" href=\"https://sobe.ru/na/instalator\"><img style=\"float:right;\" src=\"https://img.shields.io/badge/Donate-YooMoney-green\" alt=\"\"></a>" +
+                "<a target=\"_blank\" href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PFUALWTR2CTPY\"><img style=\"float:right;padding-right:10px;\" src=\"https://img.shields.io/badge/Donate-PayPal-green.svg\" alt=\"\"></a>"+
+                "</div></div></div>");
+        });
+    </script>
     <style>
         .adapter-body {
             display: block;
-            /*position: relative;*/
         }
         .m .input-field>label {
             color: #5a5a5a;
@@ -203,18 +213,6 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col right">
-            <div class="col">
-                <p class="translate">donate</p>
-            </div>
-            <div class="col" style="margin-top: 10px;">
-                <a target="_blank" href="https://sobe.ru/na/instalator"><img src="https://img.shields.io/badge/Donate-YooMoney-green" alt=""></a>
-            </div>
-            <div class="col" style="margin-top: 10px;">
-                <a target="_blank" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PFUALWTR2CTPY"><img src="https://img.shields.io/badge/Donate-PayPal-green.svg" alt=""></a>
-            </div>
-        </div>
-    </div>
+
 </body>
 </html>

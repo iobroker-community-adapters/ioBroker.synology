@@ -196,17 +196,5 @@ systemDictionary = {
         "es":    "Si el paquete no está instalado en el NAS, aún se omitirá.",
         "pl":    "Jeśli pakiet nie zostanie zainstalowany na serwerze NAS, nadal będzie pomijany.",
         "zh-cn": "如果该程序包未安装在NAS上，仍将被跳过。"
-    },
-    "donate":                                      {
-        "en": "I am writing a code in Siberia, I drink a lot of hot tea and coffee. Thanks!",
-        "de": "Ich schreibe einen Code in Sibirien, ich trinke viel heißen Tee und Kaffee. Vielen Dank!",
-        "ru": "Пишу код в Сибири, пью много горячего чая и кофе. Спасибо!",
-        "pt": "Estou escrevendo um código na Sibéria, bebo muito chá quente e café. Obrigado!",
-        "nl": "Ik schrijf een code in Siberië, ik drink veel hete thee en koffie. Bedankt!",
-        "fr": "J'écris un code en Sibérie, je bois beaucoup de thé et de café chauds. Merci!",
-        "it": "Sto scrivendo un codice in Siberia, bevo molto tè e caffè caldi. Grazie!",
-        "es": "Estoy escribiendo un código en Siberia, bebo mucho té y café calientes. ¡Gracias!",
-        "pl": "Piszę kod na Syberii, piję dużo gorącej herbaty i kawy. Dzięki!",
-        "zh-cn": "我在西伯利亚写代码，我喝很多热茶和咖啡。谢谢！"
     }
 };

@@ -65,7 +65,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 
-### 0.1.19
+### 0.1.20
 * (instalator) fixed error
 
 ### 0.1.18

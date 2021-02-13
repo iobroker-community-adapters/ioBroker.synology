@@ -968,6 +968,7 @@ function parseTempInfo(res){
     states.DiskStationManager.info.temperature = res.temperature;
     states.DiskStationManager.info.temperature_warn = res.temperature_warn;
     states.DiskStationManager.info.time = res.time;
+    states.DiskStationManager.info.uptime = res.uptime;
 }
 
 function parseSystemUtilization(res){

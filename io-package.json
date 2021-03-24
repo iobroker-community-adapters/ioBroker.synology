@@ -28,7 +28,18 @@
         "zh-cn": "change link for album cover"
       }
     },
-    "title": "Synology NAS",
+    "titleLang": {
+      "en": "Synology NAS",
+      "de": "Synology NAS",
+      "ru": "Synology NAS",
+      "pt": "Synology NAS",
+      "nl": "Synology NAS",
+      "fr": "Synology NAS",
+      "it": "Synology NAS",
+      "es": "Synology NAS",
+      "pl": "Synology NAS",
+      "zh-cn": "Synology NAS"
+    },
     "desc": {
       "en": "Get status and control your NAS Synology",
       "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",

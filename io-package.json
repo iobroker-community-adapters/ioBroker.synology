@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.20",
+    "version": "1.0.0",
     "news": {
       "0.1.20": {
         "en": "fixed error",
@@ -63,7 +63,17 @@
     "keywords": [
       "synology NAS control"
     ],
-    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md"
+    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
+    "dependencies": [
+      {
+        "js-controller": ">=3.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=4.0.9"
+      }
+    ]
   },
   "native": {
     "host": "localhost",
@@ -80,6 +90,12 @@
     "as": true,
     "dl": true
   },
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
   "objects": [],
   "instanceObjects": [
     {

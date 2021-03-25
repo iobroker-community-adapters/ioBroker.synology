@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "0.1.20",
+    "version": "1.0.0",
     "news": {
+      "1.0.0": {
+        "en": "IMPORTANT: Please re-enter the password after updating to 1.0.0!",
+        "de": "WICHTIG: Bitte geben Sie das Passwort nach dem Update auf 1.0.0 erneut ein!",
+        "ru": "ВАЖНО: Пожалуйста, повторно введите пароль после обновления до 1.0.0!",
+        "pt": "IMPORTANTE: Por favor, digite a senha novamente após atualizar para 1.0.0!",
+        "nl": "BELANGRIJK: Voer het wachtwoord opnieuw in na het updaten naar 1.0.0!",
+        "fr": "IMPORTANT: veuillez ressaisir le mot de passe après la mise à jour vers la version 1.0.0!",
+        "it": "IMPORTANTE: reinserire la password dopo l'aggiornamento alla 1.0.0!",
+        "es": "IMPORTANTE: ¡Vuelva a ingresar la contraseña después de actualizar a 1.0.0!",
+        "pl": "WAŻNE: wprowadź ponownie hasło po aktualizacji do wersji 1.0.0!",
+        "zh-cn": "重要信息：更新至1.0.0后，请重新输入密码！"
+      },
       "0.1.20": {
         "en": "fixed error",
         "de": "fixed error",
@@ -28,7 +40,18 @@
         "zh-cn": "change link for album cover"
       }
     },
-    "title": "Synology NAS",
+    "titleLang": {
+      "en": "Synology NAS",
+      "de": "Synology NAS",
+      "ru": "Synology NAS",
+      "pt": "Synology NAS",
+      "nl": "Synology NAS",
+      "fr": "Synology NAS",
+      "it": "Synology NAS",
+      "es": "Synology NAS",
+      "pl": "Synology NAS",
+      "zh-cn": "Synology NAS"
+    },
     "desc": {
       "en": "Get status and control your NAS Synology",
       "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
@@ -63,7 +86,17 @@
     "keywords": [
       "synology NAS control"
     ],
-    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md"
+    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
+    "dependencies": [
+      {
+        "js-controller": ">=3.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=4.0.9"
+      }
+    ]
   },
   "native": {
     "host": "localhost",
@@ -80,6 +113,12 @@
     "as": true,
     "dl": true
   },
+  "encryptedNative": [
+    "password"
+  ],
+  "protectedNative": [
+    "password"
+  ],
   "objects": [],
   "instanceObjects": [
     {

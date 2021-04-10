@@ -895,7 +895,7 @@ function parseInfoSystem(res){
     debug('InfoSystem - Response: ' + JSON.stringify(res));
     if (res && res.hdd_info){
         res.hdd_info.forEach((key) => {
-            const diskname = key.diskno.toLowerCase().replace(' ', '_');
+            const diskname = key.diskType.toLowerCase().replace(' ', '_') + '_' + key.diskno.toLowerCase().replace(' ', '_');
             states.DiskStationManager.hdd_info[diskname] = {
                 'diskno':          key.diskno,
                 'model':           key.model.replace(/\s{2,}/g, ''),

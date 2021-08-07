@@ -67,6 +67,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ### **WORK IN PROGRESS**
 * (MeisterTR) added release-script
 * (MeisterTR) change testing
+* (MeisterTR) change syno repo to default
 
 ### 1.0.1
 * (thost96) fix for wrong type number [issue 78](https://github.com/instalator/ioBroker.synology/issues/78)

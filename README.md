@@ -62,7 +62,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.1.0 (2021-08-07)
 * (MeisterTR) fixes for DSM7
 * (MeisterTR) added release-script
 * (MeisterTR) change testing

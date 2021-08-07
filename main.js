@@ -327,6 +327,9 @@ function parselistCameras(res){
     debug('listCameras - Response: ' + JSON.stringify(res));
     let arr = res.cameras;
     arr.forEach((k, i) => {
+
+        if(arr[i].newName) arr[i].name = arr[i].newName // DSM 7
+        
         if (arr[i].name){
             if (states.SurveillanceStation.cameras[arr[i].name] === undefined){
                 states.SurveillanceStation.cameras[arr[i].name] = {};
@@ -956,10 +959,26 @@ function parseInfo(res, api){
         if (apiName !== 'SurveillanceStation'){
             Object.keys(res).forEach((key) => {
                 states[apiName].info[key] = res[key];
+                if(apiName === 'DiskStationManager' && firstStart && key === 'version_string'){
+                    setAllInstalledForDsm7 (res[key]);
+                }
             });
         } else {
             parseSSInfo(res);
         }
+    }
+}
+function setAllInstalledForDsm7 (VersionString){
+    if(VersionString === null ) return
+    let VersionNumString = VersionString.split(' ').pop()[0]
+    info('DSM ' + VersionNumString)
+
+    if(VersionNumString === '7' || VersionNumString === 7){
+        info('DSM 7 detected, set all to true')
+        states.api['dl'].installed = true;
+        states.api['as'].installed = true;
+        states.api['vs'].installed = true;
+        states.api['ss'].installed = true;
     }
 }
 
@@ -1348,6 +1367,12 @@ function isInstalled(fullname){
 
 function debug(msg){
     adapter.log.debug(msg);
+}
+function info(msg){
+    adapter.log.info(msg);
+}
+function warn(msg){
+    adapter.log.warn(msg);
 }
 
 const unixToDate = (timestamp) => {

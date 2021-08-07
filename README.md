@@ -63,6 +63,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 ### **WORK IN PROGRESS**
+* (MeisterTR) fixes for DSM7
 * (MeisterTR) added release-script
 * (MeisterTR) change testing
 * (MeisterTR) change syno repo to default

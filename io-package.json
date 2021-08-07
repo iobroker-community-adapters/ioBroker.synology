@@ -77,7 +77,7 @@
     "compact": true,
     "materialize": true,
     "type": "infrastructure",
-    "extIcon": "https://raw.githubusercontent.com/instalator/ioBroker.synology/master/admin/synology.png",
+    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
     "plugins": {
       "sentry": {
         "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
@@ -86,7 +86,7 @@
     "keywords": [
       "synology NAS control"
     ],
-    "readme": "https://github.com/instalator/ioBroker.synology/blob/master/README.md",
+    "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
     "dependencies": [
       {
         "js-controller": ">=3.0.0"

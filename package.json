@@ -12,7 +12,7 @@
       "email": "vvvalt@mail.ru"
     }
   ],
-  "homepage": "https://github.com/instalator/ioBroker.synology",
+  "homepage": "https://github.com/iobroker-community-adapters/ioBroker.synology",
   "license": "MIT",
   "keywords": [
     "ioBroker",
@@ -21,14 +21,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/instalator/ioBroker.synology"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.synology"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.4.0",
     "moment": "^2.29.1",
-    "syno": "https://github.com/homeinstalator/syno/tarball/master/"
+    "syno": "https://github.com/iobroker-community-adapters/syno/tarball/master/"
   },
   "devDependencies": {
+    "@alcalzone/release-script": "^2.2.0",
     "@iobroker/testing": "^2.4.4",
     "@types/chai": "^4.2.15",
     "@types/chai-as-promised": "^7.1.3",
@@ -58,7 +59,7 @@
     "lint": "eslint"
   },
   "bugs": {
-    "url": "https://github.com/instalator/ioBroker.synology/issues"
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.synology/issues"
   },
   "readmeFilename": "README.md"
 }

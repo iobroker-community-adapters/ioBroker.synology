@@ -64,6 +64,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (MeisterTR) added release-script
 
 ### 1.0.1
 * (thost96) fix for wrong type number [issue 78](https://github.com/instalator/ioBroker.synology/issues/78)

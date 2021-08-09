@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "synology",
-        "version": "1.1.0",
+        "version": "1.1.1",
         "news": {
+            "1.1.1": {
+                "en": "fix type of uptime\nfix broken snapshot link",
+                "de": "Art der Betriebszeit beheben\ndefekten Snapshot-Link reparieren",
+                "ru": "исправить тип безотказной работы\nисправить неработающую ссылку на снимок",
+                "pt": "corrigir o tipo de tempo de atividade\nconsertar link de instantâneo quebrado",
+                "nl": "type uptime repareren\nkapotte snapshot-link repareren",
+                "fr": "corriger le type de disponibilité\nréparer le lien d'instantané cassé",
+                "it": "correggere il tipo di uptime\ncorreggi il collegamento dell'istantanea rotto",
+                "es": "arreglar el tipo de tiempo de actividad\narreglar enlace de instantánea roto",
+                "pl": "napraw typ uptime\nnapraw uszkodzony link do migawki",
+                "zh-cn": "修复正常运行时间类型\n修复损坏的快照链接"
+            },
             "1.1.0": {
                 "en": "fixes for DSM7\nadded release-script\nchange testing\nchange syno repo to default",
                 "de": "Korrekturen für DSM7\nRelease-Skript hinzugefügt\nÄnderungstest\nSyno-Repo auf Standard ändern",

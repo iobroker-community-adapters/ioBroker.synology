@@ -62,7 +62,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.1.1 (2021-08-09)
 * (MeisterTR) fix type of uptime
 * (MeisterTR) fix broken snapshot link
 ### 1.1.0 (2021-08-07)

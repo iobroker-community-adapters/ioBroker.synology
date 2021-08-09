@@ -204,6 +204,7 @@ const objects = {
     enabled:          {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
     favoriteRadio:    {role: "state", name: "Favorite playlist Radio", type: "string", read: true, write: false},
     motionDetected:   {role: "state", name: "Motion detected", type: "boolean", read: true, write: false},
+    uptime:           {role: "value", name: "Uptime", type: "number", read: true, write: false}
 };
 
 let PollCmd = {
@@ -271,7 +272,8 @@ function addLinkSnapShot(){
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined){
             const camId = states.SurveillanceStation.cameras[nameCam].id;
-            const _sid = syno.sessions.SurveillanceStation ? syno.sessions.SurveillanceStation._sid :'';
+            let _sid = syno.sessions.SurveillanceStation ? syno.sessions.SurveillanceStation._sid :'';
+            if (_sid === null) _sid = syno.sessions.SurveillanceStation;
             states.SurveillanceStation.cameras[nameCam]['linkSnapshot'] = syno.protocol + '://' + syno.host + ':' + syno.port + '/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId= ' + camId + '&_sid=' + _sid;
         }
     });

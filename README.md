@@ -62,6 +62,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+**WORK IN PROGRESS**
+* (MeisterTR) Fixed datatypes
+* (MeisterTR) added new ConfigJson (if you use 2FA pleease retype in config)
+* (MeisterTR) Fixed snapshot again
 ### 1.1.1 (2021-08-09)
 * (MeisterTR) fix type of uptime
 * (MeisterTR) fix broken snapshot link

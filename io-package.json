@@ -100,6 +100,13 @@
         "loglevel": "info",
         "compact": true,
         "materialize": true,
+        "adminUI": {
+            "config": "json"
+        },
+        "jsonConfig": true,
+        "tier": 2,
+        "connectionType": "local",
+        "dataSource": "poll",
         "type": "infrastructure",
         "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
         "plugins": {

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.synology",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Info and control your NAS Synology",
   "author": {
     "name": "instalator",
@@ -26,7 +26,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.4.0",
     "moment": "^2.29.1",
-    "syno":"https://github.com/MeisterTR/syno/tarball/master/"
+    "syno": "https://github.com/MeisterTR/syno/tarball/master/"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^2.2.0",

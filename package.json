@@ -26,7 +26,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.4.0",
     "moment": "^2.29.1",
-    "syno": "^2.2.0"
+    "syno":"https://github.com/MeisterTR/syno/tarball/master/"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^2.2.0",

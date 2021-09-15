@@ -79,13 +79,16 @@
     </script>
     <script>
         $(function(){
-            $(".adapter-body").append("" +
-                "<div class=\"m row\" style='display:block;position:absolute;bottom:130px;right:0;'>" +
+            $("<div class=\"m row donate\" style='display:block;position:absolute;bottom:130px;'>" +
                 "<div class=\"col right\">" +
                 "<div class=\"col\" style=\"margin-top:10px;float:right;margin-right:20px;\">" +
                 "<a target=\"_blank\" href=\"https://sobe.ru/na/instalator\"><img style=\"float:right;\" src=\"https://img.shields.io/badge/Donate-YooMoney-green\" alt=\"\"></a>" +
                 "<a target=\"_blank\" href=\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PFUALWTR2CTPY\"><img style=\"float:right;padding-right:10px;\" src=\"https://img.shields.io/badge/Donate-PayPal-green.svg\" alt=\"\"></a>"+
-                "</div></div></div>");
+                "</div></div></div>").appendTo(".adapter-body").animate({right:0},700).animate({ 'zoom': 1.5}, 300);
+            
+            setTimeout(function() {
+                $(".donate").animate({ 'zoom': 1}, 400);
+            }, 700);
         });
     </script>
     <style>
@@ -178,6 +181,7 @@
                     <option value="6.2.1">6.2.1</option>
                     <option value="6.2.2">6.2.2</option>
                     <option value="6.2.3">6.2.3</option>
+                    <option value="7.x.x">7.x.x</option>
                 </select>
                 <label for="version" class="translate">version</label>
             </div>

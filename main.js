@@ -821,10 +821,10 @@ function parseRemotePlayerStatus(playerid, res){
             states.AudioStation.players[playerid].repeat = res.play_mode.repeat;
             states.AudioStation.players[playerid].shuffle = res.play_mode.shuffle; // to bool
             states.AudioStation.players[playerid].bitrate = (res.song.additional.song_audio.bitrate / 1000).toString();
-            states.AudioStation.players[playerid].duration = SecToText(res.song.additional.song_audio.duration);
+            states.AudioStation.players[playerid].duration = secToText(res.song.additional.song_audio.duration);
             states.AudioStation.players[playerid].duration_sec = res.song.additional.song_audio.duration;
-            states.AudioStation.players[playerid].current_duration = SecToText(res.position);
-            states.AudioStation.players[playerid].current_elapsed = res.song.additional.song_audio.duration > 0 ? SecToText(res.song.additional.song_audio.duration - res.position) :'0';
+            states.AudioStation.players[playerid].current_duration = secToText(res.position);
+            states.AudioStation.players[playerid].current_elapsed = res.song.additional.song_audio.duration > 0 ? secToText(res.song.additional.song_audio.duration - res.position) :'0';
             states.AudioStation.players[playerid].seek = isFinite(seek) ? seek :0;
         }
     } catch (e) {
@@ -1459,30 +1459,30 @@ function warn(msg){
 }
 
 const unixToDate = (timestamp) => {
-    return moment.unix(timestamp).format("DD/MM/YYYY, HH:mm");
+    return moment.unix(timestamp).format('DD/MM/YYYY, HH:mm');
 };
 const dateToUnix = (date) => {
     let ts = moment(date).unix();
     return moment.unix(ts);
 };
 
-function SecToText(sec){
+function secToText(sec) {
     let res;
     let m = Math.floor(sec / 60);
     let s = sec % 60;
     let h = Math.floor(m / 60);
     m = m % 60;
     if (h > 0){
-        res = pad2(h) + ":" + pad2(m) + ":" + pad2(s);
+        res = pad2(h) + ':' + pad2(m) + ':' + pad2(s);
     } else {
-        res = pad2(m) + ":" + pad2(s);
+        res = pad2(m) + ':' + pad2(s);
     }
     return res;
 }
 
 function pad2(num){
     let s = num.toString();
-    return (s.length < 2) ? "0" + s :s;
+    return (s.length < 2) ? '0' + s :s;
 }
 
 if (module.parent){

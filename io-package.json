@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "synology",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "news": {
+            "2.0.1": {
+                "en": "Workarround JSON config Password",
+                "de": "Problemumgehung JSON-Konfigurationskennwort",
+                "ru": "Пароль конфигурации Workarround JSON",
+                "pt": "Senha de configuração JSON de solução alternativa",
+                "nl": "Tijdelijke JSON-configuratie Wachtwoord",
+                "fr": "Solution de contournement du mot de passe de configuration JSON",
+                "it": "Password di configurazione JSON alternativa",
+                "es": "Workarround JSON config Password",
+                "pl": "Obejście hasła konfiguracji JSON",
+                "zh-cn": "解决方法 JSON 配置密码"
+            },
             "2.0.0": {
                 "en": "fixed error",
                 "de": "fixed error",

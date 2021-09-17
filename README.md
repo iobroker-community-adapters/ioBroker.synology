@@ -66,6 +66,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+**WORK IN PROGRESS**
+* (MeisterTR) Workarround JSON config Password
 ### 2.0.0
 * (instalator) DSM7 support
 

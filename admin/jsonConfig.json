@@ -2,15 +2,6 @@
     "type": "panel",
     "i18n": true,
     "items": {
-        "donate": {
-            "newLine": true,
-            "color": "primary",
-            "type": "staticLink",
-            "button": true,
-            "href": "https://paypal.me/MeisterTR",
-            "icon": "data:image/png;base64,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",
-            "label": "Donate"
-        },
         "host": {
             "newLine": true,
             "type": "text",
@@ -48,8 +39,8 @@
             "lg": 3
         },
         "password": {
-            "type": "password",
-            "label": "Password",
+            "type": "text",
+            "label": "password",
             "sm": 12,
             "md": 4,
             "lg": 3
@@ -111,7 +102,8 @@
                 {"label": "6.2",        "value": "6.2"},
                 {"label": "6.2.1",      "value": "6.2.1"},
                 {"label": "6.2.2",      "value": "6.2.2"},
-                {"label": "6.2.3",      "value": "6.2.3"}
+                {"label": "6.2.3",      "value": "6.2.3"},
+                {"label": "7.x.x",      "value": "7.x.x"}
               ],
             "sm": 12,
             "md": 4,

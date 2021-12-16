@@ -29,7 +29,7 @@
     "syno": "https://github.com/MeisterTR/syno/tarball/master/"
   },
   "devDependencies": {
-    "@alcalzone/release-script": "^2.2.0",
+    "@alcalzone/release-script": "^3.4.1",
     "@iobroker/testing": "^2.4.4",
     "@types/chai": "^4.2.15",
     "@types/chai-as-promised": "^7.1.3",

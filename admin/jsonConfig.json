@@ -41,6 +41,7 @@
         "password": {
             "type": "text",
             "label": "password",
+            "repeat": false,
             "sm": 12,
             "md": 4,
             "lg": 3

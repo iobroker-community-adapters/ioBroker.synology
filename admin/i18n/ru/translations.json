@@ -1,0 +1,19 @@
+{
+    "2fa_checkbox": "Двухэтапная авторизация",
+    "2fa_code": "Секретный ключ для двухэтапной проверки",
+    "as": "Audio Station",
+    "def": "по умолчанию (5000)",
+    "dl": "Download Station",
+    "getservices": "Получать данные от сервисов",
+    "getservicesdesc": "Если пакет не установлен на NAS, он все равно будет пропущен.",
+    "host": "IP адрес",
+    "https:": "HTTPS",
+    "login": "Имя пользователя",
+    "on save adapter restarts with new config immediately": "Сразу после сохранения настроек драйвер перезапуститься с новыми значениями",
+    "password": "Пароль",
+    "polling": "Время опроса параметра (мс)",
+    "port": "Порт",
+    "slowPollingTime": "Время опроса для дополнительных параметров (мс)",
+    "ss": "Surveillance Station",
+    "version": "Версия API"
+}

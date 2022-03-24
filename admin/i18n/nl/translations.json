@@ -1,0 +1,19 @@
+{
+    "2fa_checkbox": "Authenticatie in twee stappen",
+    "2fa_code": "Geheime sleutel voor authenticatie in twee stappen",
+    "as": "Audio Station",
+    "def": "standaard (5000)",
+    "dl": "Download Station",
+    "getservices": "Ontvang gegevens van services",
+    "getservicesdesc": "Als het pakket niet op de NAS is geïnstalleerd, wordt het nog steeds overgeslagen.",
+    "host": "IP adres",
+    "https:": "https",
+    "login": "Gebruikersnaam",
+    "on save adapter restarts with new config immediately": "",
+    "password": "Wachtwoord",
+    "polling": "Parameter pollingtijd (ms)",
+    "port": "haven",
+    "slowPollingTime": "Polling-tijd voor aanvullende parameters (ms)",
+    "ss": "Surveillance Station",
+    "version": "API-versie"
+}

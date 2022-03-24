@@ -3,30 +3,6 @@
         "name": "synology",
         "version": "2.0.1",
         "news": {
-            "2.0.1": {
-                "en": "Workarround JSON config Password",
-                "de": "Problemumgehung JSON-Konfigurationskennwort",
-                "ru": "Пароль конфигурации Workarround JSON",
-                "pt": "Senha de configuração JSON de solução alternativa",
-                "nl": "Tijdelijke JSON-configuratie Wachtwoord",
-                "fr": "Solution de contournement du mot de passe de configuration JSON",
-                "it": "Password di configurazione JSON alternativa",
-                "es": "Workarround JSON config Password",
-                "pl": "Obejście hasła konfiguracji JSON",
-                "zh-cn": "解决方法 JSON 配置密码"
-            },
-            "2.0.0": {
-                "en": "fixed error",
-                "de": "fixed error",
-                "ru": "fixed error",
-                "pt": "fixed error",
-                "nl": "fixed error",
-                "fr": "fixed error",
-                "it": "fixed error",
-                "es": "fixed error",
-                "pl": "fixed error",
-                "zh-cn": "fixed error"
-            },
             "1.1.3": {
                 "en": "Fixed 2FA",
                 "de": "Behoben 2FA",
@@ -133,7 +109,8 @@
             "fr": "Obtenez le statut et contrôlez votre NAS Synology",
             "it": "Ottieni lo stato e controlla la tua Synology NAS",
             "es": "Obtenga el estado y controle su NAS Synology",
-            "pl": "Uzyskaj status i kontroluj swój NAS Synology"
+            "pl": "Uzyskaj status i kontroluj swój NAS Synology",
+            "zh-cn": "获取状态并控制您的 NAS Synology"
         },
         "platform": "Javascript/Node.js",
         "license": "MIT",

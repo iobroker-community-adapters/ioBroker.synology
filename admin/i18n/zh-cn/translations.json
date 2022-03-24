@@ -1,0 +1,19 @@
+{
+    "2fa_checkbox": "两步验证",
+    "2fa_code": "两步验证的密钥",
+    "as": "Audio Station",
+    "def": "默认值（5000）",
+    "dl": "下载站",
+    "getservices": "从服务接收数据",
+    "getservicesdesc": "如果该程序包未安装在NAS上，仍将被跳过。",
+    "host": "IP地址",
+    "https:": "https",
+    "login": "用户名",
+    "on save adapter restarts with new config immediately": "",
+    "password": "密码",
+    "polling": "参数轮询时间（毫秒）",
+    "port": "港口",
+    "slowPollingTime": "附加参数的轮询时间（毫秒）",
+    "ss": "监控站",
+    "version": "api版本"
+}

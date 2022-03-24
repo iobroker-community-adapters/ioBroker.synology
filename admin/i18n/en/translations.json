@@ -1,0 +1,19 @@
+{
+    "2fa_checkbox": "2-step verification",
+    "2fa_code": "Secret key for 2-step verification",
+    "as": "Audio Station",
+    "def": "default (5000)",
+    "dl": "Download Station",
+    "getservices": "Receive data from services",
+    "getservicesdesc": "If the package is not installed on the NAS, it will still be skipped.",
+    "host": "IP address",
+    "https:": "https",
+    "login": "User name",
+    "on save adapter restarts with new config immediately": "",
+    "password": "Password",
+    "polling": "Parameter polling time (ms)",
+    "port": "Port",
+    "slowPollingTime": "Polling time for additional parameters (ms)",
+    "ss": "Surveillance Station",
+    "version": "api Version"
+}

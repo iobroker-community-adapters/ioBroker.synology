@@ -1,0 +1,19 @@
+{
+    "2fa_checkbox": "Weryfikacja dwuetapowa",
+    "2fa_code": "Tajny klucz do weryfikacji dwuetapowej",
+    "as": "Audio Station",
+    "def": "domyślnie (5000)",
+    "dl": "Download Station",
+    "getservices": "Otrzymuj dane z usług",
+    "getservicesdesc": "Jeśli pakiet nie zostanie zainstalowany na serwerze NAS, nadal będzie pomijany.",
+    "host": "adres IP",
+    "https:": "https",
+    "login": "Nazwa Użytkownika",
+    "on save adapter restarts with new config immediately": "",
+    "password": "Hasło",
+    "polling": "Czas odpytywania parametru (ms)",
+    "port": "Port",
+    "slowPollingTime": "Czas odpytywania dla dodatkowych parametrów (ms)",
+    "ss": "Surveillance Station",
+    "version": "Wersja interfejsu API"
+}

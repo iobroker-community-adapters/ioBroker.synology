@@ -39,7 +39,7 @@
             "lg": 3
         },
         "password": {
-            "type": "text",
+            "type": "password",
             "label": "password",
             "repeat": false,
             "sm": 12,

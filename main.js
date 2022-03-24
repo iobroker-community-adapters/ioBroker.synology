@@ -343,7 +343,7 @@ const getNameCams = (id) => {
 
 function switchCam(name, command, val){
     let method = !!val ? 'enableCamera' :'disableCamera';
-    if (name !== 'undefined'){
+    if (name !== 'undefined' && states.SurveillanceStation.cameras[name]) {
         let camId = states.SurveillanceStation.cameras[name].id.toString();
         send('ss', method, {cameraIds: camId, blIncludeDeletedCam: false, version: 7});
     }

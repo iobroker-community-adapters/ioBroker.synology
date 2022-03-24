@@ -1,6 +1,6 @@
 # This is Documentation
 
-Follow these steps to configure 2FA:
+Follow these steps to configure 2FA in DSM6:
 
 ![Picture](img/2FA_step_1.png)
 

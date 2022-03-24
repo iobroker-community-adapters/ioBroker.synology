@@ -325,7 +325,7 @@
                 "type": "string",
                 "read": true,
                 "write": true,
-                "def": 0
+                "def": ""
             },
             "native": {}
         },

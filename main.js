@@ -1006,7 +1006,7 @@ function parseInfoSystem(res){
                     'total_size': parseFloat(((key.total_size / 1073741824).toFixed(2))),
                     'used_size':  parseFloat(((key.used_size / 1073741824).toFixed(2))),
                     'used':       parseFloat((((key.used_size / key.total_size) * 100).toFixed(2))),
-                'desc':       key.desc
+                'desc':       key. desc || key.vol_desc
             };
         });
     }

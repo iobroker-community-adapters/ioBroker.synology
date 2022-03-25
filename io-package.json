@@ -3,18 +3,6 @@
     "name": "synology",
     "version": "2.1.0",
     "news": {
-      "2.1.0": {
-        "en": "IMPORTANT: You need to re-enter the password once after installing this version!\nCamera snapshots are now also stored in ioBroker storage to be easier used in visualizations!\nHide password display in Admin when using Admin5\nFix volume description\nFix type issues since js-controller 3.3",
-        "de": "WICHTIG: Nach der Installation dieser Version müssen Sie das Passwort einmalig neu eingeben!\nKameraschnappschüsse werden jetzt auch im ioBroker-Speicher gespeichert, um sie einfacher in Visualisierungen verwenden zu können!\nPasswortanzeige in Admin ausblenden, wenn Admin5 verwendet wird\nDatenträgerbeschreibung korrigieren\nTypprobleme seit js-controller 3.3 behoben",
-        "ru": "ВАЖНО: Вам необходимо повторно ввести пароль один раз после установки этой версии!\nСнимки камеры теперь также хранятся в хранилище ioBroker, чтобы их было проще использовать в визуализациях!\nСкрыть отображение пароля в Admin при использовании Admin5\nИсправить описание тома\nИсправить проблемы с типом начиная с js-controller 3.3",
-        "pt": "IMPORTANTE: Você precisa redigitar a senha uma vez depois de instalar esta versão!\nOs instantâneos da câmera agora também são armazenados no armazenamento ioBroker para serem mais fáceis de usar nas visualizações!\nOcultar a exibição de senha no Admin ao usar o Admin5\nCorrigir a descrição do volume\nCorrigir problemas de tipo desde o js-controller 3.3",
-        "nl": "BELANGRIJK: u moet het wachtwoord één keer opnieuw invoeren na het installeren van deze versie!\nCamera-snapshots worden nu ook opgeslagen in ioBroker-opslag om gemakkelijker te kunnen worden gebruikt in visualisaties!\nVerberg wachtwoordweergave in Admin bij gebruik van Admin5\nVolumebeschrijving repareren\nTypeproblemen oplossen sinds js-controller 3.3",
-        "fr": "IMPORTANT : Vous devez ressaisir le mot de passe une fois après l'installation de cette version !\nLes instantanés de la caméra sont désormais également stockés dans le stockage ioBroker pour être plus facilement utilisés dans les visualisations !\nMasquer l'affichage du mot de passe dans Admin lors de l'utilisation d'Admin5\nCorriger la description du volume\nCorrection des problèmes de type depuis js-controller 3.3",
-        "it": "IMPORTANTE: è necessario reinserire la password una volta dopo aver installato questa versione!\nLe istantanee della fotocamera ora sono anche archiviate nello spazio di archiviazione di ioBroker per essere utilizzate più facilmente nelle visualizzazioni!\nNascondi la visualizzazione della password in Admin quando si utilizza Admin5\nCorreggi la descrizione del volume\nRisolti i problemi di tipo da js-controller 3.3",
-        "es": "IMPORTANTE: ¡Debe volver a ingresar la contraseña una vez después de instalar esta versión!\nLas instantáneas de la cámara ahora también se almacenan en el almacenamiento de ioBroker para facilitar su uso en las visualizaciones.\nOcultar visualización de contraseña en Admin cuando se usa Admin5\nArreglar la descripción del volumen\nSolucionar problemas de tipo desde js-controller 3.3",
-        "pl": "WAŻNE: Po zainstalowaniu tej wersji należy raz ponownie wprowadzić hasło!\nMigawki z kamer są teraz również przechowywane w pamięci ioBroker, aby można je było łatwiej wykorzystywać w wizualizacjach!\nUkryj wyświetlanie hasła w Admin podczas korzystania z Admin5\nNapraw opis głośności\nNapraw problemy z typami od js-controller 3.3",
-        "zh-cn": "重要提示：安装此版本后需要重新输入一次密码！\n相机快照现在也存储在 ioBroker 存储中，以便更轻松地用于可视化！\n使用 Admin5 时在 Admin 中隐藏密码显示\n修复卷描述\n修复自 js-controller 3.3 以来的类型问题"
-      },
       "1.1.3": {
         "en": "Fixed 2FA",
         "de": "Behoben 2FA",

@@ -68,6 +68,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## Changelog
 
 ### __WORK IN PROGRESS__
+* (Apollon77) Camera snapshots are now also stored in ioBroker storage to be easier used in visualizations!
 * (Apollon77) Fix type issues since js.controller 3.3
 
 ### 2.0.1 (2021-09-17)

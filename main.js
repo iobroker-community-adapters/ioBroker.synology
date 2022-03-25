@@ -385,17 +385,17 @@ function getLiveViewPathCamera(){
 function getSnapshotCamera(camid, cb){
     debug('getSnapshotCamera');
     const param = {cameraId: camid, preview: true, version: 7};
-    send('ss', 'getSnapshotCamera', param, (res) => {
+    send('ss', 'getSnapshotCamera', param, async (res) => {
         if (res && !res.code && !res.message){
             let buf = Buffer.from(res, 'binary');
-            fs.writeFile(`${dir}snapshotCam_${camid}.jpg`, buf, (err) => {
-                if (!err){
-                    cb && cb(`${dir}snapshotCam_${camid}.jpg`);
-                } else {
-                    cb && cb(false);
-                    error('Write snapshot file Error: ', err);
-                }
-            });
+            try {
+                await adapter.writeFileAsync(adapter.namespace, `snapshotCam_${camid}.jpg`, buf);
+                fs.writeFileSync(`${dir}snapshotCam_${camid}.jpg`, buf);
+            } catch (err) {
+                error('Write snapshot file Error: ', err);
+                return cb && cb(false);
+            }
+            cb && cb(`${dir}snapshotCam_${camid}.jpg`);
         }
     });
 }
@@ -639,10 +639,10 @@ function getSongCover(playerid, cb){
     const track = states.AudioStation.players[playerid].song_id;
     if (track !== old_states.AudioStation.players[playerid].song_id){
         old_states.AudioStation.players[playerid].song_id = track;
-        send('as', 'getSongCover', {id: track}, (res) => {
+        send('as', 'getSongCover', {id: track}, async (res) => {
             if (res && !res.message){
                 let buf = Buffer.from(res, 'binary');
-                adapter.writeFile(adapter.namespace, 'cover.jpg', buf);
+                await adapter.writeFileAsync(adapter.namespace, 'cover.jpg', buf);
                 states.AudioStation.players[playerid].cover = `../${adapter.namespace}/cover.jpg`;
             } else {
                 states.AudioStation.players[playerid].cover = `../${adapter.namespace}/cover.png`;

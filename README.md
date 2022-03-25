@@ -68,6 +68,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## Changelog
 
 ### __WORK IN PROGRESS__
+* IMPORTANT: You need to re-enter the password once after installing this version!
 * (Apollon77) Camera snapshots are now also stored in ioBroker storage to be easier used in visualizations!
 * (foxriver76) Hide password display in Admin when using Admin5
 * (Apollon77) Fix volume description

@@ -145,12 +145,52 @@
         "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
         "dependencies": [
             {
-                "js-controller": ">=3.0.0"
+                "js-controller": ">=3.2.0"
             }
         ],
         "globalDependencies": [
             {
-                "admin": ">=4.0.9"
+                "admin": ">=5.1.28"
+            }
+        ],
+        "messages": [
+            {
+                "condition": {
+                    "operand": "and",
+                    "rules": [
+                        "oldVersion<2.1.0",
+                        "newVersion>=2.1.0"
+                    ]
+                },
+                "title": {
+                    "en": "Re-enter the 2FA Secret after Update!",
+                    "de": "Geben Sie das 2FA-Geheimnis nach dem Update erneut ein!",
+                    "ru": "Повторно введите секрет 2FA после обновления!",
+                    "pt": "Reinsira o 2FA Secret após a atualização!",
+                    "nl": "Voer het 2FA-geheim opnieuw in na de update!",
+                    "fr": "Entrez à nouveau le secret 2FA après la mise à jour !",
+                    "it": "Inserisci nuovamente il segreto 2FA dopo l'aggiornamento!",
+                    "es": "¡Vuelva a ingresar el secreto 2FA después de la actualización!",
+                    "pl": "Wprowadź ponownie Sekret 2FA po aktualizacji!",
+                    "zh-cn": "更新后重新输入2FA Secret！"
+                },
+                "text": {
+                    "en": "After installing this update the 2FA secret used to access the Synology needs to be re-entered in the Instance-Settings!",
+                    "de": "Nach der Installation dieses Updates muss das 2FA-Geheimnis für den Zugriff auf die Synology in den Instanz-Einstellungen neu eingegeben werden!",
+                    "ru": "После установки этого обновления секрет 2FA, используемый для доступа к Synology, необходимо повторно ввести в настройках экземпляра!",
+                    "pt": "Depois de instalar esta atualização, o segredo 2FA usado para acessar o Synology precisa ser reinserido nas configurações da instância!",
+                    "nl": "Na het installeren van deze update moet het 2FA-geheim dat wordt gebruikt om toegang te krijgen tot Synology opnieuw worden ingevoerd in de Instance-Settings!",
+                    "fr": "Après avoir installé cette mise à jour, le secret 2FA utilisé pour accéder au Synology doit être ressaisi dans les paramètres d'instance !",
+                    "it": "Dopo aver installato questo aggiornamento, il segreto 2FA utilizzato per accedere a Synology deve essere reinserito nelle impostazioni dell'istanza!",
+                    "es": "Después de instalar esta actualización, el secreto 2FA utilizado para acceder a Synology debe volver a ingresarse en la configuración de la instancia.",
+                    "pl": "Po zainstalowaniu tej aktualizacji klucz 2FA używany do uzyskiwania dostępu do Synology należy ponownie wprowadzić w ustawieniach instancji!",
+                    "zh-cn": "安装此更新后，用于访问 Synology 的 2FA 密码需要在实例设置中重新输入！"
+                },
+                "level": "warn",
+                "buttons": [
+                    "agree",
+                    "cancel"
+                ]
             }
         ]
     },
@@ -170,10 +210,12 @@
         "dl": true
     },
     "encryptedNative": [
-        "password"
+        "password",
+        "2fa_code"
     ],
     "protectedNative": [
-        "password"
+        "password",
+        "2fa_code"
     ],
     "objects": [],
     "instanceObjects": [

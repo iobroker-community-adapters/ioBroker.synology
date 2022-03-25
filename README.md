@@ -66,6 +66,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Optimize object type determination and adjustments
+
 ### 2.1.0 (2022-03-25)
 * IMPORTANT: You need to re-enter the password once after installing this version!
 * (Apollon77) Camera snapshots are now also stored in ioBroker storage to be easier used in visualizations!

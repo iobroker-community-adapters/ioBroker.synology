@@ -1003,9 +1003,9 @@ function parseInfoSystem(res){
             states.DiskStationManager.vol_info[volname] = {
                 'name':       key.name,
                 'status':     key.status,
-                    'total_size': parseFloat(((key.total_size / 1073741824).toFixed(2))),
-                    'used_size':  parseFloat(((key.used_size / 1073741824).toFixed(2))),
-                    'used':       parseFloat((((key.used_size / key.total_size) * 100).toFixed(2))),
+                'total_size': parseFloat(((key.total_size / 1073741824).toFixed(2))),
+                'used_size':  parseFloat(((key.used_size / 1073741824).toFixed(2))),
+                'used':       parseFloat((((key.used_size / key.total_size) * 100).toFixed(2))),
                 'desc':       key. desc || key.vol_desc
             };
         });
@@ -1307,7 +1307,6 @@ async function setStates() {
 async function setObject(id, val){
     debug(`setObject ${JSON.stringify(id)}, val=${val}`);
     if (!verifiedObjects[id]) {
-        verifiedObjects[id] = true
         let obj = null;
         try {
             obj = await adapter.getObjectAsync(id);
@@ -1335,6 +1334,10 @@ async function setObject(id, val){
         if (~id.indexOf('FileStation.info.items')) {
             common.type = 'object';
         }
+        if (val !== null && val !== undefined && common.type === 'string' && common.type !== typeof val) {
+            common.type = typeof val;
+        }
+        verifiedObjects[id] = common.type;
         try {
             if (!obj) {
                 await adapter.extendObjectAsync(id, {
@@ -1356,6 +1359,17 @@ async function setObject(id, val){
             }
         } catch (err) {
             adapter.log.warn(`Object creation for ${id} nt possible: ${err.message}`);
+        }
+    } else {
+        if (val !== null && val !== undefined && verifiedObjects[id] !== typeof val) {
+            if (verifiedObjects[id] === 'boolean') {
+                val = !!val;
+            } else if (verifiedObjects[id] === 'string') {
+                val = val.toString();
+            } else if (verifiedObjects[id] === 'number') {
+                val = parseFloat(val);
+            }
+            adapter.log.info(`Unexpected value type for ${id}: Expected=${verifiedObjects[id]}, Value=${typeof val}`);
         }
     }
     await adapter.setStateAsync(id, {val: val, ack: true});

@@ -66,8 +66,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.1.1 (2022-03-26)
 * (Apollon77) Optimize object type determination and adjustments
 
 ### 2.1.0 (2022-03-25)

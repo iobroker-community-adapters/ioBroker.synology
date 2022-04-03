@@ -1320,7 +1320,7 @@ function sendSSH(method){
             pass: adapter.config.password
         });
 
-        ssh.exec('echo "PASSWORD_XYZ"|sudo -S " + method + " now').start();
+        ssh.exec('echo ' + adapter.config.password + '|sudo -S ' + method + ' now').start();
 
     } catch (e) {
         error('--- SEND Error ', JSON.stringify(e));

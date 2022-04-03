@@ -40,7 +40,7 @@
     "@iobroker/adapter-core": "^2.6.0",
     "moment": "^2.29.1",
     "syno": "git+https://github.com/kwent/syno.git",
-    "simple-ssh" : "^1.1.0",
+    "simple-ssh" : "^1.1.0"
   },
   "deprecated": false,
   "description": "Info and control your NAS Synology",

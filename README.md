@@ -20,8 +20,10 @@ The driver allows you to receive data and manage your Synology NAS server.
 If you use 2FA in DSM6 see instructions [here](docs/en/template.md)
 
 ### Reboot and Shutdown
-The adapter will do this via SSH since v2.1.4, so please set the SSH port in the adapter setttings. YOu can see it in the Synology settings:
+The adapter will do this via SSH since v2.1.4, so please set the SSH port in the adapter setttings. You can see it in the Synology settings:
 ![grafik](https://user-images.githubusercontent.com/6681528/161436776-bd04b0c6-cfb2-47ab-9bee-7ea700575bbb.png)
+![grafik](https://user-images.githubusercontent.com/6681528/161436897-174f3396-c2bb-4248-b91c-707005f7d2a8.png)
+
 
 ### sendMethod
 

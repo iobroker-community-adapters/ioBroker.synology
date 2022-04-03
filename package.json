@@ -26,7 +26,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.0",
     "moment": "^2.29.1",
-    "syno": "https://github.com/MeisterTR/syno"
+    "syno": "https://github.com/kwent/syno"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.6",

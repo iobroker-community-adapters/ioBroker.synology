@@ -3,6 +3,8 @@ const utils = require('@iobroker/adapter-core');
 const Syno = require('syno');
 const fs = require('fs');
 const moment = require('moment');
+const simpleSSH = require('simple-ssh');
+
 
 let adapter;
 let syno;
@@ -89,13 +91,13 @@ function startAdapter(options){
                 let val = state.val;
                 switch (command) {
                     case 'reboot':
-                        send('dsm', 'rebootSystem', {}, () => {
+                        sendSSH('shutdown -r', () => {
                             warn('System reboot');
                             rePollAfterCmd();
                         });
                         break;
                     case 'shutdown':
-                        send('dsm', 'shutdownSystem', {}, () => {
+                        sendSSH('shutdown -h', () => {
                             warn('System shutdown');
                             rePollAfterCmd();
                         });
@@ -1287,6 +1289,7 @@ function send(api, method, params, cb){
         params = null;
     }
     try {
+
         syno[api][method](params, (err, data) => {
             debug(`Send [${api.toUpperCase()}] [${method}] Error: [${err || 'no error'}] Response: [${JSON.stringify(data)/*typeof data*/}]`);
             data = data || '';
@@ -1302,6 +1305,23 @@ function send(api, method, params, cb){
                 }
             }
         });
+    } catch (e) {
+        error('--- SEND Error ', JSON.stringify(e));
+    }
+}
+
+
+function sendSSH(method){
+    try {
+        var ssh = new simpleSSH({
+            host: adapter.config.host,
+            port: 22,
+            user: adapter.config.login,
+            pass: adapter.config.password
+        });
+
+        ssh.exec('echo "PASSWORD_XYZ"|sudo -S " + method + " now').start();
+
     } catch (e) {
         error('--- SEND Error ', JSON.stringify(e));
     }

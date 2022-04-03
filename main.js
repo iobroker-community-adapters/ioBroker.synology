@@ -1430,17 +1430,18 @@ async function setObject(id, val){
         } catch (err) {
             adapter.log.warn(`Object creation for ${id} nt possible: ${err.message}`);
         }
-    } else {
-        if (val !== null && val !== undefined && verifiedObjects[id] !== typeof val) {
-            if (verifiedObjects[id] === 'boolean') {
-                val = !!val;
-            } else if (verifiedObjects[id] === 'string') {
-                val = val.toString();
-            } else if (verifiedObjects[id] === 'number') {
-                val = parseFloat(val);
-            }
-            adapter.log.info(`Unexpected value type for ${id}: Expected=${verifiedObjects[id]}, Value=${typeof val}`);
+    }
+    if (val !== null && val !== undefined && verifiedObjects[id] !== typeof val) {
+        if (verifiedObjects[id] === 'boolean') {
+            val = !!val;
+        } else if (verifiedObjects[id] === 'string') {
+            val = val.toString();
+        } else if (verifiedObjects[id] === 'number') {
+            val = parseFloat(val);
+        } else if (verifiedObjects[id] === 'object') {
+            val = JSON.stringify(val);
         }
+        adapter.log.info(`Unexpected value type for ${id}: Expected=${verifiedObjects[id]}, Value=${typeof val}`);
     }
     await adapter.setStateAsync(id, {val: val, ack: true});
 }

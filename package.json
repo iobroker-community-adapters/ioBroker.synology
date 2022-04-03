@@ -89,5 +89,5 @@
     "test:package": "mocha test/package --exit",
     "test:unit": "mocha test/unit --exit"
   },
-  "version": "2.1.1"
+  "version": "2.1.2"
 }

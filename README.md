@@ -66,13 +66,11 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-
-### **WORK IN PROGRESS** (2022-04-03)
+### 2.1.2 (2022-04-03) (2022-04-03)
 * (arteck) workaround for shutdown and reboot
   - plz check your ssh/telnet-Port to 222
   - ![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)
-  - 
-
+  -
 
 ### 2.1.1 (2022-03-26)
 * (Apollon77) Optimize object type determination and adjustments

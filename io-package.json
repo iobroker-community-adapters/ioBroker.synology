@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "news": {
+      "2.1.2": {
+        "en": "workaround for shutdown and reboot\nplz check your ssh/telnet-Port to 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "de": "Problemumgehung für das Herunterfahren und Neustarten\nBitte überprüfen Sie Ihren ssh/telnet-Port auf 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "ru": "обходной путь для выключения и перезагрузки\nпожалуйста, проверьте ваш ssh/telnet-порт на 222\n![график](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "pt": "solução alternativa para desligamento e reinicialização\npor favor, verifique sua porta ssh/telnet para 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "nl": "tijdelijke oplossing voor afsluiten en opnieuw opstarten\ncontroleer alstublieft uw ssh/telnet-poort naar 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "fr": "solution de contournement pour l'arrêt et le redémarrage\nplz vérifier votre ssh/telnet-Port à 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "it": "soluzione alternativa per l'arresto e il riavvio\nper favore controlla la tua porta ssh/telnet su 222\n![grafica](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "es": "solución alternativa para apagar y reiniciar\npor favor revise su ssh/telnet-Port a 222\n![gráfico](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "pl": "obejście wyłączenia i ponownego uruchomienia\nplz sprawdź swój port ssh/telnet na 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
+        "zh-cn": "关闭和重新启动的解决方法\n请检查您的 ssh/telnet 端口是否为 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n"
+      },
       "2.1.1": {
         "en": "Optimize object type determination and adjustments",
         "de": "Optimieren Sie die Objekttypermittlung und Anpassungen",
@@ -74,18 +86,6 @@
         "es": "IMPORTANTE: ¡Vuelva a ingresar la contraseña después de actualizar a 1.0.0!",
         "pl": "WAŻNE: wprowadź ponownie hasło po aktualizacji do wersji 1.0.0!",
         "zh-cn": "重要信息：更新至1.0.0后，请重新输入密码！"
-      },
-      "0.1.20": {
-        "en": "fixed error",
-        "de": "fixed error",
-        "ru": "fixed error",
-        "pt": "fixed error",
-        "nl": "fixed error",
-        "fr": "fixed error",
-        "it": "fixed error",
-        "es": "fixed error",
-        "pl": "fixed error",
-        "zh-cn": "fixed error"
       }
     },
     "titleLang": {

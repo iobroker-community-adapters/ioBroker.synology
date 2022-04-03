@@ -19,6 +19,11 @@ The driver allows you to receive data and manage your Synology NAS server.
 
 If you use 2FA in DSM6 see instructions [here](docs/en/template.md)
 
+### Reboot and Shutdown
+The adapter will do this via SSH since v2.1.4, so please set the SSH port in the adapter setttings. YOu can see it in the Synology settings:
+
+![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)
+
 ### sendMethod
 
 You can send any command (method) by setting the sendMethod object, for example:
@@ -70,7 +75,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## Changelog
 ### **WORK IN PROGRESS**
 * (arteck) workaround for shutdown and reboot(configure your ssh port in the settings)
-  - ![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)
+* (Apollon77) prevent error when setting FileStation.info.items on start once
 
 ### 2.1.1 (2022-03-26)
 * (Apollon77) Optimize object type determination and adjustments

@@ -1402,7 +1402,7 @@ async function setObject(id, val){
             common.write = objects[_id].write;
             //common.def = objects[_id].val;
         }
-        if (~id.indexOf('FileStation.info.items')) {
+        if (id.includes('FileStation.info.items.')) {
             common.type = 'object';
         }
         if (val !== null && val !== undefined && common.type === 'string' && common.type !== typeof val) {
@@ -1414,7 +1414,6 @@ async function setObject(id, val){
                 await adapter.extendObjectAsync(id, {
                     type: 'state', common, native: {}
                 });
-                await adapter.setStateAsync(id, {val: val, ack: true});
             } else {
                 if (JSON.stringify(obj.common) !== JSON.stringify(common) && objects[_id] !== undefined) {
                     await adapter.extendObjectAsync(id, {common: common});

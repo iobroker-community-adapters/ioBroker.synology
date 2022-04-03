@@ -15,5 +15,6 @@
     "port": "Port",
     "slowPollingTime": "Temps d'interrogation pour les paramètres supplémentaires (ms)",
     "ss": "Surveillance Station",
+    "ssh_port": "Port SSH (pour le redémarrage et l'arrêt)",
     "version": "Version api"
 }

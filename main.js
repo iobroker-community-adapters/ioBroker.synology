@@ -1311,19 +1311,26 @@ function send(api, method, params, cb){
 }
 
 
-function sendSSH(method){
+function sendSSH(method, cb) {
     try {
         var ssh = new simpleSSH({
             host: adapter.config.host,
-            port: 222,
+            port: adapter.config.ssh_port || 22,
             user: adapter.config.login,
             pass: adapter.config.password
         });
 
-        ssh.exec('echo "' + adapter.config.password + '"|sudo -S ' + method + ' now').start();
+        ssh.exec(`echo "${adapter.config.password}"|sudo -S ${method} now`,{
+            err: (err) => {
+                    error('SSH Error:', err);
+                },
+            exit: () => {
+                cb && cb();
+            }
+        }).start();
 
     } catch (e) {
-        error('--- SEND Error ', JSON.stringify(e));
+        error('--- SSH Error ', JSON.stringify(e));
     }
 }
 

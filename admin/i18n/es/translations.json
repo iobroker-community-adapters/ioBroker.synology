@@ -15,5 +15,6 @@
     "port": "Puerto",
     "slowPollingTime": "Tiempo de sondeo para parámetros adicionales (ms)",
     "ss": "Surveillance Station",
+    "ssh_port": "Puerto SSH (para reiniciar y apagar)",
     "version": "Versión api"
 }

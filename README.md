@@ -68,9 +68,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
-### 2.1.3 (2022-04-03) 
-* (arteck) workaround for shutdown and reboot
-  - plz check your ssh/telnet-Port to 222
+### **WORK IN PROGRESS**
+* (arteck) workaround for shutdown and reboot(configure your ssh port in the settings)
   - ![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)
 
 ### 2.1.1 (2022-03-26)

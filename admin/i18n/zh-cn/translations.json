@@ -15,5 +15,6 @@
     "port": "港口",
     "slowPollingTime": "附加参数的轮询时间（毫秒）",
     "ss": "监控站",
+    "ssh_port": "SSH 端口（用于重启和关机）",
     "version": "api版本"
 }

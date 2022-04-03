@@ -1,531 +1,508 @@
 {
-  "common": {
-    "name": "synology",
-    "version": "2.1.3",
-    "news": {
-      "2.1.3": {
-        "en": "workaround for shutdown and reboot\nplz check your ssh/telnet-Port to 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "de": "Problemumgehung für das Herunterfahren und Neustarten\nBitte überprüfen Sie Ihren ssh/telnet-Port auf 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "ru": "обходной путь для выключения и перезагрузки\nпожалуйста, проверьте ваш ssh/telnet-порт на 222\n![график](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "pt": "solução alternativa para desligamento e reinicialização\npor favor, verifique sua porta ssh/telnet para 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "nl": "tijdelijke oplossing voor afsluiten en opnieuw opstarten\ncontroleer alstublieft uw ssh/telnet-poort naar 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "fr": "solution de contournement pour l'arrêt et le redémarrage\nplz vérifier votre ssh/telnet-Port à 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "it": "soluzione alternativa per l'arresto e il riavvio\nper favore controlla la tua porta ssh/telnet su 222\n![grafica](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "es": "solución alternativa para apagar y reiniciar\npor favor revise su ssh/telnet-Port a 222\n![gráfico](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "pl": "obejście wyłączenia i ponownego uruchomienia\nplz sprawdź swój port ssh/telnet na 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
-        "zh-cn": "关闭和重新启动的解决方法\n请检查您的 ssh/telnet 端口是否为 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)"
-      },
-      "2.1.2": {
-        "en": "workaround for shutdown and reboot\nplz check your ssh/telnet-Port to 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "de": "Problemumgehung für das Herunterfahren und Neustarten\nBitte überprüfen Sie Ihren ssh/telnet-Port auf 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "ru": "обходной путь для выключения и перезагрузки\nпожалуйста, проверьте ваш ssh/telnet-порт на 222\n![график](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "pt": "solução alternativa para desligamento e reinicialização\npor favor, verifique sua porta ssh/telnet para 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "nl": "tijdelijke oplossing voor afsluiten en opnieuw opstarten\ncontroleer alstublieft uw ssh/telnet-poort naar 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "fr": "solution de contournement pour l'arrêt et le redémarrage\nplz vérifier votre ssh/telnet-Port à 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "it": "soluzione alternativa per l'arresto e il riavvio\nper favore controlla la tua porta ssh/telnet su 222\n![grafica](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "es": "solución alternativa para apagar y reiniciar\npor favor revise su ssh/telnet-Port a 222\n![gráfico](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "pl": "obejście wyłączenia i ponownego uruchomienia\nplz sprawdź swój port ssh/telnet na 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
-        "zh-cn": "关闭和重新启动的解决方法\n请检查您的 ssh/telnet 端口是否为 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n"
-      },
-      "2.1.1": {
-        "en": "Optimize object type determination and adjustments",
-        "de": "Optimieren Sie die Objekttypermittlung und Anpassungen",
-        "ru": "Оптимизация определения и настройки типов объектов",
-        "pt": "Otimize a determinação e os ajustes do tipo de objeto",
-        "nl": "Optimaliseer de bepaling en aanpassingen van het objecttype",
-        "fr": "Optimiser la détermination et les ajustements du type d'objet",
-        "it": "Ottimizza la determinazione e le regolazioni del tipo di oggetto",
-        "es": "Optimice la determinación y los ajustes del tipo de objeto",
-        "pl": "Zoptymalizuj określanie i dostosowywanie typu obiektu",
-        "zh-cn": "优化对象类型确定和调整"
-      },
-      "1.1.3": {
-        "en": "Fixed 2FA",
-        "de": "Behoben 2FA",
-        "ru": "Фиксированная 2FA",
-        "pt": "2FA fixo",
-        "nl": "Vaste 2FA",
-        "fr": "2FA fixe",
-        "it": "Risolto 2FA",
-        "es": "2FA fijo",
-        "pl": "Naprawiono 2FA",
-        "zh-cn": "固定 2FA"
-      },
-      "1.1.2": {
-        "en": "Fixed datatypes\nadded new ConfigJson (if you use 2FA pleease retype in config)\nFixed snapshot again",
-        "de": "Feste Datentypen\nneues ConfigJson hinzugefügt (wenn Sie 2FA verwenden, geben Sie die Konfiguration bitte erneut ein)\nSchnappschuss wieder behoben",
-        "ru": "Фиксированные типы данных\nдобавлен новый ConfigJson (если вы используете повторный ввод 2FA в конфигурации)\nСнова исправлен снимок",
-        "pt": "Tipos de dados fixos\nadicionado novo ConfigJson (se você usar 2FA pleease retype na configuração)\nSnapshot corrigido novamente",
-        "nl": "Vaste datatypes\nnieuwe ConfigJson toegevoegd (als je 2FA gebruikt, typ dan opnieuw in config)\nVaste momentopname weer",
-        "fr": "Types de données fixes\najouté un nouveau ConfigJson (si vous utilisez 2FA s'il vous plaît retaper dans la configuration)\nInstantané corrigé à nouveau",
-        "it": "Tipi di dati fissi\naggiunto nuovo ConfigJson (se usi 2FA, ti preghiamo di ridigitare in config)\nIstantanea corretta di nuovo",
-        "es": "Tipos de datos fijos\nse agregó un nuevo ConfigJson (si usa 2FA, por favor, vuelva a escribir en la configuración)\nInstantánea fija de nuevo",
-        "pl": "Naprawiono typy danych\ndodano nowy ConfigJson (jeśli używasz 2FA proszę o ponowne wpisanie w konfiguracji)\nZnowu naprawiono migawkę",
-        "zh-cn": "固定数据类型\n添加了新的 ConfigJson（如果您使用 2FA，请在配置中重新输入）\n再次修复快照"
-      },
-      "1.1.1": {
-        "en": "fix type of uptime\nfix broken snapshot link",
-        "de": "Art der Betriebszeit beheben\ndefekten Snapshot-Link reparieren",
-        "ru": "исправить тип безотказной работы\nисправить неработающую ссылку на снимок",
-        "pt": "corrigir o tipo de tempo de atividade\nconsertar link de instantâneo quebrado",
-        "nl": "type uptime repareren\nkapotte snapshot-link repareren",
-        "fr": "corriger le type de disponibilité\nréparer le lien d'instantané cassé",
-        "it": "correggere il tipo di uptime\ncorreggi il collegamento dell'istantanea rotto",
-        "es": "arreglar el tipo de tiempo de actividad\narreglar enlace de instantánea roto",
-        "pl": "napraw typ uptime\nnapraw uszkodzony link do migawki",
-        "zh-cn": "修复正常运行时间类型\n修复损坏的快照链接"
-      },
-      "1.1.0": {
-        "en": "fixes for DSM7\nadded release-script\nchange testing\nchange syno repo to default",
-        "de": "Korrekturen für DSM7\nRelease-Skript hinzugefügt\nÄnderungstest\nSyno-Repo auf Standard ändern",
-        "ru": "исправления для DSM7\nдобавлен релиз-скрипт\nизменение тестирования\nизменить syno repo на значение по умолчанию",
-        "pt": "correções para DSM7\nadicionado script de lançamento\nteste de mudança\nalterar o Syno Repo para o padrão",
-        "nl": "fixes voor DSM7\ntoegevoegd release-script\nverander testen\nverander syno repo naar standaard",
-        "fr": "correctifs pour DSM7\najout du script de publication\ntest de changement\nchanger le dépôt syno par défaut",
-        "it": "correzioni per DSM7\nscript di rilascio aggiunto\ncambiare test\ncambia il repository syno in default",
-        "es": "correcciones para DSM7\nscript de lanzamiento agregado\ncambio de prueba\ncambiar el repositorio syno por defecto",
-        "pl": "poprawki dla DSM7\ndodano skrypt wydania\nzmiana testowania\nzmień repozytorium syno na domyślne",
-        "zh-cn": "DSM7 修复\n添加了发布脚本\n变更测试\n将 Syno 存储库更改为默认值"
-      }
-    },
-    "titleLang": {
-      "en": "Synology NAS",
-      "de": "Synology NAS",
-      "ru": "Synology NAS",
-      "pt": "Synology NAS",
-      "nl": "Synology NAS",
-      "fr": "Synology NAS",
-      "it": "Synology NAS",
-      "es": "Synology NAS",
-      "pl": "Synology NAS",
-      "zh-cn": "Synology NAS"
-    },
-    "desc": {
-      "en": "Get status and control your NAS Synology",
-      "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
-      "ru": "Позволяет получать статус и управлять NAS Synology",
-      "pt": "Obtenha status e controle sua NAS Synology",
-      "nl": "Krijg status en controleer uw NAS Synology",
-      "fr": "Obtenez le statut et contrôlez votre NAS Synology",
-      "it": "Ottieni lo stato e controlla la tua Synology NAS",
-      "es": "Obtenga el estado y controle su NAS Synology",
-      "pl": "Uzyskaj status i kontroluj swój NAS Synology",
-      "zh-cn": "获取状态并控制您的 NAS Synology"
-    },
-    "platform": "Javascript/Node.js",
-    "license": "MIT",
-    "authors": [
-      "instalator"
-    ],
-    "mode": "daemon",
-    "main": "main.js",
-    "icon": "synology.png",
-    "enabled": false,
-    "messagebox": true,
-    "loglevel": "info",
-    "compact": true,
-    "materialize": true,
-    "adminUI": {
-      "config": "json"
-    },
-    "jsonConfig": true,
-    "tier": 2,
-    "connectionType": "local",
-    "dataSource": "poll",
-    "type": "infrastructure",
-    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
-    "plugins": {
-      "sentry": {
-        "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
-      }
-    },
-    "keywords": [
-      "synology NAS control"
-    ],
-    "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
-    "dependencies": [
-      {
-        "js-controller": ">=3.2.0"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=5.1.28"
-      }
-    ],
-    "messages": [
-      {
-        "condition": {
-          "operand": "and",
-          "rules": [
-            "oldVersion<2.1.0",
-            "newVersion>=2.1.0"
-          ]
+    "common": {
+        "name": "synology",
+        "version": "2.1.3",
+        "news": {
+            "2.1.1": {
+                "en": "Optimize object type determination and adjustments",
+                "de": "Optimieren Sie die Objekttypermittlung und Anpassungen",
+                "ru": "Оптимизация определения и настройки типов объектов",
+                "pt": "Otimize a determinação e os ajustes do tipo de objeto",
+                "nl": "Optimaliseer de bepaling en aanpassingen van het objecttype",
+                "fr": "Optimiser la détermination et les ajustements du type d'objet",
+                "it": "Ottimizza la determinazione e le regolazioni del tipo di oggetto",
+                "es": "Optimice la determinación y los ajustes del tipo de objeto",
+                "pl": "Zoptymalizuj określanie i dostosowywanie typu obiektu",
+                "zh-cn": "优化对象类型确定和调整"
+            },
+            "1.1.3": {
+                "en": "Fixed 2FA",
+                "de": "Behoben 2FA",
+                "ru": "Фиксированная 2FA",
+                "pt": "2FA fixo",
+                "nl": "Vaste 2FA",
+                "fr": "2FA fixe",
+                "it": "Risolto 2FA",
+                "es": "2FA fijo",
+                "pl": "Naprawiono 2FA",
+                "zh-cn": "固定 2FA"
+            },
+            "1.1.2": {
+                "en": "Fixed datatypes\nadded new ConfigJson (if you use 2FA pleease retype in config)\nFixed snapshot again",
+                "de": "Feste Datentypen\nneues ConfigJson hinzugefügt (wenn Sie 2FA verwenden, geben Sie die Konfiguration bitte erneut ein)\nSchnappschuss wieder behoben",
+                "ru": "Фиксированные типы данных\nдобавлен новый ConfigJson (если вы используете повторный ввод 2FA в конфигурации)\nСнова исправлен снимок",
+                "pt": "Tipos de dados fixos\nadicionado novo ConfigJson (se você usar 2FA pleease retype na configuração)\nSnapshot corrigido novamente",
+                "nl": "Vaste datatypes\nnieuwe ConfigJson toegevoegd (als je 2FA gebruikt, typ dan opnieuw in config)\nVaste momentopname weer",
+                "fr": "Types de données fixes\najouté un nouveau ConfigJson (si vous utilisez 2FA s'il vous plaît retaper dans la configuration)\nInstantané corrigé à nouveau",
+                "it": "Tipi di dati fissi\naggiunto nuovo ConfigJson (se usi 2FA, ti preghiamo di ridigitare in config)\nIstantanea corretta di nuovo",
+                "es": "Tipos de datos fijos\nse agregó un nuevo ConfigJson (si usa 2FA, por favor, vuelva a escribir en la configuración)\nInstantánea fija de nuevo",
+                "pl": "Naprawiono typy danych\ndodano nowy ConfigJson (jeśli używasz 2FA proszę o ponowne wpisanie w konfiguracji)\nZnowu naprawiono migawkę",
+                "zh-cn": "固定数据类型\n添加了新的 ConfigJson（如果您使用 2FA，请在配置中重新输入）\n再次修复快照"
+            },
+            "1.1.1": {
+                "en": "fix type of uptime\nfix broken snapshot link",
+                "de": "Art der Betriebszeit beheben\ndefekten Snapshot-Link reparieren",
+                "ru": "исправить тип безотказной работы\nисправить неработающую ссылку на снимок",
+                "pt": "corrigir o tipo de tempo de atividade\nconsertar link de instantâneo quebrado",
+                "nl": "type uptime repareren\nkapotte snapshot-link repareren",
+                "fr": "corriger le type de disponibilité\nréparer le lien d'instantané cassé",
+                "it": "correggere il tipo di uptime\ncorreggi il collegamento dell'istantanea rotto",
+                "es": "arreglar el tipo de tiempo de actividad\narreglar enlace de instantánea roto",
+                "pl": "napraw typ uptime\nnapraw uszkodzony link do migawki",
+                "zh-cn": "修复正常运行时间类型\n修复损坏的快照链接"
+            },
+            "1.1.0": {
+                "en": "fixes for DSM7\nadded release-script\nchange testing\nchange syno repo to default",
+                "de": "Korrekturen für DSM7\nRelease-Skript hinzugefügt\nÄnderungstest\nSyno-Repo auf Standard ändern",
+                "ru": "исправления для DSM7\nдобавлен релиз-скрипт\nизменение тестирования\nизменить syno repo на значение по умолчанию",
+                "pt": "correções para DSM7\nadicionado script de lançamento\nteste de mudança\nalterar o Syno Repo para o padrão",
+                "nl": "fixes voor DSM7\ntoegevoegd release-script\nverander testen\nverander syno repo naar standaard",
+                "fr": "correctifs pour DSM7\najout du script de publication\ntest de changement\nchanger le dépôt syno par défaut",
+                "it": "correzioni per DSM7\nscript di rilascio aggiunto\ncambiare test\ncambia il repository syno in default",
+                "es": "correcciones para DSM7\nscript de lanzamiento agregado\ncambio de prueba\ncambiar el repositorio syno por defecto",
+                "pl": "poprawki dla DSM7\ndodano skrypt wydania\nzmiana testowania\nzmień repozytorium syno na domyślne",
+                "zh-cn": "DSM7 修复\n添加了发布脚本\n变更测试\n将 Syno 存储库更改为默认值"
+            }
         },
-        "title": {
-          "en": "Re-enter the 2FA Secret after Update!",
-          "de": "Geben Sie das 2FA-Geheimnis nach dem Update erneut ein!",
-          "ru": "Повторно введите секрет 2FA после обновления!",
-          "pt": "Reinsira o 2FA Secret após a atualização!",
-          "nl": "Voer het 2FA-geheim opnieuw in na de update!",
-          "fr": "Entrez à nouveau le secret 2FA après la mise à jour !",
-          "it": "Inserisci nuovamente il segreto 2FA dopo l'aggiornamento!",
-          "es": "¡Vuelva a ingresar el secreto 2FA después de la actualización!",
-          "pl": "Wprowadź ponownie Sekret 2FA po aktualizacji!",
-          "zh-cn": "更新后重新输入2FA Secret！"
+        "titleLang": {
+            "en": "Synology NAS",
+            "de": "Synology NAS",
+            "ru": "Synology NAS",
+            "pt": "Synology NAS",
+            "nl": "Synology NAS",
+            "fr": "Synology NAS",
+            "it": "Synology NAS",
+            "es": "Synology NAS",
+            "pl": "Synology NAS",
+            "zh-cn": "Synology NAS"
         },
-        "text": {
-          "en": "After installing this update the 2FA secret used to access the Synology needs to be re-entered in the Instance-Settings!",
-          "de": "Nach der Installation dieses Updates muss das 2FA-Geheimnis für den Zugriff auf die Synology in den Instanz-Einstellungen neu eingegeben werden!",
-          "ru": "После установки этого обновления секрет 2FA, используемый для доступа к Synology, необходимо повторно ввести в настройках экземпляра!",
-          "pt": "Depois de instalar esta atualização, o segredo 2FA usado para acessar o Synology precisa ser reinserido nas configurações da instância!",
-          "nl": "Na het installeren van deze update moet het 2FA-geheim dat wordt gebruikt om toegang te krijgen tot Synology opnieuw worden ingevoerd in de Instance-Settings!",
-          "fr": "Après avoir installé cette mise à jour, le secret 2FA utilisé pour accéder au Synology doit être ressaisi dans les paramètres d'instance !",
-          "it": "Dopo aver installato questo aggiornamento, il segreto 2FA utilizzato per accedere a Synology deve essere reinserito nelle impostazioni dell'istanza!",
-          "es": "Después de instalar esta actualización, el secreto 2FA utilizado para acceder a Synology debe volver a ingresarse en la configuración de la instancia.",
-          "pl": "Po zainstalowaniu tej aktualizacji klucz 2FA używany do uzyskiwania dostępu do Synology należy ponownie wprowadzić w ustawieniach instancji!",
-          "zh-cn": "安装此更新后，用于访问 Synology 的 2FA 密码需要在实例设置中重新输入！"
+        "desc": {
+            "en": "Get status and control your NAS Synology",
+            "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
+            "ru": "Позволяет получать статус и управлять NAS Synology",
+            "pt": "Obtenha status e controle sua NAS Synology",
+            "nl": "Krijg status en controleer uw NAS Synology",
+            "fr": "Obtenez le statut et contrôlez votre NAS Synology",
+            "it": "Ottieni lo stato e controlla la tua Synology NAS",
+            "es": "Obtenga el estado y controle su NAS Synology",
+            "pl": "Uzyskaj status i kontroluj swój NAS Synology",
+            "zh-cn": "获取状态并控制您的 NAS Synology"
         },
-        "level": "warn",
-        "buttons": [
-          "agree",
-          "cancel"
+        "platform": "Javascript/Node.js",
+        "license": "MIT",
+        "authors": [
+            "instalator"
+        ],
+        "mode": "daemon",
+        "main": "main.js",
+        "icon": "synology.png",
+        "enabled": false,
+        "messagebox": true,
+        "loglevel": "info",
+        "compact": true,
+        "materialize": true,
+        "adminUI": {
+            "config": "json"
+        },
+        "jsonConfig": true,
+        "tier": 2,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "type": "infrastructure",
+        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
+        "plugins": {
+            "sentry": {
+                "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
+            }
+        },
+        "keywords": [
+            "synology NAS control"
+        ],
+        "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
+        "dependencies": [
+            {
+                "js-controller": ">=3.2.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.1.28"
+            }
+        ],
+        "messages": [
+            {
+                "condition": {
+                    "operand": "and",
+                    "rules": [
+                        "oldVersion<2.1.0",
+                        "newVersion>=2.1.0"
+                    ]
+                },
+                "title": {
+                    "en": "Re-enter the 2FA Secret after Update!",
+                    "de": "Geben Sie das 2FA-Geheimnis nach dem Update erneut ein!",
+                    "ru": "Повторно введите секрет 2FA после обновления!",
+                    "pt": "Reinsira o 2FA Secret após a atualização!",
+                    "nl": "Voer het 2FA-geheim opnieuw in na de update!",
+                    "fr": "Entrez à nouveau le secret 2FA après la mise à jour !",
+                    "it": "Inserisci nuovamente il segreto 2FA dopo l'aggiornamento!",
+                    "es": "¡Vuelva a ingresar el secreto 2FA después de la actualización!",
+                    "pl": "Wprowadź ponownie Sekret 2FA po aktualizacji!",
+                    "zh-cn": "更新后重新输入2FA Secret！"
+                },
+                "text": {
+                    "en": "After installing this update the 2FA secret used to access the Synology needs to be re-entered in the Instance-Settings!",
+                    "de": "Nach der Installation dieses Updates muss das 2FA-Geheimnis für den Zugriff auf die Synology in den Instanz-Einstellungen neu eingegeben werden!",
+                    "ru": "После установки этого обновления секрет 2FA, используемый для доступа к Synology, необходимо повторно ввести в настройках экземпляра!",
+                    "pt": "Depois de instalar esta atualização, o segredo 2FA usado para acessar o Synology precisa ser reinserido nas configurações da instância!",
+                    "nl": "Na het installeren van deze update moet het 2FA-geheim dat wordt gebruikt om toegang te krijgen tot Synology opnieuw worden ingevoerd in de Instance-Settings!",
+                    "fr": "Après avoir installé cette mise à jour, le secret 2FA utilisé pour accéder au Synology doit être ressaisi dans les paramètres d'instance !",
+                    "it": "Dopo aver installato questo aggiornamento, il segreto 2FA utilizzato per accedere a Synology deve essere reinserito nelle impostazioni dell'istanza!",
+                    "es": "Después de instalar esta actualización, el secreto 2FA utilizado para acceder a Synology debe volver a ingresarse en la configuración de la instancia.",
+                    "pl": "Po zainstalowaniu tej aktualizacji klucz 2FA używany do uzyskiwania dostępu do Synology należy ponownie wprowadzić w ustawieniach instancji!",
+                    "zh-cn": "安装此更新后，用于访问 Synology 的 2FA 密码需要在实例设置中重新输入！"
+                },
+                "level": "warn",
+                "buttons": [
+                    "agree",
+                    "cancel"
+                ]
+            }
         ]
-      }
+    },
+    "native": {
+        "host": "localhost",
+        "port": "5000",
+        "login": "admin",
+        "password": "",
+        "2fa_checkbox": false,
+        "2fa_code": "",
+        "https": false,
+        "version": "6.2.2",
+        "polling": 100,
+        "slowPollingTime": 60000,
+        "ss": true,
+        "as": true,
+        "dl": true,
+        "ssh_port": 22
+    },
+    "encryptedNative": [
+        "password",
+        "2fa_code"
+    ],
+    "protectedNative": [
+        "password",
+        "2fa_code"
+    ],
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "",
+            "type": "meta",
+            "common": {
+                "name": "Synology",
+                "type": "meta.user"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "If connected to Synology",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.reboot",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Reboot NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.shutdown",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Shutdown NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "DiskStationManager.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DiskStationManager",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "FileStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DownloadStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "AudioStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "VideoStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "VideoStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "VideoStation_DTV.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "VideoStation_DTV",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "SurveillanceStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "SurveillanceStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "SurveillanceStation.getSnapshotCamera",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Get snapshot by camera number",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.add_url_download",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Add download URL or magnet link",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.add_hash_download",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Add to Hash Downloads",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.pause_task",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Pause the download",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.resume_task",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Resume the download",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.folder",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "The folder to download",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.shedule_enabled",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Status and control of scheduled",
+                "type": "boolean",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.shedule_emule_enabled",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Status and control of scheduled",
+                "type": "boolean",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.activeTask",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Number of incomplete downloads",
+                "type": "number",
+                "read": true,
+                "write": false,
+                "def": 0
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.listTasks",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "An array with incomplete downloads",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sharing.create",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Generate one or more sharing link(s) by file/folder path(s).",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sharing.delete",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Delete one or more sharing links.",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sharing.clear_invalid",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Remove all expired and broken sharing links.",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        }
     ]
-  },
-  "native": {
-    "host": "localhost",
-    "port": "5000",
-    "login": "admin",
-    "password": "",
-    "2fa_checkbox": false,
-    "2fa_code": "",
-    "https": false,
-    "version": "6.2.2",
-    "polling": 100,
-    "slowPollingTime": 60000,
-    "ss": true,
-    "as": true,
-    "dl": true
-  },
-  "encryptedNative": [
-    "password",
-    "2fa_code"
-  ],
-  "protectedNative": [
-    "password",
-    "2fa_code"
-  ],
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "",
-      "type": "meta",
-      "common": {
-        "name": "Synology",
-        "type": "meta.user"
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "role": "indicator.connected",
-        "name": "If connected to Synology",
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "commands.reboot",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Reboot NAS",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "commands.shutdown",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Shutdown NAS",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "DiskStationManager.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "DiskStationManager",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "FileStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "DownloadStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "AudioStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "AudioStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "VideoStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "VideoStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "VideoStation_DTV.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "VideoStation_DTV",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "SurveillanceStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "SurveillanceStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "SurveillanceStation.getSnapshotCamera",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Get snapshot by camera number",
-        "type": "string",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.add_url_download",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Add download URL or magnet link",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.add_hash_download",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Add to Hash Downloads",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.pause_task",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Pause the download",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.resume_task",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Resume the download",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.folder",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "The folder to download",
-        "type": "string",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.shedule_enabled",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Status and control of scheduled",
-        "type": "boolean",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.shedule_emule_enabled",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Status and control of scheduled",
-        "type": "boolean",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.activeTask",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Number of incomplete downloads",
-        "type": "number",
-        "read": true,
-        "write": false,
-        "def": 0
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.listTasks",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "An array with incomplete downloads",
-        "type": "string",
-        "read": true,
-        "write": false,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sharing.create",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Generate one or more sharing link(s) by file/folder path(s).",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sharing.delete",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Delete one or more sharing links.",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sharing.clear_invalid",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Remove all expired and broken sharing links.",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    }
-  ]
 }

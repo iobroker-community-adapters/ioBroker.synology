@@ -15,5 +15,6 @@
     "port": "haven",
     "slowPollingTime": "Polling-tijd voor aanvullende parameters (ms)",
     "ss": "Surveillance Station",
+    "ssh_port": "SSH-poort (voor opnieuw opstarten en afsluiten)",
     "version": "API-versie"
 }

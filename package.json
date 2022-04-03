@@ -1,49 +1,34 @@
 {
-  "_from": "github:arteck/ioBroker.synology#a78dacbf8b3757ac6137492d235ad39bb6d4052b",
-  "_id": "iobroker.synology@2.1.1",
-  "_inBundle": false,
-  "_integrity": "",
-  "_location": "/iobroker.synology",
-  "_phantomChildren": {
-    "@types/node": "12.12.12"
-  },
-  "_requested": {
-    "type": "git",
-    "raw": "arteck/ioBroker.synology#a78dacbf8b3757ac6137492d235ad39bb6d4052b",
-    "rawSpec": "arteck/ioBroker.synology#a78dacbf8b3757ac6137492d235ad39bb6d4052b",
-    "saveSpec": "github:arteck/ioBroker.synology#a78dacbf8b3757ac6137492d235ad39bb6d4052b",
-    "fetchSpec": null,
-    "gitCommittish": "a78dacbf8b3757ac6137492d235ad39bb6d4052b"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "github:arteck/ioBroker.synology#a78dacbf8b3757ac6137492d235ad39bb6d4052b",
-  "_spec": "arteck/ioBroker.synology#a78dacbf8b3757ac6137492d235ad39bb6d4052b",
-  "_where": "J:\\source\\ioBroker\\SmartHome2",
+  "name": "iobroker.synology",
+  "version": "2.1.3",
+  "description": "Info and control your NAS Synology",
   "author": {
     "name": "instalator",
     "email": "vvvalt@mail.ru"
   },
-  "bugs": {
-    "url": "https://github.com/iobroker-community-adapters/ioBroker.synology/issues"
-  },
-  "bundleDependencies": false,
   "contributors": [
     {
       "name": "instalator",
       "email": "vvvalt@mail.ru"
     }
   ],
+  "homepage": "https://github.com/iobroker-community-adapters/ioBroker.synology",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "synology",
+    "NAS"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.synology"
+  },
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.0",
     "moment": "^2.29.1",
-    "syno": "git+https://github.com/kwent/syno.git",
-    "simple-ssh": "^1.1.0"
+    "syno": "https://github.com/kwent/syno",
+    "simple-ssh" : "^1.1.0"
   },
-  "deprecated": false,
-  "description": "Info and control your NAS Synology",
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.6",
     "@alcalzone/release-script-plugin-iobroker": "^3.5.7",
@@ -67,27 +52,18 @@
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0"
   },
-  "homepage": "https://github.com/iobroker-community-adapters/ioBroker.synology",
-  "keywords": [
-    "ioBroker",
-    "synology",
-    "NAS"
-  ],
-  "license": "MIT",
   "main": "main.js",
-  "name": "iobroker.synology",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/iobroker-community-adapters/ioBroker.synology.git"
-  },
   "scripts": {
-    "lint": "eslint",
-    "release": "release-script",
-    "test": "npm run test:js && npm run test:package",
-    "test:integration": "mocha test/integration --exit",
     "test:js": "mocha \"{!(node_modules|test)/**/*.test.js,*.test.js,test/**/test!(PackageFiles|Startup).js}\"",
     "test:package": "mocha test/package --exit",
-    "test:unit": "mocha test/unit --exit"
+    "test:unit": "mocha test/unit --exit",
+    "test:integration": "mocha test/integration --exit",
+    "test": "npm run test:js && npm run test:package",
+    "lint": "eslint",
+    "release": "release-script"
   },
-  "version": "2.1.3"
+  "bugs": {
+    "url": "https://github.com/iobroker-community-adapters/ioBroker.synology/issues"
+  },
+  "readmeFilename": "README.md"
 }

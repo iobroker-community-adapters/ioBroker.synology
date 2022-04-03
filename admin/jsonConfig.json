@@ -69,6 +69,14 @@
             "md": 4,
             "lg": 3
         },
+        "ssh_port": {
+            "newLine": true,
+            "type": "number",
+            "label": "ssh_port",
+            "sm": 12,
+            "md": 4,
+            "lg": 3
+        },
         "version": {
             "newLine": true,
             "type": "select",

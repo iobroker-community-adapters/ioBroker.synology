@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "news": {
+      "2.1.3": {
+        "en": "workaround for shutdown and reboot\nplz check your ssh/telnet-Port to 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "de": "Problemumgehung für das Herunterfahren und Neustarten\nBitte überprüfen Sie Ihren ssh/telnet-Port auf 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "ru": "обходной путь для выключения и перезагрузки\nпожалуйста, проверьте ваш ssh/telnet-порт на 222\n![график](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "pt": "solução alternativa para desligamento e reinicialização\npor favor, verifique sua porta ssh/telnet para 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "nl": "tijdelijke oplossing voor afsluiten en opnieuw opstarten\ncontroleer alstublieft uw ssh/telnet-poort naar 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "fr": "solution de contournement pour l'arrêt et le redémarrage\nplz vérifier votre ssh/telnet-Port à 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "it": "soluzione alternativa per l'arresto e il riavvio\nper favore controlla la tua porta ssh/telnet su 222\n![grafica](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "es": "solución alternativa para apagar y reiniciar\npor favor revise su ssh/telnet-Port a 222\n![gráfico](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "pl": "obejście wyłączenia i ponownego uruchomienia\nplz sprawdź swój port ssh/telnet na 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)",
+        "zh-cn": "关闭和重新启动的解决方法\n请检查您的 ssh/telnet 端口是否为 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)"
+      },
       "2.1.2": {
         "en": "workaround for shutdown and reboot\nplz check your ssh/telnet-Port to 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
         "de": "Problemumgehung für das Herunterfahren und Neustarten\nBitte überprüfen Sie Ihren ssh/telnet-Port auf 222\n![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)\n",
@@ -74,18 +86,6 @@
         "es": "correcciones para DSM7\nscript de lanzamiento agregado\ncambio de prueba\ncambiar el repositorio syno por defecto",
         "pl": "poprawki dla DSM7\ndodano skrypt wydania\nzmiana testowania\nzmień repozytorium syno na domyślne",
         "zh-cn": "DSM7 修复\n添加了发布脚本\n变更测试\n将 Syno 存储库更改为默认值"
-      },
-      "1.0.0": {
-        "en": "IMPORTANT: Please re-enter the password after updating to 1.0.0!",
-        "de": "WICHTIG: Bitte geben Sie das Passwort nach dem Update auf 1.0.0 erneut ein!",
-        "ru": "ВАЖНО: Пожалуйста, повторно введите пароль после обновления до 1.0.0!",
-        "pt": "IMPORTANTE: Por favor, digite a senha novamente após atualizar para 1.0.0!",
-        "nl": "BELANGRIJK: Voer het wachtwoord opnieuw in na het updaten naar 1.0.0!",
-        "fr": "IMPORTANT: veuillez ressaisir le mot de passe après la mise à jour vers la version 1.0.0!",
-        "it": "IMPORTANTE: reinserire la password dopo l'aggiornamento alla 1.0.0!",
-        "es": "IMPORTANTE: ¡Vuelva a ingresar la contraseña después de actualizar a 1.0.0!",
-        "pl": "WAŻNE: wprowadź ponownie hasło po aktualizacji do wersji 1.0.0!",
-        "zh-cn": "重要信息：更新至1.0.0后，请重新输入密码！"
       }
     },
     "titleLang": {

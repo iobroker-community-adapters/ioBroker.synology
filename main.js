@@ -87,57 +87,101 @@ function startAdapter(options){
                 let name = ids[ids.length - 2].toString();
                 let command = ids[ids.length - 1].toString();
                 let val = state.val;
-                if (command === 'reboot'){
-                    send('dsm', 'rebootSystem', (res) => {
-                        debug('System reboot');
-                        rePollAfterCmd();
-                    });
-                } else if (command === 'shutdown'){
-                    send('dsm', 'shutdownSystem', (res) => {
-                        debug('System shutdown');
-                        rePollAfterCmd();
-                    });
-                } else if (command === 'Browser'){  /*  /AS  */
-                    if (name in states.AudioStation.players){
-                        queueCmd = true;
-                        Browser(name, val);
-                    } else {
-                        error('Browser', `Error player ${name} offline?`);
-                    }
-                } else if (command === 'play_folder'){
-                    PlayFolder(name, val);
-                } else if (command === 'play_track'){
-                    PlayTrack(name, val);
-                } else if (command === 'song_id'){
-                    PlayTrackId(name, val);
-                } else if (command === 'current_play'){
-                    PlayTrackNum(name, val);
-                } else if (command === 'clearPlaylist'){
-                    clearPlaylist(name);
-                } else if (command === 'stop' || command === 'next' || command === 'prev' || command === 'volume' || command === 'seek' || command === 'pause' || command === 'play' || command === 'repeat' || command === 'shuffle'){
-                    PlayControl(name, command, val);
-                } else if (command === 'getSnapshotCamera'){
-                    getSnapshotCamera(val);
-                } else if (command === 'add_url_download' || command === 'add_hash_download'){
-                    addDownload(command, val);
-                } else if (command === 'shedule_emule_enabled' || command === 'shedule_enabled'){
-                    setConfigSchedule(command, val);
-                } else if (command === 'pause_task' || command === 'resume_task'){
-                    pauseTask(command, val);
-                } else if (command === 'enabled'){
-                    switchCam(name, command, val);
-                } else if (command === 'status_on'){
-                    send('ss', 'switchHomeMode', {on: val});
-                } else if (command === 'sendMethod'){
-                    sendMethod(name, val);
-                } else if (name === 'sharing' && command === 'create'){
-                    CreateSharing(command, val);
-                } else if (name === 'sharing' && command === 'delete'){
-                    DeleteSharing(command, val);
-                } else if (name === 'sharing' && command === 'clear_invalid'){
-                    send('fs', 'Clear_invalidSharing', {}, () => {
-                        debug('Remove all expired and broken sharing links.');
-                    });
+                switch (command) {
+                    case 'reboot':
+                        send('dsm', 'rebootSystem', {}, () => {
+                            warn('System reboot');
+                            rePollAfterCmd();
+                        });
+                        break;
+                    case 'shutdown':
+                        send('dsm', 'shutdownSystem', {}, () => {
+                            warn('System shutdown');
+                            rePollAfterCmd();
+                        });
+                        break;
+
+                    case 'Browser':
+                        if (name in states.AudioStation.players){
+                            queueCmd = true;
+                            Browser(name, val);
+                        } else {
+                            error('Browser', `Error player ${name} offline?`);
+                        }
+                        break;
+
+                    case 'play_folder':
+                        PlayFolder(name, val);
+                        break;
+                    case 'play_track':
+                        PlayTrack(name, val);
+                        break;
+                    case 'song_id':
+                        PlayTrackId(name, val);
+                        break;
+                    case 'current_play':
+                        PlayTrackNum(name, val);
+                        break;
+                    case 'clearPlaylist':
+                        clearPlaylist(name);
+                        break;
+
+                    case 'stop':
+                    case 'next':
+                    case 'prev':
+                    case 'volume':
+                    case 'seek':
+                    case 'pause':
+                    case 'play':
+                    case 'repeat':
+                    case 'shuffle':
+                        PlayControl(name, command, val);
+                        break;
+
+                    case 'getSnapshotCamera':
+                        getSnapshotCamera(val);
+                        break;
+
+                    case 'add_url_download':
+                    case 'add_hash_download':
+                        addDownload(command, val);
+                        break;
+                    case 'shedule_emule_enabled':
+                    case 'shedule_enabled':
+                        setConfigSchedule(command, val);
+                        break;
+                    case 'pause_task':
+                    case 'resume_task':
+                        pauseTask(command, val);
+                        break;
+                    case 'enabled':
+                         switchCam(name, command, val);
+                        break;
+                    case 'status_on':
+                        send('ss', 'switchHomeMode', {on: val});
+                        break;
+                    case 'sendMethod':
+                        sendMethod(name, val);
+                        break;
+                    case 'create':
+                        if (name === 'sharing') {
+                            CreateSharing(command, val);
+                        }
+                        break;
+                    case 'delete':
+                        if (name === 'sharing') {
+                            DeleteSharing(command, val);
+                        }
+                        break;
+                    case 'clear_invalid':
+                        if (name === 'sharing') {
+                            send('fs', 'Clear_invalidSharing', {}, () => {
+                                debug('Remove all expired and broken sharing links.');
+                            });
+                        }
+                        break;
+                    default:
+                        console.log(name);
                 }
             }
         },

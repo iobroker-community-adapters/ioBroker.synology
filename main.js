@@ -1315,12 +1315,12 @@ function sendSSH(method){
     try {
         var ssh = new simpleSSH({
             host: adapter.config.host,
-            port: 22,
+            port: 222,
             user: adapter.config.login,
             pass: adapter.config.password
         });
 
-        ssh.exec('echo ' + adapter.config.password + '|sudo -S ' + method + ' now').start();
+        ssh.exec('echo "' + adapter.config.password + '"|sudo -S ' + method + ' now').start();
 
     } catch (e) {
         error('--- SEND Error ', JSON.stringify(e));

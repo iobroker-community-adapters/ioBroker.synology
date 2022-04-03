@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.4",
+    "version": "2.1.5",
     "news": {
+      "2.1.5": {
+        "en": "fix DSM version detection",
+        "de": "DSM-Versionserkennung behoben",
+        "ru": "исправить определение версии DSM",
+        "pt": "corrigir a detecção de versão do DSM",
+        "nl": "fix DSM-versiedetectie",
+        "fr": "correction de la détection de version DSM",
+        "it": "correggere il rilevamento della versione DSM",
+        "es": "corregir la detección de versión de DSM",
+        "pl": "napraw wykrywanie wersji DSM",
+        "zh-cn": "修复 DSM 版本检测"
+      },
       "2.1.4": {
         "en": "workaround for shutdown and reboot(configure your ssh port in the settings)\nprevent error when setting FileStation.info.items on start once",
         "de": "Problemumgehung für das Herunterfahren und Neustarten (konfigurieren Sie Ihren SSH-Port in den Einstellungen)\nverhindert Fehler beim einmaligen Festlegen von FileStation.info.items beim Start",

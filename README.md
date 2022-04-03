@@ -21,8 +21,7 @@ If you use 2FA in DSM6 see instructions [here](docs/en/template.md)
 
 ### Reboot and Shutdown
 The adapter will do this via SSH since v2.1.4, so please set the SSH port in the adapter setttings. YOu can see it in the Synology settings:
-
-![grafik](https://user-images.githubusercontent.com/6681528/161432560-cdff0256-60e7-4856-9a9f-ca236d077695.png)
+![grafik](https://user-images.githubusercontent.com/6681528/161436776-bd04b0c6-cfb2-47ab-9bee-7ea700575bbb.png)
 
 ### sendMethod
 

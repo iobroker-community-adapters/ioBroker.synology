@@ -1433,8 +1433,7 @@ async function setObject(id, val){
     }
     if (verifiedObjects[id] === 'object' && val !== null && val !== undefined && typeof val !== 'string') {
         val = JSON.stringify(val);
-    }
-    if (val !== null && val !== undefined && verifiedObjects[id] !== typeof val || val) {
+    } else if (val !== null && val !== undefined && verifiedObjects[id] !== typeof val || val) {
         if (verifiedObjects[id] === 'boolean') {
             val = !!val;
         } else if (verifiedObjects[id] === 'string') {

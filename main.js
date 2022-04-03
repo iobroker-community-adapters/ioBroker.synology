@@ -1109,7 +1109,9 @@ function parseInfo(res, api){
 
 function setAllInstalledForDsm7 (VersionString){
     if(VersionString === null ) return
-    let VersionNumString = VersionString.split(' ').pop()[0]
+    let VersionMatch = VersionString.match(/^DSM ([0-9]+)\./)
+    if (!VersionMatch || !VersionMatch[1]) return
+    let VersionNumString = VersionMatch[1];
     info(`DSM ${VersionNumString}`)
 
     if(VersionNumString === '7' || VersionNumString === 7){

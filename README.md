@@ -73,6 +73,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) fix DSM version detection
+
 ### 2.1.4 (2022-04-03)
 * (arteck) workaround for shutdown and reboot(configure your ssh port in the settings)
 * (Apollon77) prevent error when setting FileStation.info.items on start once

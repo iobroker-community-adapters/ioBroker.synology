@@ -66,6 +66,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+### 2.1.2 (2022-04-03)
+* (arteck) workaround for shutdown and reboot
+
 ### 2.1.1 (2022-03-26)
 * (Apollon77) Optimize object type determination and adjustments
 

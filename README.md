@@ -74,6 +74,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
+
+### __WORK IN PROGRESS__
+* (Apollon77) Fix 2FA
+
 ### 2.1.5 (2022-04-03)
 * (Apollon77) fix DSM version detection
 

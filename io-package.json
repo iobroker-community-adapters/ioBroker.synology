@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.5",
+    "version": "2.1.6",
     "news": {
+      "2.1.6": {
+        "en": "Fix 2FA",
+        "de": "2FA reparieren",
+        "ru": "Исправить двухфакторную аутентификацию",
+        "pt": "Corrigir 2FA",
+        "nl": "2FA repareren",
+        "fr": "Réparer 2FA",
+        "it": "Correggi 2FA",
+        "es": "Reparar 2FA",
+        "pl": "Napraw 2FA",
+        "zh-cn": "修复 2FA"
+      },
       "2.1.5": {
         "en": "fix DSM version detection",
         "de": "DSM-Versionserkennung behoben",
@@ -74,18 +86,6 @@
         "es": "arreglar el tipo de tiempo de actividad\narreglar enlace de instantánea roto",
         "pl": "napraw typ uptime\nnapraw uszkodzony link do migawki",
         "zh-cn": "修复正常运行时间类型\n修复损坏的快照链接"
-      },
-      "1.1.0": {
-        "en": "fixes for DSM7\nadded release-script\nchange testing\nchange syno repo to default",
-        "de": "Korrekturen für DSM7\nRelease-Skript hinzugefügt\nÄnderungstest\nSyno-Repo auf Standard ändern",
-        "ru": "исправления для DSM7\nдобавлен релиз-скрипт\nизменение тестирования\nизменить syno repo на значение по умолчанию",
-        "pt": "correções para DSM7\nadicionado script de lançamento\nteste de mudança\nalterar o Syno Repo para o padrão",
-        "nl": "fixes voor DSM7\ntoegevoegd release-script\nverander testen\nverander syno repo naar standaard",
-        "fr": "correctifs pour DSM7\najout du script de publication\ntest de changement\nchanger le dépôt syno par défaut",
-        "it": "correzioni per DSM7\nscript di rilascio aggiunto\ncambiare test\ncambia il repository syno in default",
-        "es": "correcciones para DSM7\nscript de lanzamiento agregado\ncambio de prueba\ncambiar el repositorio syno por defecto",
-        "pl": "poprawki dla DSM7\ndodano skrypt wydania\nzmiana testowania\nzmień repozytorium syno na domyślne",
-        "zh-cn": "DSM7 修复\n添加了发布脚本\n变更测试\n将 Syno 存储库更改为默认值"
       }
     },
     "titleLang": {

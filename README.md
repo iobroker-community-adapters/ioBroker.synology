@@ -74,8 +74,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.1.6 (2022-04-04)
 * (Apollon77) Fix 2FA
 
 ### 2.1.5 (2022-04-03)

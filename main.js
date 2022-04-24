@@ -9,7 +9,7 @@ const simpleSSH = require('simple-ssh');
 let adapter;
 let syno;
 let timeOutPoll;
-let timeOutRecconect;
+let timeOutReconnect;
 let pollTime;
 let connect = false;
 let iteration = 0;
@@ -73,7 +73,7 @@ function startAdapter(options){
         ready:        main,
         unload:       callback => {
             timeOutPoll && clearTimeout(timeOutPoll);
-            timeOutRecconect && clearTimeout(timeOutRecconect);
+            timeOutReconnect && clearTimeout(timeOutReconnect);
             timeOut && clearTimeout(timeOut);
             try {
                 debug('cleaned everything up...');
@@ -1460,13 +1460,13 @@ function error(src, e, cb){
     if (!~src.indexOf('getSongCover')){
         adapter.log.debug(`*** ERROR : src: ${src || 'unknown'} code: ${code} message: ${message}`);
     }
-    if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT'){
-        timeOutRecconect && clearTimeout(timeOutRecconect);
+    if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || (code === 404 && message.includes('2-step'))){
+        timeOutReconnect && clearTimeout(timeOutReconnect);
         timeOutPoll && clearTimeout(timeOutPoll);
         setInfoConnection(false);
         connect = false;
         adapter.log.debug('Error: Reconnection after 10s');
-        timeOutRecconect = setTimeout(() => {
+        timeOutReconnect = setTimeout(() => {
             newSyno();
         }, 10000);
     } else {

@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.6",
+    "version": "2.1.7",
     "news": {
+      "2.1.7": {
+        "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
+        "de": "Versuchen Sie, Kontosperren zu verhindern, wenn Sie 2FA bei Neustarts des NAS verwenden",
+        "ru": "Попробуйте предотвратить блокировку учетной записи при использовании 2FA при перезапуске NAS.",
+        "pt": "Tente evitar bloqueios de conta ao usar 2FA nas reinicializações do NAS",
+        "nl": "Probeer accountvergrendelingen te voorkomen bij gebruik van 2FA bij het opnieuw opstarten van de NAS",
+        "fr": "Essayez d'empêcher les verrouillages de compte lors de l'utilisation de 2FA lors des redémarrages du NAS",
+        "it": "Cerca di prevenire i blocchi dell'account quando si utilizza 2FA al riavvio del NAS",
+        "es": "Intente evitar bloqueos de cuenta cuando use 2FA en reinicios del NAS",
+        "pl": "Spróbuj zapobiec blokadom kont podczas korzystania z 2FA przy ponownym uruchomieniu NAS",
+        "zh-cn": "尝试在 NAS 重启时使用 2FA 防止帐户锁定"
+      },
       "2.1.6": {
         "en": "Fix 2FA",
         "de": "2FA reparieren",
@@ -74,18 +86,6 @@
         "es": "Tipos de datos fijos\nse agregó un nuevo ConfigJson (si usa 2FA, por favor, vuelva a escribir en la configuración)\nInstantánea fija de nuevo",
         "pl": "Naprawiono typy danych\ndodano nowy ConfigJson (jeśli używasz 2FA proszę o ponowne wpisanie w konfiguracji)\nZnowu naprawiono migawkę",
         "zh-cn": "固定数据类型\n添加了新的 ConfigJson（如果您使用 2FA，请在配置中重新输入）\n再次修复快照"
-      },
-      "1.1.1": {
-        "en": "fix type of uptime\nfix broken snapshot link",
-        "de": "Art der Betriebszeit beheben\ndefekten Snapshot-Link reparieren",
-        "ru": "исправить тип безотказной работы\nисправить неработающую ссылку на снимок",
-        "pt": "corrigir o tipo de tempo de atividade\nconsertar link de instantâneo quebrado",
-        "nl": "type uptime repareren\nkapotte snapshot-link repareren",
-        "fr": "corriger le type de disponibilité\nréparer le lien d'instantané cassé",
-        "it": "correggere il tipo di uptime\ncorreggi il collegamento dell'istantanea rotto",
-        "es": "arreglar el tipo de tiempo de actividad\narreglar enlace de instantánea roto",
-        "pl": "napraw typ uptime\nnapraw uszkodzony link do migawki",
-        "zh-cn": "修复正常运行时间类型\n修复损坏的快照链接"
       }
     },
     "titleLang": {

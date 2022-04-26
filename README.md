@@ -74,8 +74,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.1.7 (2022-04-26)
 * (Apollon77) Try to prevent account locks when using 2FA on restarts of the NAS
 
 ### 2.1.6 (2022-04-04)

@@ -1,4 +1,4 @@
-# This is Documentation
+# 2FA
 
 Follow these steps to configure 2FA in DSM6:
 
@@ -21,3 +21,6 @@ Complete the 2FA setup.
 
 ![Picture](img/admin.jpg)
 
+If this do not work out or it can not be found that way (on DSM7 or such) then try this:
+
+Click on "user options" => "personal" => "2FA" => Verification Code (OTP) => Reset devices => "Can't scan it?" and here you get the secret key - copy and paste this to iobroker, go back, scan the code with your mobile and validate it.

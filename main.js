@@ -1250,7 +1250,7 @@ function sendPolling(namePolling){
                         timeOut = setTimeout(() => {
                             iterator(namePolling);
                         }, 30000);
-                    } else {
+                    } else if (!timeOutReconnect) {
                         iterator(namePolling);
                     }
                 });
@@ -1465,10 +1465,11 @@ function error(src, e, cb){
         timeOutPoll && clearTimeout(timeOutPoll);
         setInfoConnection(false);
         connect = false;
-        adapter.log.debug('Error: Reconnection after 10s');
+        adapter.log.debug('Error: Reconnection after 30s');
         timeOutReconnect = setTimeout(() => {
+            timeOutReconnect = null;
             newSyno();
-        }, 10000);
+        }, 30000);
     } else {
         cb && cb(e);
     }

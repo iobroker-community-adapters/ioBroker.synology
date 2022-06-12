@@ -74,8 +74,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
-
-### __WORK IN PROGRESS__
+### 2.1.8 (2022-06-12)
 * (Apollon77) slow down reconnects to the DSM
 
 ### 2.1.7 (2022-04-26)

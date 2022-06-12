@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.7",
+    "version": "2.1.8",
     "news": {
+      "2.1.8": {
+        "en": "slow down reconnects to the DSM",
+        "de": "verlangsamung der Verbindungen zum DSM",
+        "ru": "замедлить переподключение к DSM",
+        "pt": "retardar reconectações ao DSM",
+        "nl": "langzamer contact met de DSM",
+        "fr": "ralentir les reconnections au DSM",
+        "it": "rallentare le connessioni al DSM",
+        "es": "desacelerar las conexiones con el DSM",
+        "pl": "powolne połączenia do DSM",
+        "zh-cn": "d. 与DSM的重新连接缓慢"
+      },
       "2.1.7": {
         "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
         "de": "Versuchen Sie, Kontosperren zu verhindern, wenn Sie 2FA bei Neustarts des NAS verwenden",
@@ -74,18 +86,6 @@
         "es": "2FA fijo",
         "pl": "Naprawiono 2FA",
         "zh-cn": "固定 2FA"
-      },
-      "1.1.2": {
-        "en": "Fixed datatypes\nadded new ConfigJson (if you use 2FA pleease retype in config)\nFixed snapshot again",
-        "de": "Feste Datentypen\nneues ConfigJson hinzugefügt (wenn Sie 2FA verwenden, geben Sie die Konfiguration bitte erneut ein)\nSchnappschuss wieder behoben",
-        "ru": "Фиксированные типы данных\nдобавлен новый ConfigJson (если вы используете повторный ввод 2FA в конфигурации)\nСнова исправлен снимок",
-        "pt": "Tipos de dados fixos\nadicionado novo ConfigJson (se você usar 2FA pleease retype na configuração)\nSnapshot corrigido novamente",
-        "nl": "Vaste datatypes\nnieuwe ConfigJson toegevoegd (als je 2FA gebruikt, typ dan opnieuw in config)\nVaste momentopname weer",
-        "fr": "Types de données fixes\najouté un nouveau ConfigJson (si vous utilisez 2FA s'il vous plaît retaper dans la configuration)\nInstantané corrigé à nouveau",
-        "it": "Tipi di dati fissi\naggiunto nuovo ConfigJson (se usi 2FA, ti preghiamo di ridigitare in config)\nIstantanea corretta di nuovo",
-        "es": "Tipos de datos fijos\nse agregó un nuevo ConfigJson (si usa 2FA, por favor, vuelva a escribir en la configuración)\nInstantánea fija de nuevo",
-        "pl": "Naprawiono typy danych\ndodano nowy ConfigJson (jeśli używasz 2FA proszę o ponowne wpisanie w konfiguracji)\nZnowu naprawiono migawkę",
-        "zh-cn": "固定数据类型\n添加了新的 ConfigJson（如果您使用 2FA，请在配置中重新输入）\n再次修复快照"
       }
     },
     "titleLang": {

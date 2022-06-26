@@ -677,7 +677,7 @@ async function getStatusPlayer(cb){
                         reject();
                     }
                 }
-                resolve();
+                resolve(true);
             });
         })
     }

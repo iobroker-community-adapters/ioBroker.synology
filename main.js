@@ -642,12 +642,11 @@ function clearPlayerStates(playerid, cb){
     cb && cb();
 }
 
-function getStatusPlayer(cb){
-    for (const playerid of Object.keys(states.AudioStation.players)) {
-        let param = {};
-        if (playerid && states.AudioStation.players[playerid].online){
+async function getStatusPlayer(cb){
+    function getOneStatusPlayer(playerid) {
+        return new Promise((resolve, reject) => {
             debug(`* getStatusPlayer ${playerid}`);
-            param = {
+            let param = {
                 id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
             };
             send('as', 'getStatusRemotePlayerStatus', param, (res) => {
@@ -674,10 +673,25 @@ function getStatusPlayer(cb){
                     states.AudioStation.players[playerid].online = false;
                     states.AudioStation.players[playerid].state_playing = 'stop';
                     clearPlayerStates(playerid);
+                    if (res === false && timeOutReconnect) {
+                        reject();
+                    }
                 }
+                resolve();
             });
+        })
+    }
+
+    for (const playerid of Object.keys(states.AudioStation.players)) {
+        if (playerid && states.AudioStation.players[playerid].online){
+            try {
+                await getOneStatusPlayer(playerid);
+            } catch (err) {
+                break;
+            }
         }
     }
+    cb && cb();
 }
 
 function getSongCover(playerid, cb){
@@ -1233,7 +1247,7 @@ function sendPolling(namePolling){
                         } else {
                             error('ParseFunction', `syno[${api}][${method}] Error - Not Function!`);
                         }
-                    } else if (err){
+                    } else if (err) {
                         if (api === 'ss' && method === 'getInfo' && ~err.toString().indexOf('version does not support')){
                             adapter.log.warn(`sendPolling Error -${err} You are using a hacked version of SS?`);
                         } else if (~err.toString().indexOf('No such account or incorrect password')){
@@ -1245,7 +1259,7 @@ function sendPolling(namePolling){
                             iteration = -1;
                         }
                     }
-                    if (adapter.config['twofa_checkbox'] && firstStart){
+                    if (adapter.config['twofa_checkbox'] && firstStart) {
                         timeOut && clearTimeout(timeOut);
                         timeOut = setTimeout(() => {
                             iterator(namePolling);
@@ -1309,6 +1323,7 @@ function send(api, method, params, cb){
         });
     } catch (e) {
         error('--- SEND Error ', JSON.stringify(e));
+        cb && cb(false);
     }
 }
 
@@ -1460,7 +1475,7 @@ function error(src, e, cb){
     if (!~src.indexOf('getSongCover')){
         adapter.log.debug(`*** ERROR : src: ${src || 'unknown'} code: ${code} message: ${message}`);
     }
-    if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || (code === 404 && message.includes('2-step'))){
+    if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || code === 'EHOSTUNREACH' || (code === 404 && message.includes('2-step'))){
         timeOutReconnect && clearTimeout(timeOutReconnect);
         timeOutPoll && clearTimeout(timeOutPoll);
         setInfoConnection(false);

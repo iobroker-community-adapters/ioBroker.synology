@@ -1531,6 +1531,7 @@ function newSyno(){
     if (apiVersion === '7.x.x') {
         apiVersion = '6.2.3';
     }
+    firstStart = true;
     try {
         syno = new Syno({
             ignoreCertificateErrors: true, /*rejectUnauthorized: false,*/

@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.8",
+    "version": "2.1.9",
     "news": {
+      "2.1.9": {
+        "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
+        "de": "Versuchen Sie, Kontosperren zu verhindern, wenn 2FA bei Neustarts des NAS",
+        "ru": "Попробуйте предотвратить замки аккаунта при использовании 2FA на перезагрузках НАН",
+        "pt": "Tente evitar bloqueios de conta ao usar 2FA em reinicializações do NAS",
+        "nl": "Probeer rekeningsloten te voorkomen als je 2FA gebruikt voor herstart van de NASA",
+        "fr": "Essayez d'éviter les verrous de compte lors de l'utilisation de 2FA sur les redémarrages du NAS",
+        "it": "Cerca di evitare le serrature dell'account quando si utilizza 2FA su riavvio del NAS",
+        "es": "Trate de prevenir las cerraduras de cuenta al utilizar 2FA en reinicios del NAS",
+        "pl": "Próba zapobiegania zamknięciu w przypadku ponownego uruchomienia NAS na podstawie 2FA",
+        "zh-cn": "利用《国家体系》的其它条款防止账户锁定"
+      },
       "2.1.8": {
         "en": "slow down reconnects to the DSM",
         "de": "verlangsamung der Verbindungen zum DSM",
@@ -74,18 +86,6 @@
         "es": "Optimice la determinación y los ajustes del tipo de objeto",
         "pl": "Zoptymalizuj określanie i dostosowywanie typu obiektu",
         "zh-cn": "优化对象类型确定和调整"
-      },
-      "1.1.3": {
-        "en": "Fixed 2FA",
-        "de": "Behoben 2FA",
-        "ru": "Фиксированная 2FA",
-        "pt": "2FA fixo",
-        "nl": "Vaste 2FA",
-        "fr": "2FA fixe",
-        "it": "Risolto 2FA",
-        "es": "2FA fijo",
-        "pl": "Naprawiono 2FA",
-        "zh-cn": "固定 2FA"
       }
     },
     "titleLang": {

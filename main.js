@@ -1259,7 +1259,7 @@ function sendPolling(namePolling){
                             iteration = -1;
                         }
                     }
-                    if (adapter.config['twofa_checkbox'] && firstStart) {
+                    if (adapter.config['twofa_checkbox'] && firstStart && !timeOutReconnect) {
                         timeOut && clearTimeout(timeOut);
                         timeOut = setTimeout(() => {
                             iterator(namePolling);

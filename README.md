@@ -74,6 +74,12 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 
 ## Changelog
+<!--
+## __WORK IN PROGRESS__
+-->
+### __WORK IN PROGRESS__
+*(McM1957) Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)
+
 ### 2.1.9 (2022-07-01)
 * (Apollon77) Try to prevent account locks when using 2FA on restarts of the NAS
 

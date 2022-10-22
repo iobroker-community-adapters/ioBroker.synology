@@ -91,13 +91,13 @@ function startAdapter(options){
                 let val = state.val;
                 switch (command) {
                     case 'reboot':
-                        sendSSH('shutdown -r', () => {
+                        sendSSH('shutdown -r now', () => {
                             warn('System reboot');
                             rePollAfterCmd();
                         });
                         break;
                     case 'shutdown':
-                        sendSSH('shutdown -h', () => {
+                        sendSSH('shutdown -h now', () => {
                             warn('System shutdown');
                             rePollAfterCmd();
                         });
@@ -1337,10 +1337,13 @@ function sendSSH(method, cb) {
             pass: adapter.config.password
         });
 
-        ssh.exec(`echo "${adapter.config.password}"|sudo -S ${method} now`,{
+        const sshcmd= 'echo \''+adapter.config.password+'\' | sudo -S ' + method;
+        //ssh.exec(`echo \'${adapter.config.password}\n\'|sudo -S ${method}`,{
+        ssh.exec(sshcmd, {
             err: (err) => {
-                    error('SSH Error:', err);
-                },
+                error('SSH Error:', err);
+                console.log( 'SSH Error:' + err );
+            },
             exit: () => {
                 cb && cb();
             }

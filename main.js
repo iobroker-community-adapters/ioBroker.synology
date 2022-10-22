@@ -1337,12 +1337,12 @@ function sendSSH(method, cb) {
             pass: adapter.config.password
         });
 
+        //old code ssh.exec(`echo \'${adapter.config.password}\n\'|sudo -S ${method}`,{
         const sshcmd= 'echo \''+adapter.config.password+'\' | sudo -S ' + method;
-        //ssh.exec(`echo \'${adapter.config.password}\n\'|sudo -S ${method}`,{
+        debug( 'SSH:' + sshcmd);
         ssh.exec(sshcmd, {
             err: (err) => {
                 error('SSH Error:', err);
-                console.log( 'SSH Error:' + err );
             },
             exit: () => {
                 cb && cb();

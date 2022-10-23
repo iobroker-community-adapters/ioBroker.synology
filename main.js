@@ -1337,7 +1337,7 @@ function sendSSH(method, cb) {
             pass: adapter.config.password
         });
 
-        //old code ssh.exec(`echo \'${adapter.config.password}\n\'|sudo -S ${method}`,{
+        // substitute single ' with '"'"' - 'aaa'bbb' -> 'aaa'"'"'bbb' using string concat
         const pwd= adapter.config.password.replaceAll("'", "\'\"\'\"\'");
         const sshcmd= `echo '${pwd}'|sudo -S ${method}`;
         debug( 'SSH:' + sshcmd);

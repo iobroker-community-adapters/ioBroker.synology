@@ -1338,7 +1338,8 @@ function sendSSH(method, cb) {
         });
 
         //old code ssh.exec(`echo \'${adapter.config.password}\n\'|sudo -S ${method}`,{
-        const sshcmd= 'echo \''+adapter.config.password+'\' | sudo -S ' + method;
+        const pwd= adapter.config.password.replaceAll("'", "\'\"\'\"\'");
+        const sshcmd= `echo '${pwd}'|sudo -S ${method}`;
         debug( 'SSH:' + sshcmd);
         ssh.exec(sshcmd, {
             err: (err) => {

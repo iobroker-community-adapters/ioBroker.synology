@@ -1,11 +1,24 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.9",
+    "version": "2.1.10",
     "news": {
+      "2.1.10": {
+        "en": "Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)\nBase modules have been updated as suggested by dependabot.",
+        "de": "Die Handhabung von Passwörtern mit Sonderzeichen (d.h. Dollarzeichen) wurde behoben (#180)\nBasismodule wurden wie von dependabot vorgeschlagen aktualisiert.",
+        "ru": "Обработка паролей, содержащих специальные символы (т.е. знак доллара) была зафиксирована (#180)\nБазовые модули были обновлены в качестве предложенного в зависимости от.",
+        "pt": "Manipulação de senhas contendo caracteres especiais (ou seja, um sinal de dólar) foi corrigido (#180)\nMódulos base foram atualizados como sugerido por dependeabot.",
+        "nl": "De wachtwoorden bevatten speciale personages\nBasismodules zijn geüpdateerd door afhankelijkheid.",
+        "fr": "La manipulation de mots de passe contenant des caractères spéciaux (c.-à-d. un signe en dollars) a été corrigée (#180)\nLes modules de base ont été mis à jour comme l ' a suggéré le fonctionnaire.",
+        "it": "La gestione delle password contenenti caratteri speciali (cioè un segno di dollaro) è stata fissata (#180)\nI moduli base sono stati aggiornati come suggerito da dipendeabot.",
+        "es": "Se ha fijado el manejo de contraseñas que contienen caracteres especiales (es decir, un signo de dólar) (#180)\nLos módulos de base se han actualizado según lo sugerido por dependabot.",
+        "pl": "Umieszczenie hasła zawierającego specjalne znaki (np. znak dolarowy) zostało ustalone (#180)\nModuły bazowe zostały zaktualizowane w zależności od bota.",
+        "uk": "Обробка паролів, що містять спеціальні символи (тобто знак долара) була виправлена (#180)\nОновлено базові модулі, запропоновані залежною.",
+        "zh-cn": "已确定含有特殊性质的密码(即美元签名)\n基地单元已按依赖性药物的建议更新。."
+      },
       "2.1.9": {
         "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
-        "de": "Versuchen Sie, Kontosperren zu verhindern, wenn 2FA bei Neustarts des NAS",
+        "de": "Es wird versucht Kontosperren zu verhindern, wenn 2FA bei Neustarts des NAS aktiviert ist.",
         "ru": "Попробуйте предотвратить замки аккаунта при использовании 2FA на перезагрузках НАН",
         "pt": "Tente evitar bloqueios de conta ao usar 2FA em reinicializações do NAS",
         "nl": "Probeer rekeningsloten te voorkomen als je 2FA gebruikt voor herstart van de NASA",
@@ -17,7 +30,7 @@
       },
       "2.1.8": {
         "en": "slow down reconnects to the DSM",
-        "de": "verlangsamung der Verbindungen zum DSM",
+        "de": "Verlangsamung der Verbindungen zum DSM implementiert",
         "ru": "замедлить переподключение к DSM",
         "pt": "retardar reconectações ao DSM",
         "nl": "langzamer contact met de DSM",

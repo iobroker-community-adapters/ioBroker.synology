@@ -77,7 +77,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
 ## __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.1.10 (2022-10-23)
 *(McM1957) Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)
 *(McM1957) Base modules have been updated as suggested by dependabot.
 

@@ -1,4 +1,6 @@
 "use strict";
+// @ts-check
+
 const utils = require('@iobroker/adapter-core');
 const Syno = require('syno');
 const fs = require('fs');
@@ -1338,7 +1340,8 @@ function sendSSH(method, cb) {
         });
 
         // substitute single ' with '"'"' - 'aaa'bbb' -> 'aaa'"'"'bbb' using string concat
-        const pwd= adapter.config.password.replaceAll("'", "\'\"\'\"\'");
+        //const pwd= adapter.config.password.replaceAll("'", "\'\"\'\"\'"); - replaceAll requires node.15
+        const pwd= adapter.config.password.replace(/\'/g, "\'\"\'\"\'");
         const sshcmd= `echo '${pwd}'|sudo -S ${method}`;
         debug( 'SSH:' + sshcmd);
         ssh.exec(sshcmd, {

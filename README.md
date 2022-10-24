@@ -78,7 +78,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## __WORK IN 
 -->
 ### __WORK IN PROGRESS__
-*(McM1957) Code has been adapted tobe compatible with node.14.
+*(McM1957) The adapter has been adapted to be compatible with node.14.
 
 ### 2.1.10 (2022-10-23)
 *(McM1957) Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)

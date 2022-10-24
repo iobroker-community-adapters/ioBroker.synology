@@ -77,7 +77,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
 ## __WORK IN 
 -->
-### __WORK IN PROGRESS__
+### 2.1.11 (2022-10-24)
 *(McM1957) The adapter has been adapted to be compatible with node14.
 
 ### 2.1.10 (2022-10-23)

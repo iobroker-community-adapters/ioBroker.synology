@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.10",
+    "version": "2.1.11",
     "news": {
+      "2.1.11": {
+        "en": "The adapter has been adapted to be compatible with node14.",
+        "de": "Der Adapter wurde angepasst, um mit node14 kompatibel zu sein.",
+        "ru": "Адаптер адаптирован к совместимости с node14.",
+        "pt": "O adaptador foi adaptado para ser compatível com o node14.",
+        "nl": "De adapter is aangepast om vergelijkbaar te zijn met Node14.",
+        "fr": "L'adaptateur a été adapté pour être compatible avec node14.",
+        "it": "L'adattatore è stato adattato per essere compatibile con node14.",
+        "es": "El adaptador ha sido adaptado para ser compatible con nodo14.",
+        "pl": "Adaptator jest kompatybilny z węzłem 14.",
+        "uk": "Адаптер був адаптований до сумісності з node14.",
+        "zh-cn": "适应者已适应与第14号不相符。."
+      },
       "2.1.10": {
         "en": "Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)\nBase modules have been updated as suggested by dependabot.",
         "de": "Die Handhabung von Passwörtern mit Sonderzeichen (d.h. Dollarzeichen) wurde behoben (#180)\nBasismodule wurden wie von dependabot vorgeschlagen aktualisiert.",

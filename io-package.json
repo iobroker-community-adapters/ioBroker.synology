@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.11",
+    "version": "2.1.12",
     "news": {
+      "2.1.12": {
+        "en": "Logging of password in clear text has been removed.",
+        "de": "Die Protokollierung des Passworts im Klartext wurde entfernt.",
+        "ru": "Запись пароля в ясном тексте удалена.",
+        "pt": "O registro de senha em texto claro foi removido.",
+        "nl": "Er is veel wachtwoord verwijderd.",
+        "fr": "La saisie du mot de passe dans un texte clair a été supprimée.",
+        "it": "La registrazione della password in testo chiaro è stata rimossa.",
+        "es": "Se ha eliminado la contraseña en texto claro.",
+        "pl": "Zdarza się, że fragment tekstu jawnego został usunięty.",
+        "uk": "Зняття пароля в чіткому тексті.",
+        "zh-cn": "删除了明确案文中的密码。."
+      },
       "2.1.11": {
         "en": "The adapter has been adapted to be compatible with node14.",
         "de": "Der Adapter wurde angepasst, um mit node14 kompatibel zu sein.",

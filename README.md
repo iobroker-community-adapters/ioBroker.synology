@@ -77,7 +77,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
 ## __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.1.12 (2022-10-26)
 *(McM1957) Logging of password in clear text has been removed.
 
 ### 2.1.11 (2022-10-24)

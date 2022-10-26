@@ -75,8 +75,11 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 <!--
-## __WORK IN 
+## __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+*(McM1957) Logging of password in clear text has been removed.
+
 ### 2.1.11 (2022-10-24)
 *(McM1957) The adapter has been adapted to be compatible with node14.
 

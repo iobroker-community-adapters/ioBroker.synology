@@ -1343,7 +1343,8 @@ function sendSSH(method, cb) {
         //const pwd= adapter.config.password.replaceAll("'", "\'\"\'\"\'"); - replaceAll requires node.15
         const pwd= adapter.config.password.replace(/'/g, "'\"'\"'");
         const sshcmd= `echo '${pwd}'|sudo -S ${method}`;
-        debug( 'SSH:' + sshcmd);
+        const sshcmd4log= `echo '******'|sudo -S ${method}`;
+        debug( 'SSH:' + sshcmd4log);
         ssh.exec(sshcmd, {
             err: (err) => {
                 error('SSH Error:', err);

@@ -27,7 +27,7 @@
     "@iobroker/adapter-core": "^2.6.6",
     "moment": "^2.29.4",
     "simple-ssh": "^1.1.0",
-    "syno": "git+https://github.com/MeisterTR/syno"
+    "syno": "git+https://git@github.com/MeisterTR/syno.git"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",

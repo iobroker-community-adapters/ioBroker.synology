@@ -42,7 +42,9 @@ jobs:
       matrix:
         node-version: [14.x, 16.x, 18.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
-
+        exclude:
+          - os: windows-latest
+            node-version: 14.x
     steps:
       - uses: ioBroker/testing-action-adapter@v1
         with:

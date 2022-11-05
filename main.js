@@ -1524,7 +1524,7 @@ function main(){
         PollCmd.slowPoll = result;
     }
     pathInstance = `${adapter.namespace.replace('.', '_')}/`;
-    dir = `${utils.controllerDir}/${adapter.systemConfig.dataDir}${adapter.namespace.replace('.', '_')}/`;
+    dir = utils.getAbsoluteDefaultDataDir()+`${adapter.namespace.replace('.', '_')}/`;
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
     adapter.writeFile(adapter.namespace, 'cover.png', fs.readFileSync(`${__dirname}/admin/cover.png`));
     newSyno();

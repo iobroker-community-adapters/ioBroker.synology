@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.12",
+    "version": "2.1.13",
     "news": {
+      "2.1.13": {
+        "en": "Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)\nSeveral base modules have been updated.",
+        "de": "Code wurde für die bevorstehende Version des js-Controllers vorbereitet. Referenz auf utils.controller Dir wurde entfernt. (#198)\nMehrere Basismodule wurden aktualisiert.",
+        "ru": "Код был подготовлен для предстоящего релиза js-controller. Ссылка на utils.controller Dir был удален. (#198)\nОбновлены несколько базовых модулей.",
+        "pt": "O código foi preparado para a próxima versão js-controller. Referência a utils.controller Dir foi removido. (#198)\nVários módulos de base foram atualizados.",
+        "nl": "De code is voorbereid op het opkomen van Js-controller vrijlating. Referentie tot utils. Dir is verwijderd\nEr zijn meerdere basismodules geüpdateerd.",
+        "fr": "Le code a été préparé pour la prochaine libération de js-controller. Référence à utils.controller Dir a été enlevé. (#198)\nPlusieurs modules de base ont été mis à jour.",
+        "it": "Codice è stato preparato per il prossimo rilascio js-controller. Riferimento utils.controller Dir è stato rimosso. (#198)\nDiversi moduli di base sono stati aggiornati.",
+        "es": "El código ha sido preparado para la próxima liberación js-controller. Referencia a utils.controller Dir ha sido eliminado. (#198)\nSe han actualizado varios módulos de base.",
+        "pl": "Kod został przygotowany do nadchodzącego wydania js-controllera. Odwołuje się do narzędzi. Zwolniony został (#198)\nZaktualizowano kilka modułów bazowych.",
+        "uk": "Код був підготовлений для майбутнього релізу js-controller. Посилання на utils.controller Зняття циркулі. (#198)\nБуло оновлено кілька базових модулів.",
+        "zh-cn": "已编制了即将释放的小册子的守则。 提及使用费。 他们已被撤职。\n更新了几个基单元。."
+      },
       "2.1.12": {
         "en": "Logging of password in clear text has been removed.",
         "de": "Die Protokollierung des Passworts im Klartext wurde entfernt.",

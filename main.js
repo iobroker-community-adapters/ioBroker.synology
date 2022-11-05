@@ -5,8 +5,8 @@ const utils = require('@iobroker/adapter-core');
 const Syno = require('syno');
 const fs = require('fs');
 const moment = require('moment');
+const path = require('path');
 const simpleSSH = require('simple-ssh');
-
 
 let adapter;
 let syno;
@@ -23,7 +23,7 @@ let slowPollingTime;
 let dir;
 let old_states;
 let timeOut;
-let pathInstance;
+// let pathInstance;
 let verifiedObjects = {};
 
 const stateSS = {
@@ -1406,7 +1406,7 @@ async function setObject(id, val){
         let obj = null;
         try {
             obj = await adapter.getObjectAsync(id);
-        } catch {
+        } catch (e) {
             // ignore
         }
         let common = {
@@ -1523,8 +1523,11 @@ function main(){
         });
         PollCmd.slowPoll = result;
     }
-    pathInstance = `${adapter.namespace.replace('.', '_')}/`;
-    dir = `${utils.controllerDir}/${adapter.systemConfig.dataDir}${adapter.namespace.replace('.', '_')}/`;
+    // const dirOld = `${utils.controllerDir}/${adapter.systemConfig.dataDir}${adapter.namespace.replace('.', '_')}/`;
+    const pathInstance = `${adapter.namespace.replace('.', '_')}/`;
+    dir = path.join( utils.getAbsoluteDefaultDataDir(), pathInstance );
+    debug ('working directory is ' + dir);
+
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
     adapter.writeFile(adapter.namespace, 'cover.png', fs.readFileSync(`${__dirname}/admin/cover.png`));
     newSyno();

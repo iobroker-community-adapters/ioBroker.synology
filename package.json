@@ -26,7 +26,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.6",
     "moment": "^2.29.4",
-    "simple-ssh": "^1.1.0",
+    "simple-ssh": "^1.1.1",
     "syno": "git+https://git@github.com/MeisterTR/syno.git"
   },
   "devDependencies": {

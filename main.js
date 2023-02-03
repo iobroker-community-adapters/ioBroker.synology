@@ -7,6 +7,7 @@ const fs = require('fs');
 const moment = require('moment');
 const path = require('path');
 const simpleSSH = require('simple-ssh');
+const wol = require('wol');
 
 let adapter;
 let syno;
@@ -25,6 +26,8 @@ let old_states;
 let timeOut;
 // let pathInstance;
 let verifiedObjects = {};
+let wolTries = 3;
+let wolTimer = null;
 
 const stateSS = {
     recStatus:  {
@@ -78,6 +81,10 @@ function startAdapter(options){
             timeOutReconnect && clearTimeout(timeOutReconnect);
             timeOut && clearTimeout(timeOut);
             try {
+                if (wolTimer) {
+                    clearTimeout(wolTimer);
+                    wolTimer = null;
+                }
                 debug('cleaned everything up...');
                 callback();
             } catch (e) {
@@ -159,7 +166,7 @@ function startAdapter(options){
                         pauseTask(command, val);
                         break;
                     case 'enabled':
-                         switchCam(name, command, val);
+                        switchCam(name, command, val);
                         break;
                     case 'status_on':
                         send('ss', 'switchHomeMode', {on: val});
@@ -188,6 +195,21 @@ function startAdapter(options){
                         console.log(name);
                 }
             }
+            //Wake on LAN command is sent before start
+            if (id && state && !state.ack){
+                debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+                const ids = id.split('.');
+                const name = ids[ids.length - 2].toString();
+                const command = ids[ids.length - 1].toString();
+                switch (command) {
+                    case 'wake':
+                        debug(`Try to wake on LAN with mac ${syno.mac}`);
+                        wake(syno.mac);
+                        break;
+                    default:
+                        console.log(name);
+                }
+            }
         },
         message:      obj => {
             if (typeof obj === 'object' && obj.command){
@@ -202,6 +224,30 @@ function startAdapter(options){
             }
         }
     }));
+}
+
+function wake(mac){
+
+    const macRegex = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/;
+    if (mac != '' && macRegex.test(mac) && mac != '00:00:00:00:00:00') {
+        wol.wake(mac, function (err, res) {
+            wolTries = wolTries - 1;
+            if (err) {
+                debug(err);
+                wolTries = 3;
+            }
+            if (wolTries > 0){
+                wolTimer = setTimeout(() => {
+                    wake(mac);
+                }, 750);
+            } else if (wolTries === 0){
+                wolTries = 3;
+            }
+            debug('Wake on LAN try ' + (wolTries + 1) + ': ' + res);
+        });
+    } else {
+        warn('Failed to wake Synology. Please set valid MAC address in instance settings');
+    }
 }
 
 let states = {
@@ -1060,18 +1106,18 @@ function parseInfoSystem(res){
             };
         });
         if (res.vol_info) {
-        res.vol_info.forEach((key) => {
-            const volname = key.name.toLowerCase();
-            states.DiskStationManager.vol_info[volname] = {
-                'name':       key.name,
-                'status':     key.status,
-                'total_size': parseFloat(((key.total_size / 1073741824).toFixed(2))),
-                'used_size':  parseFloat(((key.used_size / 1073741824).toFixed(2))),
-                'used':       parseFloat((((key.used_size / key.total_size) * 100).toFixed(2))),
-                'desc':       key. desc || key.vol_desc
-            };
-        });
-    }
+            res.vol_info.forEach((key) => {
+                const volname = key.name.toLowerCase();
+                states.DiskStationManager.vol_info[volname] = {
+                    'name':       key.name,
+                    'status':     key.status,
+                    'total_size': parseFloat(((key.total_size / 1073741824).toFixed(2))),
+                    'used_size':  parseFloat(((key.used_size / 1073741824).toFixed(2))),
+                    'used':       parseFloat((((key.used_size / key.total_size) * 100).toFixed(2))),
+                    'desc':       key. desc || key.vol_desc
+                };
+            });
+        }
     }
 }
 
@@ -1548,6 +1594,7 @@ function newSyno(){
             ignoreCertificateErrors: true, /*rejectUnauthorized: false,*/
             host:                    adapter.config.host || '127.0.0.1',
             port:                    adapter.config.port || '5000',
+            mac:                     adapter.config.mac || '00:00:00:00:00:00',
             account:                 adapter.config.login || 'admin',
             passwd:                  adapter.config.password || '',
             protocol:                adapter.config.https ? 'https' :'http',

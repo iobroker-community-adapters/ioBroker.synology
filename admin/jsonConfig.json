@@ -30,6 +30,14 @@
             "md": 4,
             "lg": 3
         },
+        "mac": {
+            "type": "text",
+            "label": "Mac address",
+            "help": "(optional, used for Wake on LAN)",
+            "sm": 12,
+            "md": 4,
+            "lg": 3
+        },
         "login": {
             "newLine": true,
             "type": "text",
@@ -155,11 +163,6 @@
             "sm": 12,
             "md": 4,
             "lg": 3
-        },
-        "div": {
-            "newLine": true,
-            "type": "divider",
-            "height": "4px"
         },
         "ex": {
             "type": "header",

@@ -77,6 +77,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
 ## __WORK IN PROGRESS__
 -->
+## __WORK IN PROGRESS__
+* (Standarduser) Added WOL to awake Synology NAS server
+
 ### 2.1.13 (2022-11-05)
 *(McM1957) Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)
 *(McM1957) Several base modules have been updated.

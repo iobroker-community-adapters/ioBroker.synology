@@ -227,8 +227,7 @@ function startAdapter(options){
 }
 
 function wake(mac){
-
-    const macRegex = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/;
+    const macRegex = /^(([0-9A-Fa-f]{2}[:-]?){5}[0-9A-Fa-f]{2})$/;
     if (mac != '' && macRegex.test(mac) && mac != '00:00:00:00:00:00') {
         wol.wake(mac, function (err, res) {
             wolTries = wolTries - 1;

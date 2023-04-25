@@ -6,7 +6,7 @@
     "dl": "Download Station",
     "getservices": "Daten von Diensten empfangen",
     "getservicesdesc": "Wenn das Paket nicht auf dem NAS installiert ist, wird es trotzdem übersprungen.",
-    "host": "IP Adresse",
+    "host": "IP-Adresse",
     "https:": "https",
     "login": "Nutzername",
     "on save adapter restarts with new config immediately": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",

@@ -24,7 +24,7 @@
     "url": "https://github.com/iobroker-community-adapters/ioBroker.synology"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.6.8",
+    "@iobroker/adapter-core": "^3.0.3",
     "moment": "^2.29.4",
     "simple-ssh": "^1.1.1",
     "syno": "git+https://git@github.com/MeisterTR/syno.git"

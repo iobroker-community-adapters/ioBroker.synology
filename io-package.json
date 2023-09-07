@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "2.1.13",
+    "version": "3.0.0",
     "news": {
+      "3.0.0": {
+        "en": "Added WOL to awake Synology NAS server\nOnly node 16 or higher supported",
+        "de": "Hinzugefügt WOL zu wecken Synology NAS Server\nNur Knoten 16 oder höher unterstützt",
+        "ru": "Добавлен WOL для пробуждения сервера Synology NAS\nТолько узел 16 или выше поддерживается",
+        "pt": "Adicionado WOL para despertar servidor Synology NAS\nApenas nó 16 ou superior suportado",
+        "nl": "Voeg WOL toe om Synology NAS server wakker te maken\nAlleen node 16 of hoger ondersteuning",
+        "fr": "Ajouté WOL au serveur de NAS Synology\nSeulement node 16 ou plus supporté",
+        "it": "Aggiunto WOL per svegliare Synology NAS server\nSolo nodo 16 o superiore supportato",
+        "es": "Añadido WOL para despertar el servidor NAS de Synology\nSólo el nodo 16 o mayor apoyo",
+        "pl": "Added WOL to awake Synology NAS serwer NAS\nTylko węzeł 16 lub więcej",
+        "uk": "Додано WOL до сервера синології авекії NAS\nТільки вузол 16 або вище підтримується",
+        "zh-cn": "增加WOL,以瓦塞·桑科纳斯服务器\n只有16个或以上的支助"
+      },
       "2.1.13": {
         "en": "Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)\nSeveral base modules have been updated.",
         "de": "Code wurde für die bevorstehende Version des js-Controllers vorbereitet. Referenz auf utils.controller Dir wurde entfernt. (#198)\nMehrere Basismodule wurden aktualisiert.",
@@ -78,66 +91,6 @@
         "es": "desacelerar las conexiones con el DSM",
         "pl": "powolne połączenia do DSM",
         "zh-cn": "d. 与DSM的重新连接缓慢"
-      },
-      "2.1.7": {
-        "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
-        "de": "Versuchen Sie, Kontosperren zu verhindern, wenn Sie 2FA bei Neustarts des NAS verwenden",
-        "ru": "Попробуйте предотвратить блокировку учетной записи при использовании 2FA при перезапуске NAS.",
-        "pt": "Tente evitar bloqueios de conta ao usar 2FA nas reinicializações do NAS",
-        "nl": "Probeer accountvergrendelingen te voorkomen bij gebruik van 2FA bij het opnieuw opstarten van de NAS",
-        "fr": "Essayez d'empêcher les verrouillages de compte lors de l'utilisation de 2FA lors des redémarrages du NAS",
-        "it": "Cerca di prevenire i blocchi dell'account quando si utilizza 2FA al riavvio del NAS",
-        "es": "Intente evitar bloqueos de cuenta cuando use 2FA en reinicios del NAS",
-        "pl": "Spróbuj zapobiec blokadom kont podczas korzystania z 2FA przy ponownym uruchomieniu NAS",
-        "zh-cn": "尝试在 NAS 重启时使用 2FA 防止帐户锁定"
-      },
-      "2.1.6": {
-        "en": "Fix 2FA",
-        "de": "2FA reparieren",
-        "ru": "Исправить двухфакторную аутентификацию",
-        "pt": "Corrigir 2FA",
-        "nl": "2FA repareren",
-        "fr": "Réparer 2FA",
-        "it": "Correggi 2FA",
-        "es": "Reparar 2FA",
-        "pl": "Napraw 2FA",
-        "zh-cn": "修复 2FA"
-      },
-      "2.1.5": {
-        "en": "fix DSM version detection",
-        "de": "DSM-Versionserkennung behoben",
-        "ru": "исправить определение версии DSM",
-        "pt": "corrigir a detecção de versão do DSM",
-        "nl": "fix DSM-versiedetectie",
-        "fr": "correction de la détection de version DSM",
-        "it": "correggere il rilevamento della versione DSM",
-        "es": "corregir la detección de versión de DSM",
-        "pl": "napraw wykrywanie wersji DSM",
-        "zh-cn": "修复 DSM 版本检测"
-      },
-      "2.1.4": {
-        "en": "workaround for shutdown and reboot(configure your ssh port in the settings)\nprevent error when setting FileStation.info.items on start once",
-        "de": "Problemumgehung für das Herunterfahren und Neustarten (konfigurieren Sie Ihren SSH-Port in den Einstellungen)\nverhindert Fehler beim einmaligen Festlegen von FileStation.info.items beim Start",
-        "ru": "обходной путь для выключения и перезагрузки (настройте свой порт ssh в настройках)\nпредотвратить ошибку при настройке FileStation.info.items при запуске один раз",
-        "pt": "solução alternativa para desligamento e reinicialização (configure sua porta ssh nas configurações)\nevitar erros ao definir FileStation.info.items em iniciar uma vez",
-        "nl": "tijdelijke oplossing voor afsluiten en opnieuw opstarten (configureer uw ssh-poort in de instellingen)\nfouten voorkomen bij het instellen van FileStation.info.items bij eenmaal starten",
-        "fr": "solution de contournement pour l'arrêt et le redémarrage (configurez votre port ssh dans les paramètres)\néviter les erreurs lors de la configuration de FileStation.info.items au démarrage une fois",
-        "it": "soluzione alternativa per lo spegnimento e il riavvio (configura la tua porta ssh nelle impostazioni)\nprevenire errori durante l'impostazione di FileStation.info.items all'avvio una volta",
-        "es": "solución alternativa para apagar y reiniciar (configure su puerto ssh en la configuración)\nevitar errores al configurar FileStation.info.items al iniciar una vez",
-        "pl": "obejście wyłączenia i ponownego uruchomienia (skonfiguruj swój port ssh w ustawieniach)\nzapobiegaj błędom podczas jednorazowego ustawiania FileStation.info.items",
-        "zh-cn": "关闭和重启的解决方法（在设置中配置您的 ssh 端口）\n防止在启动时设置 FileStation.info.items 时出错"
-      },
-      "2.1.1": {
-        "en": "Optimize object type determination and adjustments",
-        "de": "Optimieren Sie die Objekttypermittlung und Anpassungen",
-        "ru": "Оптимизация определения и настройки типов объектов",
-        "pt": "Otimize a determinação e os ajustes do tipo de objeto",
-        "nl": "Optimaliseer de bepaling en aanpassingen van het objecttype",
-        "fr": "Optimiser la détermination et les ajustements du type d'objet",
-        "it": "Ottimizza la determinazione e le regolazioni del tipo di oggetto",
-        "es": "Optimice la determinación y los ajustes del tipo de objeto",
-        "pl": "Zoptymalizuj określanie i dostosowywanie typu obiektu",
-        "zh-cn": "优化对象类型确定和调整"
       }
     },
     "titleLang": {

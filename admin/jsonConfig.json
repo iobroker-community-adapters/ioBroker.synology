@@ -48,7 +48,7 @@
         },
         "password": {
             "type": "password",
-            "label": "password",
+            "label": "Password",
             "repeat": false,
             "sm": 12,
             "md": 4,
@@ -56,7 +56,7 @@
         },
         "https": {
             "type": "checkbox",
-            "label": "Https",
+            "label": "HTTPS",
             "sm": 12,
             "md": 4,
             "lg": 3
@@ -100,6 +100,7 @@
                 "pl":    "Wersja interfejsu API",
                 "zh-cn": "api版本"
             },
+            "noTranslation": true,
             "options": [
                 {"label": "5.0",        "value": "5.0"},
                 {"label": "5.1",        "value": "5.1"},
@@ -140,7 +141,7 @@
                 "pl":    "Czas odpytywania parametru (ms)",
                 "zh-cn": "参数轮询时间（毫秒）"
             },
-            "step":1,
+            "step": 1,
             "sm": 12,
             "md": 4,
             "lg": 3
@@ -178,6 +179,7 @@
                 "pl":    "Otrzymuj dane z usług",
                 "zh-cn": "从服务接收数据"
             },
+            "size": 4,
             "newLine": true
         },
         "as": {

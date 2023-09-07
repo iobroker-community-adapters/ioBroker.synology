@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 // @ts-check
 
 const utils = require('@iobroker/adapter-core');
@@ -16,7 +16,7 @@ let timeOutReconnect;
 let pollTime;
 let connect = false;
 let iteration = 0;
-let queueCmd = null;
+// let queueCmd = null;
 let startTime;
 let endTime;
 let firstStart = true;
@@ -25,7 +25,7 @@ let dir;
 let old_states;
 let timeOut;
 // let pathInstance;
-let verifiedObjects = {};
+const verifiedObjects = {};
 let wolTries = 3;
 let wolTimer = null;
 
@@ -71,7 +71,7 @@ const stateSS = {
     }
 };
 
-function startAdapter(options){
+function startAdapter(options) {
     return adapter = utils.adapter(Object.assign({}, options, {
         systemConfig: true,
         name:         'synology',
@@ -92,12 +92,12 @@ function startAdapter(options){
             }
         },
         stateChange:  (id, state) => {
-            if (id && state && !state.ack && !firstStart){
+            if (id && state && !state.ack && !firstStart) {
                 debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-                let ids = id.split(".");
-                let name = ids[ids.length - 2].toString();
-                let command = ids[ids.length - 1].toString();
-                let val = state.val;
+                const ids = id.split('.');
+                const name = ids[ids.length - 2].toString();
+                const command = ids[ids.length - 1].toString();
+                const val = state.val;
                 switch (command) {
                     case 'reboot':
                         sendSSH('shutdown -r now', () => {
@@ -113,8 +113,8 @@ function startAdapter(options){
                         break;
 
                     case 'Browser':
-                        if (name in states.AudioStation.players){
-                            queueCmd = true;
+                        if (name in states.AudioStation.players) {
+                            // queueCmd = true;
                             Browser(name, val);
                         } else {
                             error('Browser', `Error player ${name} offline?`);
@@ -195,8 +195,8 @@ function startAdapter(options){
                         console.log(name);
                 }
             }
-            //Wake on LAN command is sent before start
-            if (id && state && !state.ack){
+            // Wake on LAN command is sent before start
+            if (id && state && !state.ack) {
                 debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
                 const ids = id.split('.');
                 const name = ids[ids.length - 2].toString();
@@ -212,9 +212,9 @@ function startAdapter(options){
             }
         },
         message:      obj => {
-            if (typeof obj === 'object' && obj.command){
+            if (typeof obj === 'object' && obj.command) {
                 debug(`message ******* ${JSON.stringify(obj)}`);
-                if (obj.command === 'getSnapshot' && obj.message.camId){
+                if (obj.command === 'getSnapshot' && obj.message.camId) {
                     getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
                         obj.callback && adapter.sendTo(obj.from, obj.command, res, obj.callback);
                     });
@@ -226,30 +226,31 @@ function startAdapter(options){
     }));
 }
 
-function wake(mac){
-    const macRegex = /^(([0-9A-Fa-f]{2}[:-]?){5}[0-9A-Fa-f]{2})$/;
-    if (mac != '' && macRegex.test(mac) && mac != '00:00:00:00:00:00') {
-        wol.wake(mac, function (err, res) {
+function wake(mac) {
+    const macRegex = /^(([0-9A-Fa-f]{2}[:-]?) {5}[0-9A-Fa-f]{2})$/;
+    if (mac && macRegex.test(mac) && mac !== '00:00:00:00:00:00') {
+        wol.wake(mac, (err, res) => {
             wolTries = wolTries - 1;
             if (err) {
                 debug(err);
                 wolTries = 3;
             }
-            if (wolTries > 0){
+            if (wolTries > 0) {
                 wolTimer = setTimeout(() => {
+                    wolTimer = null;
                     wake(mac);
                 }, 750);
-            } else if (wolTries === 0){
+            } else if (wolTries === 0) {
                 wolTries = 3;
             }
-            debug('Wake on LAN try ' + (wolTries + 1) + ': ' + res);
+            debug(`Wake on LAN try ${wolTries + 1}: ${res}`);
         });
     } else {
         warn('Failed to wake Synology. Please set valid MAC address in instance settings');
     }
 }
 
-let states = {
+const states = {
     DiskStationManager:  {info: {}, hdd_info: {}, vol_info: {}},
     FileStation:         {info: {}, sharing: {}},
     DownloadStation:     {info: {}},
@@ -269,119 +270,119 @@ let states = {
 };
 
 const objects = {
-    album:                            {role: "media.album", name: "Album", type: "string", read: true, write: false},
-    artist:                           {role: "media.artist", name: "Artist", type: "string", read: true, write: false},
-    audio_show_virtual_library:       {role: "state", name: "Audio show virtual library", type: "boolean", read: true, write: false},
-    bitrate:                          {role: "media.bitrate", name: "Bitrate", type: "string", unit: "kbps", read: true, write: false},
-    Browser:                          {role: "media.browser", name: "AudioStation Browser Files", type: "string", read: true, write: true},
-    cameraNumber:                     {role: "state", name: "Camera number", type: "number", read: true, write: false},
-    capacity:                         {role: "state", name: "Capacity", type: "number", unit: "GB", read: true, write: false},
-    clearPlaylist:                    {role: "button", name: "Clear current playlist", type: "boolean", read: false, write: true},
-    cover:                            {role: "media.cover", name: "Media cover (eg. http://{ip}:8082/{state})", type: "string", read: true, write: false},
-    cpu_load:                         {role: "state", name: "Cpu load", type: "number", unit: "%", read: true, write: false},
-    current_duration:                 {role: "media.duration.text", name: "Playback duration", type: "string", read: true, write: false},
-    current_elapsed:                  {role: "media.elapsed.text", name: "Playback elapsed", type: "string", read: true, write: false},
-    current_play:                     {role: "media.track", name: "Controlling and state current play track number", type: "number", read: true, write: true},
-    disable_upnp:                     {role: "state", name: "Disable upnp", type: "boolean", read: true, write: false},
-    dsd_decode_capability:            {role: "state", name: "DSD decode capability", type: "boolean", read: true, write: false},
-    dtv:                              {role: "state", name: "DTV", type: "boolean", read: true, write: false},
-    dtv_transcode:                    {role: "state", name: "DTV transcode", type: "boolean", read: true, write: false},
-    duration:                         {role: "media.duration.text", name: "Duration track", type: "string", read: true, write: false},
-    duration_sec:                     {role: "media.duration", name: "Duration track in seconds", type: "number", read: true, write: false},
-    ebox_order:                       {role: "state", name: "Ebox order", type: "number", read: true, write: false},
-    enableVideoRelay:                 {role: "state", name: "Enable video relay", type: "boolean", read: true, write: false},
-    enable_download:                  {role: "state", name: "Enable download", type: "boolean", read: true, write: false},
-    enable_equalizer:                 {role: "state", name: "Enable equalizer", type: "boolean", read: true, write: false},
-    enable_iso_mount:                 {role: "state", name: "Enable ISO mount", type: "boolean", read: true, write: false},
-    enable_list_usergrp:              {role: "state", name: "Enable list user groups", type: "boolean", read: true, write: false},
-    enable_personal_library:          {role: "state", name: "Enable personal library", type: "boolean", read: true, write: false},
-    enable_remote_mount:              {role: "state", name: "Enable remote mount", type: "boolean", read: true, write: false},
-    enable_user_home:                 {role: "state", name: "User home", type: "boolean", read: true, write: true},
-    enabled:                          {role: "state", name: "Is enabled", type: "boolean", read: true, write: true},
-    favoriteRadio:                    {role: "state", name: "Favorite playlist Radio", type: "string", read: true, write: false},
-    fhd_hardware_transcode:           {role: "state", name: "FullHD hardware transcode", type: "boolean", read: true, write: false},
-    genre:                            {role: "media.genre", name: "Genre", type: "string", read: true, write: false},
-    geo_lat:                          {role: "state", name: "Geo latitude", type: "number", read: true, write: false},
-    geo_lng:                          {role: "state", name: "Geo longitude", type: "number", read: true, write: false},
-    geo_radius:                       {role: "state", name: "Geo radius", type: "number", read: true, write: false},
-    hardware_transcode:               {role: "state", name: "Hardware transcode", type: "boolean", read: true, write: false},
-    has_music_share:                  {role: "state", name: "Has music share", type: "boolean", read: true, write: false},
-    id:                               {role: "state", name: "ID", type: "number", read: true, write: false},
-    isLicenseEnough:                  {role: "state", name: "Is License Enough", type: "number", read: true, write: false},
-    is_dtv_enabled:                   {role: "state", name: "Is DTV enabled", type: "boolean", read: true, write: false},
-    is_manager:                       {role: "state", name: "Is manager", type: "boolean", read: true, write: false},
-    is_personal_metadata_key_enabled: {role: "state", name: "Is personal metadata key enabled", type: "boolean", read: true, write: false},
-    is_subtitle_search_enabled:       {role: "state", name: "Is subtitle search enabled", type: "boolean", read: true, write: false},
-    is_system_crashed:                {role: "state", name: "Is system crashed", type: "boolean", read: true, write: false},
-    liscenseNumber:                   {role: "state", name: "License Number", type: "number", read: true, write: false},
-    maxCameraSupport:                 {role: "state", name: "Max camera support", type: "number", read: true, write: false},
-    memory_size:                      {role: "state", name: "Memory size", type: "number", read: true, write: false},
-    memory_usage:                     {role: "state", name: "Memory usage", type: "number", unit: "%", read: true, write: false},
-    motionDetected:                   {role: "state", name: "Motion detected", type: "boolean", read: true, write: false},
-    next:                             {role: "button.next", name: "Controlling playback next", type: "boolean", read: false, write: true},
-    notify_on:                        {role: "state", name: "Notify on", type: "boolean", read: true, write: false},
-    offline_conversion:               {role: "state", name: "Offline conversion", type: "boolean", read: true, write: false},
-    onetime_disable_on:               {role: "state", name: "Onetime disable ON", type: "boolean", read: true, write: false},
-    onetime_enable_on:                {role: "state", name: "Onetime enable ON", type: "boolean", read: true, write: false},
-    online:                           {role: "state", name: "Is player online", type: "boolean", read: true, write: false},
-    path:                             {role: "media", name: "Path track", type: "string", read: true, write: false},
-    pause:                            {role: "button.pause", name: "Controlling playback pause", type: "boolean", read: false, write: true},
-    play:                             {role: "button.play", name: "Controlling playback play", type: "boolean", read: false, write: true},
-    play_folder:                      {role: "media.add", name: "Add tracks from the folder to the playlist", type: "string", read: true, write: true},
-    play_track:                       {role: "state", name: "Play track by its id", type: "string", read: true, write: true},
-    player_name:                      {role: "media", name: "Remote player name", type: "string", read: true, write: false},
-    playing_queue_max:                {role: "state", name: "Playing queue max", type: "number", read: true, write: false},
-    playlist:                         {role: "media.playlist", name: "AudioStation playlist", type: "string", read: true, write: true},
-    playlist_edit:                    {role: "state", name: "Playlist edit", type: "boolean", read: true, write: false},
-    playlist_total:                   {role: "media", name: "Number of tracks in the playlist", type: "number", read: true, write: false},
-    port:                             {role: "state", name: "Port", type: "number", read: true, write: false},
-    prefer_using_html5:               {role: "state", name: "Prefer using HTML5", type: "boolean", read: true, write: false},
-    prev:                             {role: "button.prev", name: "Controlling playback previous", type: "boolean", read: false, write: true},
-    ram:                              {role: "state", name: "RAM", type: "number", unit: "MB", read: true, write: false},
-    remindQuickconnectTunnel:         {role: "state", name: "Remind QuickConnect Tunnel", type: "boolean", read: true, write: false},
-    remote_controller:                {role: "state", name: "Remote controller", type: "boolean", read: true, write: false},
-    remote_player:                    {role: "state", name: "Remote player", type: "boolean", read: true, write: false},
-    remux:                            {role: "state", name: "Remux", type: "boolean", read: true, write: false},
-    renderer:                         {role: "state", name: "Renderer", type: "boolean", read: true, write: false},
-    repeat:                           {role: "media.mode.repeat", name: "Repeat control", type: "string", read: true, write: true, states: {none: "Off", all: "All", one: "One"}},
-    same_subnet:                      {role: "state", name: "Same subnet", type: "boolean", read: true, write: false},
-    seek:                             {role: "media.seek", name: "Controlling playback seek", type: "number", unit: "%", min: 0, max: 100, read: true, write: true},
-    serviceVolSize:                   {role: "state", name: "Service Volume Size", type: "number", read: true, write: false},
-    sharing:                          {role: "state", name: "Sharing", type: "boolean", read: true, write: false},
-    shuffle:                          {role: "media.mode.shuffle", name: "Shuffle control", type: "boolean", read: true, write: true},
-    software_transcode:               {role: "state", name: "Software transcode", type: "boolean", read: true, write: false},
-    song_id:                          {role: "media.playid", name: "Controlling and state current play track id", type: "number", read: true, write: true},
-    state_playing:                    {role: "media.state", name: "Status Play, stop, or pause", type: "string", read: true, write: false},
-    status_on:                        {role: "state", name: "HomeMode status", type: "boolean", read: true, write: true},
-    stop:                             {role: "button.stop", name: "Controlling playback stop", type: "boolean", read: false, write: true},
-    subplayer_volume:                 {role: "level.volume", name: "Subplayer volume if supported", type: "number", min: 0, max: 100, read: true, write: true},
-    support_bluetooth:                {role: "state", name: "Support bluetooth", type: "boolean", read: true, write: false},
-    support_file_request:             {role: "state", name: "Support file request", type: "boolean", read: true, write: false},
-    support_sharing:                  {role: "state", name: "Support sharing", type: "boolean", read: true, write: false},
-    support_usb:                      {role: "state", name: "Support USB", type: "boolean", read: true, write: false},
-    support_vfs:                      {role: "state", name: "Support VFS", type: "boolean", read: true, write: false},
-    support_virtual_library:          {role: "state", name: "Support virtual library", type: "boolean", read: true, write: false},
-    tag_edit:                         {role: "state", name: "Tag edit", type: "boolean", read: true, write: false},
-    temperature:                      {role: "state", name: "Temperature", type: "number", unit: "°C", read: true, write: false},
-    temperature_warn:                 {role: "state", name: "Temperature warn", type: "boolean", read: true, write: false},
-    timezone_offset:                  {role: "state", name: "Timezone offset", type: "number", read: true, write: false},
-    title:                            {role: "media.title", name: "Title", type: "string", read: true, write: false},
-    total_size:                       {role: "state", name: "Total size", type: "number", unit: "GB", read: true, write: false},
-    transcode:                        {role: "state", name: "Transcode", type: "boolean", read: true, write: false},
-    transcode_to_mp3:                 {role: "state", name: "Transcode to mp3", type: "boolean", read: true, write: false},
-    uid:                              {role: "state", name: "UID", type: "number", read: true, write: false},
-    upgrade_ready:                    {role: "state", name: "Upgrade ready", type: "boolean", read: true, write: false},
-    upnp_browse:                      {role: "state", name: "UPnP browse", type: "boolean", read: true, write: false},
-    uptime:                           {role: "state", name: "Uptime", type: "number", read: true, write: false},
-    used:                             {role: "state", name: "Used", type: "number", unit: "%", read: true, write: false},
-    used_size:                        {role: "state", name: "Used size", type: "number", unit: "GB", read: true, write: false},
-    version:                          {role: "state", name: "Version", type: "number", read: true, write: false},
-    volume:                           {role: "level.volume", name: "Volume", type: "number", min: 0, max: 100, read: true, write: true},
-    year:                             {role: "media.date", name: "Year", type: "number", read: true, write: false},
+    album:                            {role: 'media.album', name: 'Album', type: 'string', read: true, write: false},
+    artist:                           {role: 'media.artist', name: 'Artist', type: 'string', read: true, write: false},
+    audio_show_virtual_library:       {role: 'state', name: 'Audio show virtual library', type: 'boolean', read: true, write: false},
+    bitrate:                          {role: 'media.bitrate', name: 'Bitrate', type: 'string', unit: 'kbps', read: true, write: false},
+    Browser:                          {role: 'media.browser', name: 'AudioStation Browser Files', type: 'string', read: true, write: true},
+    cameraNumber:                     {role: 'state', name: 'Camera number', type: 'number', read: true, write: false},
+    capacity:                         {role: 'state', name: 'Capacity', type: 'number', unit: 'GB', read: true, write: false},
+    clearPlaylist:                    {role: 'button', name: 'Clear current playlist', type: 'boolean', read: false, write: true},
+    cover:                            {role: 'media.cover', name: 'Media cover (eg. http://{ip}:8082/{state})', type: 'string', read: true, write: false},
+    cpu_load:                         {role: 'state', name: 'Cpu load', type: 'number', unit: '%', read: true, write: false},
+    current_duration:                 {role: 'media.duration.text', name: 'Playback duration', type: 'string', read: true, write: false},
+    current_elapsed:                  {role: 'media.elapsed.text', name: 'Playback elapsed', type: 'string', read: true, write: false},
+    current_play:                     {role: 'media.track', name: 'Controlling and state current play track number', type: 'number', read: true, write: true},
+    disable_upnp:                     {role: 'state', name: 'Disable upnp', type: 'boolean', read: true, write: false},
+    dsd_decode_capability:            {role: 'state', name: 'DSD decode capability', type: 'boolean', read: true, write: false},
+    dtv:                              {role: 'state', name: 'DTV', type: 'boolean', read: true, write: false},
+    dtv_transcode:                    {role: 'state', name: 'DTV transcode', type: 'boolean', read: true, write: false},
+    duration:                         {role: 'media.duration.text', name: 'Duration track', type: 'string', read: true, write: false},
+    duration_sec:                     {role: 'media.duration', name: 'Duration track in seconds', type: 'number', read: true, write: false},
+    ebox_order:                       {role: 'state', name: 'Ebox order', type: 'number', read: true, write: false},
+    enableVideoRelay:                 {role: 'state', name: 'Enable video relay', type: 'boolean', read: true, write: false},
+    enable_download:                  {role: 'state', name: 'Enable download', type: 'boolean', read: true, write: false},
+    enable_equalizer:                 {role: 'state', name: 'Enable equalizer', type: 'boolean', read: true, write: false},
+    enable_iso_mount:                 {role: 'state', name: 'Enable ISO mount', type: 'boolean', read: true, write: false},
+    enable_list_usergrp:              {role: 'state', name: 'Enable list user groups', type: 'boolean', read: true, write: false},
+    enable_personal_library:          {role: 'state', name: 'Enable personal library', type: 'boolean', read: true, write: false},
+    enable_remote_mount:              {role: 'state', name: 'Enable remote mount', type: 'boolean', read: true, write: false},
+    enable_user_home:                 {role: 'state', name: 'User home', type: 'boolean', read: true, write: true},
+    enabled:                          {role: 'state', name: 'Is enabled', type: 'boolean', read: true, write: true},
+    favoriteRadio:                    {role: 'state', name: 'Favorite playlist Radio', type: 'string', read: true, write: false},
+    fhd_hardware_transcode:           {role: 'state', name: 'FullHD hardware transcode', type: 'boolean', read: true, write: false},
+    genre:                            {role: 'media.genre', name: 'Genre', type: 'string', read: true, write: false},
+    geo_lat:                          {role: 'state', name: 'Geo latitude', type: 'number', read: true, write: false},
+    geo_lng:                          {role: 'state', name: 'Geo longitude', type: 'number', read: true, write: false},
+    geo_radius:                       {role: 'state', name: 'Geo radius', type: 'number', read: true, write: false},
+    hardware_transcode:               {role: 'state', name: 'Hardware transcode', type: 'boolean', read: true, write: false},
+    has_music_share:                  {role: 'state', name: 'Has music share', type: 'boolean', read: true, write: false},
+    id:                               {role: 'state', name: 'ID', type: 'number', read: true, write: false},
+    isLicenseEnough:                  {role: 'state', name: 'Is License Enough', type: 'number', read: true, write: false},
+    is_dtv_enabled:                   {role: 'state', name: 'Is DTV enabled', type: 'boolean', read: true, write: false},
+    is_manager:                       {role: 'state', name: 'Is manager', type: 'boolean', read: true, write: false},
+    is_personal_metadata_key_enabled: {role: 'state', name: 'Is personal metadata key enabled', type: 'boolean', read: true, write: false},
+    is_subtitle_search_enabled:       {role: 'state', name: 'Is subtitle search enabled', type: 'boolean', read: true, write: false},
+    is_system_crashed:                {role: 'state', name: 'Is system crashed', type: 'boolean', read: true, write: false},
+    liscenseNumber:                   {role: 'state', name: 'License Number', type: 'number', read: true, write: false},
+    maxCameraSupport:                 {role: 'state', name: 'Max camera support', type: 'number', read: true, write: false},
+    memory_size:                      {role: 'state', name: 'Memory size', type: 'number', read: true, write: false},
+    memory_usage:                     {role: 'state', name: 'Memory usage', type: 'number', unit: '%', read: true, write: false},
+    motionDetected:                   {role: 'state', name: 'Motion detected', type: 'boolean', read: true, write: false},
+    next:                             {role: 'button.next', name: 'Controlling playback next', type: 'boolean', read: false, write: true},
+    notify_on:                        {role: 'state', name: 'Notify on', type: 'boolean', read: true, write: false},
+    offline_conversion:               {role: 'state', name: 'Offline conversion', type: 'boolean', read: true, write: false},
+    onetime_disable_on:               {role: 'state', name: 'Onetime disable ON', type: 'boolean', read: true, write: false},
+    onetime_enable_on:                {role: 'state', name: 'Onetime enable ON', type: 'boolean', read: true, write: false},
+    online:                           {role: 'state', name: 'Is player online', type: 'boolean', read: true, write: false},
+    path:                             {role: 'media', name: 'Path track', type: 'string', read: true, write: false},
+    pause:                            {role: 'button.pause', name: 'Controlling playback pause', type: 'boolean', read: false, write: true},
+    play:                             {role: 'button.play', name: 'Controlling playback play', type: 'boolean', read: false, write: true},
+    play_folder:                      {role: 'media.add', name: 'Add tracks from the folder to the playlist', type: 'string', read: true, write: true},
+    play_track:                       {role: 'state', name: 'Play track by its id', type: 'string', read: true, write: true},
+    player_name:                      {role: 'media', name: 'Remote player name', type: 'string', read: true, write: false},
+    playing_queue_max:                {role: 'state', name: 'Playing queue max', type: 'number', read: true, write: false},
+    playlist:                         {role: 'media.playlist', name: 'AudioStation playlist', type: 'string', read: true, write: true},
+    playlist_edit:                    {role: 'state', name: 'Playlist edit', type: 'boolean', read: true, write: false},
+    playlist_total:                   {role: 'media', name: 'Number of tracks in the playlist', type: 'number', read: true, write: false},
+    port:                             {role: 'state', name: 'Port', type: 'number', read: true, write: false},
+    prefer_using_html5:               {role: 'state', name: 'Prefer using HTML5', type: 'boolean', read: true, write: false},
+    prev:                             {role: 'button.prev', name: 'Controlling playback previous', type: 'boolean', read: false, write: true},
+    ram:                              {role: 'state', name: 'RAM', type: 'number', unit: 'MB', read: true, write: false},
+    remindQuickconnectTunnel:         {role: 'state', name: 'Remind QuickConnect Tunnel', type: 'boolean', read: true, write: false},
+    remote_controller:                {role: 'state', name: 'Remote controller', type: 'boolean', read: true, write: false},
+    remote_player:                    {role: 'state', name: 'Remote player', type: 'boolean', read: true, write: false},
+    remux:                            {role: 'state', name: 'Remux', type: 'boolean', read: true, write: false},
+    renderer:                         {role: 'state', name: 'Renderer', type: 'boolean', read: true, write: false},
+    repeat:                           {role: 'media.mode.repeat', name: 'Repeat control', type: 'string', read: true, write: true, states: {none: 'Off', all: 'All', one: 'One'}},
+    same_subnet:                      {role: 'state', name: 'Same subnet', type: 'boolean', read: true, write: false},
+    seek:                             {role: 'media.seek', name: 'Controlling playback seek', type: 'number', unit: '%', min: 0, max: 100, read: true, write: true},
+    serviceVolSize:                   {role: 'state', name: 'Service Volume Size', type: 'number', read: true, write: false},
+    sharing:                          {role: 'state', name: 'Sharing', type: 'boolean', read: true, write: false},
+    shuffle:                          {role: 'media.mode.shuffle', name: 'Shuffle control', type: 'boolean', read: true, write: true},
+    software_transcode:               {role: 'state', name: 'Software transcode', type: 'boolean', read: true, write: false},
+    song_id:                          {role: 'media.playid', name: 'Controlling and state current play track id', type: 'number', read: true, write: true},
+    state_playing:                    {role: 'media.state', name: 'Status Play, stop, or pause', type: 'string', read: true, write: false},
+    status_on:                        {role: 'state', name: 'HomeMode status', type: 'boolean', read: true, write: true},
+    stop:                             {role: 'button.stop', name: 'Controlling playback stop', type: 'boolean', read: false, write: true},
+    subplayer_volume:                 {role: 'level.volume', name: 'Subplayer volume if supported', type: 'number', min: 0, max: 100, read: true, write: true},
+    support_bluetooth:                {role: 'state', name: 'Support bluetooth', type: 'boolean', read: true, write: false},
+    support_file_request:             {role: 'state', name: 'Support file request', type: 'boolean', read: true, write: false},
+    support_sharing:                  {role: 'state', name: 'Support sharing', type: 'boolean', read: true, write: false},
+    support_usb:                      {role: 'state', name: 'Support USB', type: 'boolean', read: true, write: false},
+    support_vfs:                      {role: 'state', name: 'Support VFS', type: 'boolean', read: true, write: false},
+    support_virtual_library:          {role: 'state', name: 'Support virtual library', type: 'boolean', read: true, write: false},
+    tag_edit:                         {role: 'state', name: 'Tag edit', type: 'boolean', read: true, write: false},
+    temperature:                      {role: 'state', name: 'Temperature', type: 'number', unit: '°C', read: true, write: false},
+    temperature_warn:                 {role: 'state', name: 'Temperature warn', type: 'boolean', read: true, write: false},
+    timezone_offset:                  {role: 'state', name: 'Timezone offset', type: 'number', read: true, write: false},
+    title:                            {role: 'media.title', name: 'Title', type: 'string', read: true, write: false},
+    total_size:                       {role: 'state', name: 'Total size', type: 'number', unit: 'GB', read: true, write: false},
+    transcode:                        {role: 'state', name: 'Transcode', type: 'boolean', read: true, write: false},
+    transcode_to_mp3:                 {role: 'state', name: 'Transcode to mp3', type: 'boolean', read: true, write: false},
+    uid:                              {role: 'state', name: 'UID', type: 'number', read: true, write: false},
+    upgrade_ready:                    {role: 'state', name: 'Upgrade ready', type: 'boolean', read: true, write: false},
+    upnp_browse:                      {role: 'state', name: 'UPnP browse', type: 'boolean', read: true, write: false},
+    uptime:                           {role: 'state', name: 'Uptime', type: 'number', read: true, write: false},
+    used:                             {role: 'state', name: 'Used', type: 'number', unit: '%', read: true, write: false},
+    used_size:                        {role: 'state', name: 'Used size', type: 'number', unit: 'GB', read: true, write: false},
+    version:                          {role: 'state', name: 'Version', type: 'number', read: true, write: false},
+    volume:                           {role: 'level.volume', name: 'Volume', type: 'number', min: 0, max: 100, read: true, write: true},
+    year:                             {role: 'media.date', name: 'Year', type: 'number', read: true, write: false},
 };
 
-let PollCmd = {
-    "firstPoll": [
+const PollCmd = {
+    'firstPoll': [
         {api: 'dsm', method: 'getPollingData', params: {}, ParseFunction: parseInstallingPackets}, // OR listPackages if < 6 || 7 See in main function
         //{api: 'dsm', method: 'listPackages', params: {}, ParseFunction: parseInstallingPackets}, // OR listPackages if < 6 || 7 See in main function
         {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parseInfo},
@@ -395,18 +396,18 @@ let PollCmd = {
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parselistCameras},
         {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
     ],
-    "fastPoll":  [
+    'fastPoll':  [
         {api: 'dsm', method: 'getSystemUtilization', params: {}, ParseFunction: parseSystemUtilization},
         {api: 'dsm', method: 'getSystemStatus', params: {}, ParseFunction: parseSystemStatus},
         {api: 'dsm', method: 'getInfo', params: {}, ParseFunction: parseTempInfo},
-        {api: 'dsm', method: 'infoSystem', params: {type: "storage", version: 1}, ParseFunction: parseInfoSystem},
+        {api: 'dsm', method: 'infoSystem', params: {type: 'storage', version: 1}, ParseFunction: parseInfoSystem},
         getStatusPlayer,
         {api: 'ss', method: 'getInfoHomeMode', params: {need_mobiles: true}, ParseFunction: parseInfoHomeMode},
         {api: 'ss', method: 'listCameras', params: {basic: true, version: 7}, ParseFunction: parselistCameras},
         {api: 'dl', method: 'getConfigSchedule', params: {}, ParseFunction: parsegetConfigSchedule},
         {api: 'fs', method: 'listSharings', params: {}, ParseFunction: parseListSharings},
     ],
-    "slowPoll":  [
+    'slowPoll':  [
         {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
         {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parselistTasks},
         {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parselistRadios},
@@ -418,7 +419,7 @@ let PollCmd = {
 /************************ SurveillanceStation ***********************/
 
 const getIdsCams = () => {
-    let ids = [];
+    const ids = [];
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined) ids.push(states.SurveillanceStation.cameras[nameCam].id);
     });
@@ -426,26 +427,28 @@ const getIdsCams = () => {
 };
 
 const getNameCams = (id) => {
-    for (let nameCam in states.SurveillanceStation.cameras) {
-        if (!states.SurveillanceStation.cameras.hasOwnProperty(nameCam)) continue;
-        if (states.SurveillanceStation.cameras[nameCam].id === id){
+    for (const nameCam in states.SurveillanceStation.cameras) {
+        if (!Object.prototype.hasOwnProperty.call(states.SurveillanceStation.cameras, nameCam)) {
+            continue;
+        }
+        if (states.SurveillanceStation.cameras[nameCam].id === id) {
             return nameCam;
         }
     }
 };
 
-function switchCam(name, command, val){
-    let method = !!val ? 'enableCamera' :'disableCamera';
+function switchCam(name, command, val) {
+    const method = val ? 'enableCamera' :'disableCamera';
     if (name !== 'undefined' && states.SurveillanceStation.cameras[name]) {
-        let camId = states.SurveillanceStation.cameras[name].id.toString();
+        const camId = states.SurveillanceStation.cameras[name].id.toString();
         send('ss', method, {cameraIds: camId, blIncludeDeletedCam: false, version: 7});
     }
 }
 
-function addLinkSnapShot(){
+function addLinkSnapShot() {
     debug('addLinkSnapShot');
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
-        if (nameCam !== undefined){
+        if (nameCam !== undefined) {
             const camId = states.SurveillanceStation.cameras[nameCam].id;
             let _sid = syno.sessions.SurveillanceStation ? syno.sessions.SurveillanceStation._sid :'';
             if (typeof _sid === 'undefined') {
@@ -456,12 +459,12 @@ function addLinkSnapShot(){
     });
 }
 
-function getLiveViewPathCamera(){
+function getLiveViewPathCamera() {
     debug('getLiveViewPathCamera');
     const ids = getIdsCams();
-    if (ids){
+    if (ids) {
         send('ss', 'getLiveViewPathCamera', {idList: ids}, (res) => {
-            if (res && !res.code && !res.message){
+            if (res && !res.code && !res.message) {
                 res.forEach((obj) => {
                     const nameCam = getNameCams(obj.id);
                     states.SurveillanceStation.cameras[nameCam]['linkMjpegHttpPath'] = obj.mjpegHttpPath;
@@ -475,12 +478,12 @@ function getLiveViewPathCamera(){
     }
 }
 
-function getSnapshotCamera(camid, cb){
+function getSnapshotCamera(camid, cb) {
     debug('getSnapshotCamera');
     const param = {cameraId: camid, preview: true, version: 7};
     send('ss', 'getSnapshotCamera', param, async (res) => {
-        if (res && !res.code && !res.message){
-            let buf = Buffer.from(res, 'binary');
+        if (res && !res.code && !res.message) {
+            const buf = Buffer.from(res, 'binary');
             try {
                 await adapter.writeFileAsync(adapter.namespace, `snapshotCam_${camid}.jpg`, buf);
                 fs.writeFileSync(`${dir}snapshotCam_${camid}.jpg`, buf);
@@ -492,27 +495,27 @@ function getSnapshotCamera(camid, cb){
         }
     });
 }
-
-function parselistEvents(res){
+/*
+function parselistEvents(res) {
     debug(`test - Response: ${JSON.stringify(res)}`);
-    if (res.events.length > 0){
+    if (res.events.length > 0) {
         res.events.forEach((event) => {
             states.SurveillanceStation.cameras[event.camera_name].motionDetected = true;
         });
     }
 }
-
-function parselistCameras(res){
+*/
+function parselistCameras(res) {
     debug(`listCameras - Response: ${JSON.stringify(res)}`);
-    let arr = res.cameras;
+    const arr = res.cameras;
     arr.forEach((k, i) => {
 
         if(arr[i].newName) {
             arr[i].name = arr[i].newName; // DSM 7
         }
 
-        if (arr[i].name){
-            if (states.SurveillanceStation.cameras[arr[i].name] === undefined){
+        if (arr[i].name) {
+            if (states.SurveillanceStation.cameras[arr[i].name] === undefined) {
                 states.SurveillanceStation.cameras[arr[i].name] = {};
             }
             states.SurveillanceStation.cameras[arr[i].name].host = arr[i].host || arr[i].ip;
@@ -530,7 +533,7 @@ function parselistCameras(res){
     });
 }
 
-function parseInfoHomeMode(res){
+function parseInfoHomeMode(res) {
     debug(`InfoHomeMode - Response: ${JSON.stringify(res)}`);
     states.SurveillanceStation.HomeMode['status_on'] = res.on;
     states.SurveillanceStation.HomeMode['notify_on'] = res.notify_on;
@@ -544,7 +547,7 @@ function parseInfoHomeMode(res){
     states.SurveillanceStation.HomeMode['wifi_ssid'] = res.wifi_ssid;
 }
 
-function parseSSInfo(res){
+function parseSSInfo(res) {
     states.SurveillanceStation.info.CMSMinVersion = res.CMSMinVersion;
     states.SurveillanceStation.info.cameraNumber = res.cameraNumber;
     states.SurveillanceStation.info.isLicenseEnough = res.isLicenseEnough;
@@ -561,11 +564,11 @@ function parseSSInfo(res){
 
 /*********************** DownloadStation ************************/
 
-function addDownload(command, url, cb){
-    if (url){
+function addDownload(command, url, cb) {
+    if (url) {
         debug('addDownload');
         if (command === 'add_hash_download') url = `magnet:?xt=urn:btih:${url}`;
-        let param = {type: "url", create_list: true, uri: [url], version: 2};
+        const param = {type: 'url', create_list: true, uri: [url], version: 2};
         adapter.getState('DownloadStation.folder', (err, state) => {
             if (!err && state) param.destination = state.val;
             send('dl', 'createTask', param, (res) => {
@@ -578,69 +581,69 @@ function addDownload(command, url, cb){
     }
 }
 
-function setConfigSchedule(command, val){
+function setConfigSchedule(command, val) {
     debug('setConfigSchedule');
     let param;
-    if (command === 'shedule_enabled'){
+    if (command === 'shedule_enabled') {
         param = {enabled: val};
     }
-    if (command === 'shedule_emule_enabled'){
+    if (command === 'shedule_emule_enabled') {
         param = {emule_enabled: val};
     }
     send('dl', 'setConfigSchedule', param, (res) => {
-        if (res && res.message){
+        if (res && res.message) {
             error('setConfigSchedule Error: ', res.message);
         }
     });
 }
 
-function pauseTask(command, val){
+function pauseTask(command, val) {
     debug('pauseTask');
-    let param, method, ids = [];
-    if (!~val.toString().indexOf('dbid_') && val !== 'all'){
+    let param;
+    let method;
+    const ids = [];
+    if (!~val.toString().indexOf('dbid_') && val !== 'all') {
         param = {id: `dbid_${val}`};
-    } else if (val === 'all'){
+    } else if (val === 'all') {
         try {
             const arr = JSON.parse(states.DownloadStation.listTasks);
-            if (arr && arr.length > 0){
-                arr.forEach((key) => {
-                    ids.push(key.id);
-                });
+            if (arr && arr.length > 0) {
+                arr.forEach((key) => ids.push(key.id));
                 param = {id: ids.join(',')};
             }
         } catch (e) {
-
+            // ignore
         }
     } else {
         param = {id: val};
     }
-    if (command === 'pause_task'){
+    if (command === 'pause_task') {
         method = 'pauseTask';
     }
-    if (command === 'resume_task'){
+    if (command === 'resume_task') {
         method = 'resumeTask';
     }
     send('dl', method, param, (res) => {
-        if (res && res.message){
+        if (res && res.message) {
             adapter.log.error(`pauseTask Error: ${res.message}`);
         }
     });
 }
 
-function parsegetConfigSchedule(res){
+function parsegetConfigSchedule(res) {
     debug(`getConfigSchedule - Response: ${JSON.stringify(res)}`);
-    if (res && !res.message){
+    if (res && !res.message) {
         states.DownloadStation['shedule_emule_enabled'] = res.emule_enabled;
         states.DownloadStation['shedule_enabled'] = res.enabled;
     }
 }
 
-function parselistTasks(res){
+function parselistTasks(res) {
     debug(`listTasks - Response: ${JSON.stringify(res)}`);
-    if (res && !res.message){
-        let task = [];
+    if (res && !res.message) {
+        const task = [];
         res.tasks.forEach((obj) => {
-            if (obj.status !== 'finished'){
+            if (obj.status !== 'finished') {
                 task.push(obj);
             }
         });
@@ -651,7 +654,7 @@ function parselistTasks(res){
 
 /************************* AudioStation *************************/
 
-function clearPlaylist(playerid, cb){
+function clearPlaylist(playerid, cb) {
     const param = {
         id:            playerid,
         offset:        0,
@@ -664,7 +667,7 @@ function clearPlaylist(playerid, cb){
     });
 }
 
-function clearPlayerStates(playerid, cb){
+function clearPlayerStates(playerid, cb) {
     debug(`Clearing the player status ${playerid}`);
     states.AudioStation.players[playerid].playlist_total = 0;
     states.AudioStation.players[playerid].volume = 0;
@@ -689,30 +692,30 @@ function clearPlayerStates(playerid, cb){
     cb && cb();
 }
 
-async function getStatusPlayer(cb){
+async function getStatusPlayer(cb) {
     function getOneStatusPlayer(playerid) {
         return new Promise((resolve, reject) => {
             debug(`* getStatusPlayer ${playerid}`);
-            let param = {
+            const param = {
                 id: playerid, additional: 'song_tag, song_audio, subplayer_volume'
             };
             send('as', 'getStatusRemotePlayerStatus', param, (res) => {
-                if (res && res.state){
+                if (res && res.state) {
                     let state = res.state;
-                    if (state === 'playing'){
+                    if (state === 'playing') {
                         state = 'play';
-                    } else if (state === 'stopped' || state === 'none' || state === 'no-media' || state === 'transition'){
+                    } else if (state === 'stopped' || state === 'none' || state === 'no-media' || state === 'transition') {
                         state = 'stop';
                     }
                     states.AudioStation.players[playerid].state_playing = state;
                     states.AudioStation.players[playerid].online = true;
-                    if ((res.state === 'playing' || res.state === 'pause') && res.song){
+                    if ((res.state === 'playing' || res.state === 'pause') && res.song) {
                         parseRemotePlayerStatus(playerid, res);
                         getPlaylist(playerid, () => {
                             getSongCover(playerid);
                         });
                     } else {
-                        if (states.AudioStation.players[playerid].playlist_total !== 0){
+                        if (states.AudioStation.players[playerid].playlist_total !== 0) {
                             clearPlayerStates(playerid);
                         }
                     }
@@ -726,11 +729,11 @@ async function getStatusPlayer(cb){
                 }
                 resolve(true);
             });
-        })
+        });
     }
 
     for (const playerid of Object.keys(states.AudioStation.players)) {
-        if (playerid && states.AudioStation.players[playerid].online){
+        if (playerid && states.AudioStation.players[playerid].online) {
             try {
                 await getOneStatusPlayer(playerid);
             } catch (err) {
@@ -741,14 +744,14 @@ async function getStatusPlayer(cb){
     cb && cb();
 }
 
-function getSongCover(playerid, cb){
+function getSongCover(playerid, cb) {
     debug('getSongCover');
     const track = states.AudioStation.players[playerid].song_id;
-    if (track !== old_states.AudioStation.players[playerid].song_id){
+    if (track !== old_states.AudioStation.players[playerid].song_id) {
         old_states.AudioStation.players[playerid].song_id = track;
         send('as', 'getSongCover', {id: track}, async (res) => {
-            if (res && !res.message){
-                let buf = Buffer.from(res, 'binary');
+            if (res && !res.message) {
+                const buf = Buffer.from(res, 'binary');
                 await adapter.writeFileAsync(adapter.namespace, 'cover.jpg', buf);
                 states.AudioStation.players[playerid].cover = `../${adapter.namespace}/cover.jpg`;
             } else {
@@ -759,28 +762,30 @@ function getSongCover(playerid, cb){
     }
 }
 
-function getPlaylist(playerid, cb){
+function getPlaylist(playerid, cb) {
     debug('getPlaylist');
     send('as', 'getPlayListRemotePlayer', {id: playerid}, (res) => {
-        if (res){
+        if (res) {
             parsePlayListRemotePlayer(playerid, res);
             cb && cb();
         }
     });
 }
 
-function Browser(playerid, val){
+function Browser(playerid, val) {
     debug('Browser');
     let param = {};
-    if (val && val !== '/'){
+    if (val && val !== '/') {
         if (~val.toString().indexOf('dir_')){
             param = {id: val};
         } else {
             try {
                 const obj = JSON.parse(states.AudioStation.players[playerid].Browser);
-                for (let dir_id in obj.files) {
-                    if (!obj.files.hasOwnProperty(dir_id)) continue;
-                    if (obj.files[dir_id].file === val){
+                for (const dir_id in obj.files) {
+                    if (!Object.prototype.hasOwnProperty.call(obj.files, dir_id)) {
+                        continue;
+                    }
+                    if (obj.files[dir_id].file === val) {
                         param = {id: obj.files[dir_id].id};
                     }
                 }
@@ -791,11 +796,11 @@ function Browser(playerid, val){
         }
     }
     send('as', 'listFolders', param, (res) => {
-        let arr = {files: []};
+        const arr = {files: []};
         if (res && res.items) {
             res.items.forEach((k, i) => {
                 let filetype = 'file';
-                if (res.items[i].type === 'folder'){
+                if (res.items[i].type === 'folder') {
                     filetype = 'directory';
                 }
                 arr.files.push({
@@ -811,26 +816,26 @@ function Browser(playerid, val){
     });
 }
 
-function PlayControl(playerid, cmd, val){
+function PlayControl(playerid, cmd, val) {
     debug('PlayControl');
-    let param = {
+    const param = {
         id:     playerid,
         action: cmd,
         value:  null
     };
-    if (playerid){
-        if (cmd === 'volume'){
+    if (playerid) {
+        if (cmd === 'volume') {
             param.action = 'set_volume';
             param.value = val;
         }
-        if (cmd === 'seek'){
+        if (cmd === 'seek') {
             param.value = parseFloat(((val / 100) * states.AudioStation.players[playerid].duration_sec).toFixed(4));
         }
-        if (cmd === 'repeat'){
+        if (cmd === 'repeat') {
             param.action = 'set_repeat';
             param.value = val;
         }
-        if (cmd === 'shuffle'){
+        if (cmd === 'shuffle') {
             param.action = 'set_shuffle';
             param.value = val;
         }
@@ -838,10 +843,10 @@ function PlayControl(playerid, cmd, val){
     }
 }
 
-function PlayFolder(playerid, folder){
+function PlayFolder(playerid, folder) {
     debug('PlayFolder');
     let param = {};
-    if (playerid){
+    if (playerid) {
         send('as', 'controlRemotePlayer', {id: playerid, action: 'stop'}, () => {
             clearPlaylist(playerid, () => {
                 param = {
@@ -851,7 +856,7 @@ function PlayFolder(playerid, folder){
                     offset:             0,
                     limit:              0,
                     play:               true,
-                    containers_json:    JSON.stringify([{"type": "folder", "id": folder, "recursive": true, "sort_by": "title", "sort_direction": "ASC"}])
+                    containers_json:    JSON.stringify([{'type': 'folder', 'id': folder, 'recursive': true, 'sort_by': 'title', 'sort_direction': 'ASC'}])
                 };
                 send('as', 'updatePlayListRemotePlayer', param, () => { //add folder to playlist
                     send('as', 'controlRemotePlayer', {id: playerid, action: 'play'});
@@ -861,10 +866,10 @@ function PlayFolder(playerid, folder){
     }
 }
 
-function PlayTrack(playerid, val){
+function PlayTrack(playerid, val) {
     debug('PlayTrack');
     let param = {};
-    if (playerid){
+    if (playerid) {
         param = {
             id:                 playerid,
             library:            'shared',
@@ -881,19 +886,19 @@ function PlayTrack(playerid, val){
     }
 }
 
-function PlayTrackNum(playerid, val){
+function PlayTrackNum(playerid, val) {
     debug('PlayTrackNum');
-    if (playerid){
+    if (playerid) {
         send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: val});
     }
 }
 
-function PlayTrackId(playerid, val){
+function PlayTrackId(playerid, val) {
     debug('PlayTrack');
     try {
-        let arr = JSON.parse(states.AudioStation.players[playerid].playlist);
-        let track = arr.findIndex(item => item.id === val);
-        if (track){
+        const arr = JSON.parse(states.AudioStation.players[playerid].playlist);
+        const track = arr.findIndex(item => item.id === val);
+        if (track) {
             send('as', 'controlRemotePlayer', {id: playerid, action: 'play', value: track});
         } else {
             error('PlayTrackId:', 'Error track not found');
@@ -903,12 +908,12 @@ function PlayTrackId(playerid, val){
     }
 }
 
-function parseListRemotePlayers(res){
+function parseListRemotePlayers(res) {
     debug(`ListRemotePlayers - Response: ${JSON.stringify(res)}`);
     //states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
     res.players.forEach((player) => {
         const playerid = player.id;
-        if (states.AudioStation.players[playerid] === undefined){
+        if (states.AudioStation.players[playerid] === undefined) {
             states.AudioStation.players[playerid] = {};
             states.AudioStation.players[playerid].online = true;
             states.AudioStation.players[playerid].player_name = player.name;
@@ -925,11 +930,11 @@ function parseListRemotePlayers(res){
     });
 }
 
-function parseRemotePlayerStatus(playerid, res){
+function parseRemotePlayerStatus(playerid, res) {
     debug(`RemotePlayerStatus - Response: ${JSON.stringify(res)}`);
     try {
-        if (res && res.index !== undefined){
-            let seek = parseFloat(((res.position / res.song.additional.song_audio.duration) * 100).toFixed(4));
+        if (res && res.index !== undefined) {
+            const seek = parseFloat(((res.position / res.song.additional.song_audio.duration) * 100).toFixed(4));
             states.AudioStation.players[playerid].current_play = parseInt(res.index, 10);
             states.AudioStation.players[playerid].playlist_total = res.playlist_total;
             states.AudioStation.players[playerid].volume = res.volume;
@@ -955,55 +960,55 @@ function parseRemotePlayerStatus(playerid, res){
     }
 }
 
-function parsePlayListRemotePlayer(playerid, res){
+function parsePlayListRemotePlayer(playerid, res) {
     debug(`PlayListRemotePlayer - Response: ${JSON.stringify(res)}`);
     try {
-        let playlist = [];
-        if (res && res.songs){
-            let arr = res.songs;
+        const playlist = [];
+        if (res && res.songs) {
+            const arr = res.songs;
             arr.forEach((k, i) => {
                 playlist[i] = {
-                    "id":      arr[i].id,
-                    "artist":  "",
-                    "album":   "",
-                    "bitrate": 0,
-                    "title":   arr[i].title,
-                    "file":    arr[i].path,
-                    "genre":   "",
-                    "year":    0,
-                    "len":     "00:00",
-                    "rating":  "",
-                    "cover":   ""
-                }
+                    'id':      arr[i].id,
+                    'artist':  '',
+                    'album':   '',
+                    'bitrate': 0,
+                    'title':   arr[i].title,
+                    'file':    arr[i].path,
+                    'genre':   '',
+                    'year':    0,
+                    'len':     '00:00',
+                    'rating':  '',
+                    'cover':   ''
+                };
             });
         }
         states.AudioStation.players[playerid].playlist = JSON.stringify(playlist);
     } catch (e) {
-
+        // ignore
     }
 }
 
-function parselistRadios(res){
+function parselistRadios(res) {
     debug(`listRadios - Response: ${JSON.stringify(res)}`);
-    if (res && !res.message){
+    if (res && !res.message) {
         try {
-            let radio_playlist = [];
-            if (res.radios){
-                let arr = res.radios;
+            const radio_playlist = [];
+            if (res.radios) {
+                const arr = res.radios;
                 arr.forEach((k, i) => {
                     radio_playlist[i] = {
-                        "id":      arr[i].id,
-                        "artist":  "",
-                        "album":   "",
-                        "bitrate": arr[i].desc ? arr[i].desc.match(/\(.*?(\d+)/)[1] :"",
-                        "title":   arr[i].title,
-                        "file":    arr[i].url,
-                        "genre":   "",
-                        "year":    0,
-                        "len":     "00:00",
-                        "rating":  "",
-                        "cover":   ""
-                    }
+                        'id':      arr[i].id,
+                        'artist':  '',
+                        'album':   '',
+                        'bitrate': arr[i].desc ? arr[i].desc.match(/\(.*?(\d+)/)[1] :'',
+                        'title':   arr[i].title,
+                        'file':    arr[i].url,
+                        'genre':   '',
+                        'year':    0,
+                        'len':     '00:00',
+                        'rating':  '',
+                        'cover':   ''
+                    };
                 });
                 Object.keys(states.AudioStation.players).forEach((playerid) => {
                     states.AudioStation.players[playerid].favoriteRadio = JSON.stringify(radio_playlist);
@@ -1017,10 +1022,10 @@ function parselistRadios(res){
 
 /*********************** FileStation ************************/
 
-function CreateSharing(command, link){
+function CreateSharing(command, link) {
     debug('CreateSharings');
     let params_set = {};
-    if (link){
+    if (link) {
         try {
             params_set = JSON.parse(link);
         } catch (e) {
@@ -1033,7 +1038,7 @@ function CreateSharing(command, link){
             params_set.password = '';
         }
         send('fs', 'createSharing', params_set, (res) => {
-            if (res){
+            if (res) {
                 CreateSharings(res);
             }
         });
@@ -1042,21 +1047,21 @@ function CreateSharing(command, link){
     }
 }
 
-function DeleteSharing(command, id){
+function DeleteSharing(command, id) {
     debug('DeleteSharings');
-    if (id){
+    if (id) {
         send('fs', 'deleteSharing', {'id': id});
     } else {
         error('DeleteSharings', 'ID not set');
     }
 }
 
-function parseListSharings(res){
+function parseListSharings(res) {
     debug(`parseListSharings - Response: ${JSON.stringify(res)}`);
-    let arr = res.links;
-    let temp_array = [];
+    const arr = res.links;
+    const temp_array = [];
     arr.forEach((k, i) => {
-        if (arr[i].id){
+        if (arr[i].id) {
             temp_array[i] = {
                 'name':           arr[i].name,
                 'date_available': arr[i].date_available,
@@ -1074,24 +1079,24 @@ function parseListSharings(res){
                 'url':            arr[i].url,
                 'request_info':   arr[i].request_info,
                 'request_name':   arr[i].request_name
-            }
+            };
         }
     });
     states.FileStation.sharing['list'] = JSON.stringify(temp_array);
 }
 
-function CreateSharings(res){
+function CreateSharings(res) {
     debug(`parseCreateSharings - Response: ${JSON.stringify(res)}`);
-    let arr = res.links;
+    const arr = res.links;
     states.FileStation.sharing['last_url'] = JSON.stringify(arr[0].url);
     states.FileStation.sharing['last_qrcode'] = JSON.stringify(arr[0].qrcode);
 }
 
 /************************** DSM ****************************/
 
-function parseInfoSystem(res){
+function parseInfoSystem(res) {
     debug(`InfoSystem - Response: ${JSON.stringify(res)}`);
-    if (res && res.hdd_info){
+    if (res && res.hdd_info) {
         res.hdd_info.forEach((key) => {
             const diskname = `${key.diskType.toLowerCase().replace(' ', '_')}_${key.diskno.toLowerCase().replace(' ', '_')}`;
             states.DiskStationManager.hdd_info[diskname] = {
@@ -1120,26 +1125,32 @@ function parseInfoSystem(res){
     }
 }
 
-function parseInstallingPackets(res){
+function parseInstallingPackets(res) {
     debug(`InstallingPackets - Response: ${JSON.stringify(res)}`);
-    if (res && res.packages){
+    if (res && res.packages) {
         if (!Array.isArray(res.packages)){
-            for (let fullname in res.packages) { // for getPollingData
-                if (!res.packages.hasOwnProperty(fullname)) continue;
-                for (let name in states.api) {
-                    if (!states.api.hasOwnProperty(name)) continue;
-                    if (states.api[name].name === fullname){
+            for (const fullname in res.packages) { // for getPollingData
+                if (!Object.prototype.hasOwnProperty.call(res.packages, fullname)) {
+                    continue;
+                }
+                for (const name in states.api) {
+                    if (!Object.prototype.hasOwnProperty.call(states.api, name)) {
+                        continue;
+                    }
+                    if (states.api[name].name === fullname) {
                         states.api[name]['installed'] = res.packages[fullname];
                     }
                 }
             }
         } else {
-            let arr = res.packages; // for listPackages
-            arr.forEach((obj) => {
-                for (let name in states.api) {
-                    if (!states.api.hasOwnProperty(name)) continue;
-                    if (states.api[name].name === obj.id){
-                        states.api[name]['installed'] = true;
+            const arr = res.packages; // for listPackages
+            arr.forEach(obj => {
+                for (const name in states.api) {
+                    if (!Object.prototype.hasOwnProperty.call(states.api, name)) {
+                        continue;
+                    }
+                    if (states.api[name].name === obj.id) {
+                        states.api[name].installed = true;
                     }
                 }
             });
@@ -1147,17 +1158,17 @@ function parseInstallingPackets(res){
     }
 }
 
-function parseInfo(res, api){
+function parseInfo(res, api) {
     debug(`Info - Response: ${JSON.stringify(res)}`);
-    if (states.api[api].installed){
+    if (states.api[api].installed) {
         const apiName = states.api[api].name;
-        if (apiName !== 'SurveillanceStation'){
+        if (apiName !== 'SurveillanceStation') {
             Object.keys(res).forEach((key) => {
-                if(key === 'version'){
+                if(key === 'version') {
                     states[apiName].info[key] = parseInt(res[key]);
                 } else {
                     states[apiName].info[key] = res[key];
-                    if(apiName === 'DiskStationManager' && firstStart && key === 'version_string'){
+                    if(apiName === 'DiskStationManager' && firstStart && key === 'version_string') {
                         setAllInstalledForDsm7 (res[key]);
                     }
                 }
@@ -1168,15 +1179,15 @@ function parseInfo(res, api){
     }
 }
 
-function setAllInstalledForDsm7 (VersionString){
-    if(VersionString === null ) return
-    let VersionMatch = VersionString.match(/^DSM ([0-9]+)\./)
-    if (!VersionMatch || !VersionMatch[1]) return
-    let VersionNumString = VersionMatch[1];
-    info(`DSM ${VersionNumString}`)
+function setAllInstalledForDsm7 (VersionString) {
+    if(VersionString === null ) return;
+    const VersionMatch = VersionString.match(/^DSM ([0-9]+)\./);
+    if (!VersionMatch || !VersionMatch[1]) return;
+    const VersionNumString = VersionMatch[1];
+    info(`DSM ${VersionNumString}`);
 
-    if(VersionNumString === '7' || VersionNumString === 7){
-        info('DSM 7 detected, set all to true')
+    if(VersionNumString === '7' || VersionNumString === 7) {
+        info('DSM 7 detected, set all to true');
         states.api['dl'].installed = true;
         states.api['as'].installed = true;
         states.api['vs'].installed = true;
@@ -1184,7 +1195,7 @@ function setAllInstalledForDsm7 (VersionString){
     }
 }
 
-function parseTempInfo(res){
+function parseTempInfo(res) {
     debug(`TempInfo - Response: ${JSON.stringify(res)}`);
     states.DiskStationManager.info.temperature = res.temperature;
     states.DiskStationManager.info.temperature_warn = res.temperature_warn;
@@ -1192,16 +1203,16 @@ function parseTempInfo(res){
     states.DiskStationManager.info.uptime = parseInt(res.uptime);
 }
 
-function parseSystemUtilization(res){
+function parseSystemUtilization(res) {
     debug(`SystemUtilization - Response: ${JSON.stringify(res)}`);
-    if (res && res.cpu){
+    if (res && res.cpu) {
         states.DiskStationManager.info['cpu_load'] = parseInt(res.cpu.user_load);
         states.DiskStationManager.info['memory_usage'] = parseInt(res.memory.real_usage);
         states.DiskStationManager.info['memory_size'] = parseInt(res.memory.memory_size);
     }
 }
 
-function parseSystemStatus(res){
+function parseSystemStatus(res) {
     debug(`SystemStatus - Response: ${JSON.stringify(res)}`);
     states.DiskStationManager.info['is_disk_wcache_crashed'] = res.is_disk_wcache_crashed;
     states.DiskStationManager.info['is_system_crashed'] = res.is_system_crashed;
@@ -1210,7 +1221,7 @@ function parseSystemStatus(res){
 
 /** **************************************************************/
 
-function parseTest(res){
+function parseTest(res) {
     debug(`test - Response: ${JSON.stringify(res)}`);
 
     //{api: 'ss', method: 'listEvents', params: {locked: 0, reason: 2, limit: 1, /*cameraIds: '2', */version: 4}, ParseFunction: parse.listEvents}, // Рабочий вариант
@@ -1226,24 +1237,24 @@ function parseTest(res){
 
 /** **************************************************************/
 
-function sendMethod(name, val){
+function sendMethod(name, val) {
     debug(`sendMethod to ${name} cmd:${val}`);
     const api = isInstalled(name);
-    if (api){
+    if (api) {
         let json, param;
         try {
             json = JSON.parse(val);
-            if (!json.method){
+            if (!json.method) {
                 error('sendMethod', `Error command - ${val} Method not specified`);
             } else {
                 const method = json.method;
-                if (typeof json.params === 'object'){
+                if (typeof json.params === 'object') {
                     param = json.params;
                 } else {
                     param = {};
                 }
                 send(api, method, param, (res) => {
-                    if (res){
+                    if (res) {
                         const id = `${name}.sendMethod`;
                         adapter.setState(id, {val: JSON.stringify(res), ack: true});
                     }
@@ -1257,10 +1268,10 @@ function sendMethod(name, val){
     }
 }
 
-function queuePolling(){
+function queuePolling() {
     iteration = 0;
     let namePolling = '';
-    if (endTime - startTime > slowPollingTime){
+    if (endTime - startTime > slowPollingTime) {
         startTime = new Date().getTime();
         namePolling = 'slowPoll';
     } else {
@@ -1270,15 +1281,15 @@ function queuePolling(){
     sendPolling(namePolling);
 }
 
-function sendPolling(namePolling){
+function sendPolling(namePolling) {
     const poll = PollCmd[namePolling][iteration];
     debug('-----------------------------------------------------------------------------------------------------');
-    if (poll !== undefined){
+    if (poll !== undefined) {
         debug(`* sendPolling. namePolling = ${namePolling} | iteration = ${iteration} | typeof poll = ${typeof poll} | poll = ${JSON.stringify(poll)}`);
-        if (typeof poll === 'function'){
+        if (typeof poll === 'function') {
             poll();
             iterator(namePolling);
-        } else if (states.api[poll.api].installed){
+        } else if (states.api[poll.api].installed) {
             const api = poll.api;
             const method = poll.method;
             const params = poll.params;
@@ -1286,10 +1297,10 @@ function sendPolling(namePolling){
             try {
                 syno[api][method](params, (err, res) => {
                     debug(!err && res ? '* The response is received, parse:' :'* No response, read next.');
-                    if (!err && res){
+                    if (!err && res) {
                         if (!connect) setInfoConnection(true);
                         connect = true;
-                        if (typeof poll.ParseFunction === "function"){
+                        if (typeof poll.ParseFunction === 'function') {
                             poll.ParseFunction(res, api);
                         } else {
                             error('ParseFunction', `syno[${api}][${method}] Error - Not Function!`);
@@ -1302,7 +1313,7 @@ function sendPolling(namePolling){
                         } else {
                             error(`*sendPolling syno[${api}][${method}]`, err);
                         }
-                        if (method === 'getPollingData' || method === 'listPackages'){
+                        if (method === 'getPollingData' || method === 'listPackages') {
                             iteration = -1;
                         }
                     }
@@ -1328,9 +1339,9 @@ function sendPolling(namePolling){
     }
 }
 
-function iterator(namePolling){
+function iterator(namePolling) {
     iteration++;
-    if (iteration > PollCmd[namePolling].length - 1){
+    if (iteration > PollCmd[namePolling].length - 1) {
         iteration = 0;
         timeOutPoll && clearTimeout(timeOutPoll);
         if (namePolling === 'firstPoll') firstStart = false;
@@ -1346,8 +1357,8 @@ function iterator(namePolling){
     }
 }
 
-function send(api, method, params, cb){
-    if (typeof params === 'function'){
+function send(api, method, params, cb) {
+    if (typeof params === 'function') {
         cb = params;
         params = null;
     }
@@ -1356,10 +1367,10 @@ function send(api, method, params, cb){
         syno[api][method](params, (err, data) => {
             debug(`Send [${api.toUpperCase()}] [${method}] Error: [${err || 'no error'}] Response: [${JSON.stringify(data)/*typeof data*/}]`);
             data = data || '';
-            if (!err){
+            if (!err) {
                 cb && cb(data);
-            } else if (err){
-                if (method === 'getStatusRemotePlayerStatus'){
+            } else if (err) {
+                if (method === 'getStatusRemotePlayerStatus') {
                     cb && cb(false);
                 } else {
                     error(`function send: [${api}][${method}]`, err, () => {
@@ -1377,7 +1388,7 @@ function send(api, method, params, cb){
 
 function sendSSH(method, cb) {
     try {
-        var ssh = new simpleSSH({
+        const ssh = new simpleSSH({
             host: adapter.config.host,
             port: adapter.config.ssh_port || 22,
             user: adapter.config.login,
@@ -1408,25 +1419,25 @@ async function setStates() {
     debug('setStates');
     let ids = '';
     for (const _api of Object.keys(states)) {
-        if (_api !== 'api'){
+        if (_api !== 'api') {
             for (const _type of Object.keys(states[_api])) {
-                if (typeof states[_api][_type] == 'object'){
+                if (typeof states[_api][_type] == 'object') {
                     for (const key of Object.keys(states[_api][_type])) {
-                        if (typeof states[_api][_type][key] == 'object'){
+                        if (typeof states[_api][_type][key] == 'object') {
                             //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
                             for (const key2 of Object.keys(states[_api][_type][key])) {
                                 //adapter.log.error('*********' + states[_api][_type][key][key2]);
-                                if (!old_states[_api][_type].hasOwnProperty(key)){
+                                if (!Object.prototype.hasOwnProperty.call(old_states[_api][_type], key)) {
                                     old_states[_api][_type][key] = {};
                                 }
-                                if (states[_api][_type][key][key2] !== old_states[_api][_type][key][key2]){
+                                if (states[_api][_type][key][key2] !== old_states[_api][_type][key][key2]) {
                                     old_states[_api][_type][key][key2] = states[_api][_type][key][key2];
                                     ids = `${_api}.${_type}.${key}.${key2}`;
                                     await setObject(ids, states[_api][_type][key][key2]);
                                 }
                             }
                         } else {
-                            if (states[_api][_type][key] !== old_states[_api][_type][key]){
+                            if (states[_api][_type][key] !== old_states[_api][_type][key]) {
                                 old_states[_api][_type][key] = states[_api][_type][key];
                                 ids = `${_api}.${_type}.${key}`;
                                 await setObject(ids, states[_api][_type][key]);
@@ -1434,7 +1445,7 @@ async function setStates() {
                         }
                     }
                 } else {
-                    if (states[_api][_type] !== old_states[_api][_type]){
+                    if (states[_api][_type] !== old_states[_api][_type]) {
                         old_states[_api][_type] = states[_api][_type];
                         ids = `${_api}.${_type}`;
                         await setObject(ids, states[_api][_type]);
@@ -1445,7 +1456,7 @@ async function setStates() {
     }
 }
 
-async function setObject(id, val){
+async function setObject(id, val) {
     debug(`setObject ${JSON.stringify(id)}, val=${val}`);
     if (!verifiedObjects[id]) {
         let obj = null;
@@ -1454,7 +1465,7 @@ async function setObject(id, val){
         } catch (e) {
             // ignore
         }
-        let common = {
+        const common = {
             name: id, desc: id, type: 'string', role: 'state'
         };
         let _id = id.split('.');
@@ -1517,10 +1528,10 @@ async function setObject(id, val){
     await adapter.setStateAsync(id, {val: val, ack: true});
 }
 
-function error(src, e, cb){
-    let code = e.code;
+function error(src, e, cb) {
+    const code = e.code;
     let message;
-    if (e.message === undefined){
+    if (e.message === undefined) {
         message = e;
     } else {
         message = e.message;
@@ -1543,20 +1554,20 @@ function error(src, e, cb){
     }
 }
 
-function main(){
+function main() {
     if (!adapter.systemConfig) return;
     adapter.subscribeStates('*');
     setInfoConnection(false);
     old_states = JSON.parse(JSON.stringify(states));
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
-    if (pollTime > slowPollingTime){
+    if (pollTime > slowPollingTime) {
         adapter.log.warn('pollTime > slowPollingTime! It is necessary to fix the polling time in the settings');
     }
-    if (parseInt(adapter.config.version, 10) < 6 || parseInt(adapter.config.version, 10) >= 7){
+    if (parseInt(adapter.config.version, 10) < 6 || parseInt(adapter.config.version, 10) >= 7) {
         PollCmd.firstPoll[0] = {api: 'dsm', method: 'listPackages', params: {version: 1}, ParseFunction: parseInstallingPackets};
     }
-    if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as){
+    if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as) {
         let result;
         result = PollCmd.fastPoll.filter(item => {
             return !((item.api === 'ss' && !adapter.config.ss) || (item.api === 'dl' && !adapter.config.dl) || ((item.api === 'as' || (typeof item === 'function' && item.name === 'getStatusPlayer')) && !adapter.config.as));
@@ -1578,7 +1589,7 @@ function main(){
     newSyno();
 }
 
-function newSyno(){
+function newSyno() {
     startTime = new Date().getTime();
     endTime = new Date().getTime();
     adapter.log.info(`Connecting to Synology ${adapter.config.host}:${adapter.config.port}`);
@@ -1607,20 +1618,21 @@ function newSyno(){
     }
 }
 
-function setInfoConnection(val){
-    adapter.getState('info.connection', function (err, state){
-        if (!err && state !== null){
-            if (state.val === val){
-            } else if (state.val !== val){
+function setInfoConnection(val) {
+    adapter.getState('info.connection', function (err, state) {
+        if (!err && state !== null) {
+            if (state.val === val) {
+                // ignore
+            } else if (state.val !== val) {
                 adapter.setState('info.connection', val, true);
             }
-        } else if (!state && !err){
+        } else if (!state && !err) {
             adapter.setState('info.connection', val, true);
         }
     });
 }
 
-function rePollAfterCmd(){
+function rePollAfterCmd() {
     timeOutPoll && clearTimeout(timeOutPoll);
     setInfoConnection(false);
     connect = false;
@@ -1628,41 +1640,44 @@ function rePollAfterCmd(){
     queuePolling();
 }
 
-function isInstalled(fullname){
-    for (let api in states.api) {
-        if (!states.api.hasOwnProperty(api)) continue;
-        if (states.api[api].name === fullname){
+function isInstalled(fullName) {
+    for (const api in states.api) {
+        if (!Object.prototype.hasOwnProperty.call(states.api, api)) {
+            continue;
+        }
+        if (states.api[api].name === fullName) {
             return api;
         }
     }
     return false;
 }
 
-function debug(msg){
+function debug(msg) {
     adapter.log.debug(msg);
 }
-function info(msg){
+function info(msg) {
     adapter.log.info(msg);
 }
-function warn(msg){
+function warn(msg) {
     adapter.log.warn(msg);
 }
 
 const unixToDate = (timestamp) => {
     return moment.unix(timestamp).format('DD/MM/YYYY, HH:mm');
 };
+/*
 const dateToUnix = (date) => {
-    let ts = moment(date).unix();
+    const ts = moment(date).unix();
     return moment.unix(ts);
 };
-
+*/
 function secToText(sec) {
     let res;
     let m = Math.floor(sec / 60);
-    let s = sec % 60;
-    let h = Math.floor(m / 60);
+    const s = sec % 60;
+    const h = Math.floor(m / 60);
     m = m % 60;
-    if (h > 0){
+    if (h > 0) {
         res = `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
     } else {
         res = `${pad2(m)}:${pad2(s)}`;
@@ -1670,12 +1685,12 @@ function secToText(sec) {
     return res;
 }
 
-function pad2(num){
-    let s = num.toString();
+function pad2(num) {
+    const s = num.toString();
     return (s.length < 2) ? `0${s}` :s;
 }
 
-if (module.parent){
+if (module.parent) {
     module.exports = startAdapter;
 } else {
     startAdapter();

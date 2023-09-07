@@ -321,6 +321,19 @@
       "native": {}
     },
     {
+      "_id": "commands.wake",
+      "type": "state",
+      "common": {
+        "role": "button",
+        "name": "Wake NAS",
+        "type": "boolean",
+        "read": false,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
       "_id": "DiskStationManager.sendMethod",
       "type": "state",
       "common": {

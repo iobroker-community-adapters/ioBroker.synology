@@ -77,6 +77,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
      ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (Standarduser) Corrected typo in RegEx for Mac-Address
+
 ### 3.0.0 (2023-09-07)
 * (Standarduser) Added WOL to awake Synology NAS server
 * (bluefox) Only node 16 or higher supported

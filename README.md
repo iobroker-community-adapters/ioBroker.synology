@@ -77,7 +77,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
      ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 3.0.1 (2023-10-01)
 * (Standarduser) A Typo in RegEx for Mac-Address has been corrected.
 * (McM1957) Dependencies have been updated.
 

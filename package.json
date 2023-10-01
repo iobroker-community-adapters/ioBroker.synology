@@ -1,6 +1,6 @@
 {
   "name": "iobroker.synology",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Info and control your NAS Synology",
   "author": {
     "name": "instalator",
@@ -25,9 +25,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/iobroker-community-adapters/ioBroker.synology"
-  },
-  "engines": {
-    "node": ">=16"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.0.3",

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "news": {
+      "3.0.1": {
+        "en": "A Typo in RegEx for Mac-Address has been corrected.\nDependencies have been updated.",
+        "de": "Ein Typo in RegEx für Mac-Addressen wurde korrigiert.\nAbhängigkeiten wurden aktualisiert.",
+        "ru": "Исправлена Typo в RegEx для Mac-Address.\nОбновлены зависимости.",
+        "pt": "Um Typo em RegEx para Mac-Address foi corrigido.\nAs dependências foram atualizadas.",
+        "nl": "Een Typo in RegEx voor Mac-Address is gecorrigeerd.\nAfhankelijkheid is geüpdateerd.",
+        "fr": "Un Typo de RegEx pour Mac-Address a été corrigé.\nLes dépendances ont été mises à jour.",
+        "it": "Un Typo su RegEx per Mac-Address è stato corretto.\nLe dipendenze sono state aggiornate.",
+        "es": "Se ha corregido un Typo en RegEx para Mac-Address.\nSe han actualizado las dependencias.",
+        "pl": "Typo w RegEx dla Mac-Address zostało poprawione.\nW zależności zostały zaktualizowane.",
+        "uk": "A Typo в RegEx для Mac-Address було виправлено.\nОновлено залежність.",
+        "zh-cn": "已经对麦斯的RegEx的Typo进行了纠正。.\n情况已经更新。."
+      },
       "3.0.0": {
         "en": "Added WOL to awake Synology NAS server\nOnly node 16 or higher supported",
         "de": "Hinzugefügt WOL zu wecken Synology NAS Server\nNur Knoten 16 oder höher unterstützt",
@@ -79,18 +92,6 @@
         "es": "Trate de prevenir las cerraduras de cuenta al utilizar 2FA en reinicios del NAS",
         "pl": "Próba zapobiegania zamknięciu w przypadku ponownego uruchomienia NAS na podstawie 2FA",
         "zh-cn": "利用《国家体系》的其它条款防止账户锁定"
-      },
-      "2.1.8": {
-        "en": "slow down reconnects to the DSM",
-        "de": "Verlangsamung der Verbindungen zum DSM implementiert",
-        "ru": "замедлить переподключение к DSM",
-        "pt": "retardar reconectações ao DSM",
-        "nl": "langzamer contact met de DSM",
-        "fr": "ralentir les reconnections au DSM",
-        "it": "rallentare le connessioni al DSM",
-        "es": "desacelerar las conexiones con el DSM",
-        "pl": "powolne połączenia do DSM",
-        "zh-cn": "d. 与DSM的重新连接缓慢"
       }
     },
     "titleLang": {

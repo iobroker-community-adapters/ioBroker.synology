@@ -1,551 +1,556 @@
 {
-  "common": {
-    "name": "synology",
-    "version": "3.0.1",
-    "news": {
-      "3.0.1": {
-        "en": "A Typo in RegEx for Mac-Address has been corrected.\nDependencies have been updated.",
-        "de": "Ein Typo in RegEx für Mac-Addressen wurde korrigiert.\nAbhängigkeiten wurden aktualisiert.",
-        "ru": "Исправлена Typo в RegEx для Mac-Address.\nОбновлены зависимости.",
-        "pt": "Um Typo em RegEx para Mac-Address foi corrigido.\nAs dependências foram atualizadas.",
-        "nl": "Een Typo in RegEx voor Mac-Address is gecorrigeerd.\nAfhankelijkheid is geüpdateerd.",
-        "fr": "Un Typo de RegEx pour Mac-Address a été corrigé.\nLes dépendances ont été mises à jour.",
-        "it": "Un Typo su RegEx per Mac-Address è stato corretto.\nLe dipendenze sono state aggiornate.",
-        "es": "Se ha corregido un Typo en RegEx para Mac-Address.\nSe han actualizado las dependencias.",
-        "pl": "Typo w RegEx dla Mac-Address zostało poprawione.\nW zależności zostały zaktualizowane.",
-        "uk": "A Typo в RegEx для Mac-Address було виправлено.\nОновлено залежність.",
-        "zh-cn": "已经对麦斯的RegEx的Typo进行了纠正。.\n情况已经更新。."
-      },
-      "3.0.0": {
-        "en": "Added WOL to awake Synology NAS server\nOnly node 16 or higher supported",
-        "de": "Hinzugefügt WOL zu wecken Synology NAS Server\nNur Knoten 16 oder höher unterstützt",
-        "ru": "Добавлен WOL для пробуждения сервера Synology NAS\nТолько узел 16 или выше поддерживается",
-        "pt": "Adicionado WOL para despertar servidor Synology NAS\nApenas nó 16 ou superior suportado",
-        "nl": "Voeg WOL toe om Synology NAS server wakker te maken\nAlleen node 16 of hoger ondersteuning",
-        "fr": "Ajouté WOL au serveur de NAS Synology\nSeulement node 16 ou plus supporté",
-        "it": "Aggiunto WOL per svegliare Synology NAS server\nSolo nodo 16 o superiore supportato",
-        "es": "Añadido WOL para despertar el servidor NAS de Synology\nSólo el nodo 16 o mayor apoyo",
-        "pl": "Added WOL to awake Synology NAS serwer NAS\nTylko węzeł 16 lub więcej",
-        "uk": "Додано WOL до сервера синології авекії NAS\nТільки вузол 16 або вище підтримується",
-        "zh-cn": "增加WOL,以瓦塞·桑科纳斯服务器\n只有16个或以上的支助"
-      },
-      "2.1.13": {
-        "en": "Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)\nSeveral base modules have been updated.",
-        "de": "Code wurde für die bevorstehende Version des js-Controllers vorbereitet. Referenz auf utils.controller Dir wurde entfernt. (#198)\nMehrere Basismodule wurden aktualisiert.",
-        "ru": "Код был подготовлен для предстоящего релиза js-controller. Ссылка на utils.controller Dir был удален. (#198)\nОбновлены несколько базовых модулей.",
-        "pt": "O código foi preparado para a próxima versão js-controller. Referência a utils.controller Dir foi removido. (#198)\nVários módulos de base foram atualizados.",
-        "nl": "De code is voorbereid op het opkomen van Js-controller vrijlating. Referentie tot utils. Dir is verwijderd\nEr zijn meerdere basismodules geüpdateerd.",
-        "fr": "Le code a été préparé pour la prochaine libération de js-controller. Référence à utils.controller Dir a été enlevé. (#198)\nPlusieurs modules de base ont été mis à jour.",
-        "it": "Codice è stato preparato per il prossimo rilascio js-controller. Riferimento utils.controller Dir è stato rimosso. (#198)\nDiversi moduli di base sono stati aggiornati.",
-        "es": "El código ha sido preparado para la próxima liberación js-controller. Referencia a utils.controller Dir ha sido eliminado. (#198)\nSe han actualizado varios módulos de base.",
-        "pl": "Kod został przygotowany do nadchodzącego wydania js-controllera. Odwołuje się do narzędzi. Zwolniony został (#198)\nZaktualizowano kilka modułów bazowych.",
-        "uk": "Код був підготовлений для майбутнього релізу js-controller. Посилання на utils.controller Зняття циркулі. (#198)\nБуло оновлено кілька базових модулів.",
-        "zh-cn": "已编制了即将释放的小册子的守则。 提及使用费。 他们已被撤职。\n更新了几个基单元。."
-      },
-      "2.1.12": {
-        "en": "Logging of password in clear text has been removed.",
-        "de": "Die Protokollierung des Passworts im Klartext wurde entfernt.",
-        "ru": "Запись пароля в ясном тексте удалена.",
-        "pt": "O registro de senha em texto claro foi removido.",
-        "nl": "Er is veel wachtwoord verwijderd.",
-        "fr": "La saisie du mot de passe dans un texte clair a été supprimée.",
-        "it": "La registrazione della password in testo chiaro è stata rimossa.",
-        "es": "Se ha eliminado la contraseña en texto claro.",
-        "pl": "Zdarza się, że fragment tekstu jawnego został usunięty.",
-        "uk": "Зняття пароля в чіткому тексті.",
-        "zh-cn": "删除了明确案文中的密码。."
-      },
-      "2.1.11": {
-        "en": "The adapter has been adapted to be compatible with node14.",
-        "de": "Der Adapter wurde angepasst, um mit node14 kompatibel zu sein.",
-        "ru": "Адаптер адаптирован к совместимости с node14.",
-        "pt": "O adaptador foi adaptado para ser compatível com o node14.",
-        "nl": "De adapter is aangepast om vergelijkbaar te zijn met Node14.",
-        "fr": "L'adaptateur a été adapté pour être compatible avec node14.",
-        "it": "L'adattatore è stato adattato per essere compatibile con node14.",
-        "es": "El adaptador ha sido adaptado para ser compatible con nodo14.",
-        "pl": "Adaptator jest kompatybilny z węzłem 14.",
-        "uk": "Адаптер був адаптований до сумісності з node14.",
-        "zh-cn": "适应者已适应与第14号不相符。."
-      },
-      "2.1.10": {
-        "en": "Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)\nBase modules have been updated as suggested by dependabot.",
-        "de": "Die Handhabung von Passwörtern mit Sonderzeichen (d.h. Dollarzeichen) wurde behoben (#180)\nBasismodule wurden wie von dependabot vorgeschlagen aktualisiert.",
-        "ru": "Обработка паролей, содержащих специальные символы (т.е. знак доллара) была зафиксирована (#180)\nБазовые модули были обновлены в качестве предложенного в зависимости от.",
-        "pt": "Manipulação de senhas contendo caracteres especiais (ou seja, um sinal de dólar) foi corrigido (#180)\nMódulos base foram atualizados como sugerido por dependeabot.",
-        "nl": "De wachtwoorden bevatten speciale personages\nBasismodules zijn geüpdateerd door afhankelijkheid.",
-        "fr": "La manipulation de mots de passe contenant des caractères spéciaux (c.-à-d. un signe en dollars) a été corrigée (#180)\nLes modules de base ont été mis à jour comme l ' a suggéré le fonctionnaire.",
-        "it": "La gestione delle password contenenti caratteri speciali (cioè un segno di dollaro) è stata fissata (#180)\nI moduli base sono stati aggiornati come suggerito da dipendeabot.",
-        "es": "Se ha fijado el manejo de contraseñas que contienen caracteres especiales (es decir, un signo de dólar) (#180)\nLos módulos de base se han actualizado según lo sugerido por dependabot.",
-        "pl": "Umieszczenie hasła zawierającego specjalne znaki (np. znak dolarowy) zostało ustalone (#180)\nModuły bazowe zostały zaktualizowane w zależności od bota.",
-        "uk": "Обробка паролів, що містять спеціальні символи (тобто знак долара) була виправлена (#180)\nОновлено базові модулі, запропоновані залежною.",
-        "zh-cn": "已确定含有特殊性质的密码(即美元签名)\n基地单元已按依赖性药物的建议更新。."
-      },
-      "2.1.9": {
-        "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
-        "de": "Es wird versucht Kontosperren zu verhindern, wenn 2FA bei Neustarts des NAS aktiviert ist.",
-        "ru": "Попробуйте предотвратить замки аккаунта при использовании 2FA на перезагрузках НАН",
-        "pt": "Tente evitar bloqueios de conta ao usar 2FA em reinicializações do NAS",
-        "nl": "Probeer rekeningsloten te voorkomen als je 2FA gebruikt voor herstart van de NASA",
-        "fr": "Essayez d'éviter les verrous de compte lors de l'utilisation de 2FA sur les redémarrages du NAS",
-        "it": "Cerca di evitare le serrature dell'account quando si utilizza 2FA su riavvio del NAS",
-        "es": "Trate de prevenir las cerraduras de cuenta al utilizar 2FA en reinicios del NAS",
-        "pl": "Próba zapobiegania zamknięciu w przypadku ponownego uruchomienia NAS na podstawie 2FA",
-        "zh-cn": "利用《国家体系》的其它条款防止账户锁定"
-      }
-    },
-    "titleLang": {
-      "en": "Synology NAS",
-      "de": "Synology NAS",
-      "ru": "Synology NAS",
-      "pt": "Synology NAS",
-      "nl": "Synology NAS",
-      "fr": "Synology NAS",
-      "it": "Synology NAS",
-      "es": "Synology NAS",
-      "pl": "Synology NAS",
-      "zh-cn": "Synology NAS"
-    },
-    "desc": {
-      "en": "Get status and control your NAS Synology",
-      "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
-      "ru": "Позволяет получать статус и управлять NAS Synology",
-      "pt": "Obtenha status e controle sua NAS Synology",
-      "nl": "Krijg status en controleer uw NAS Synology",
-      "fr": "Obtenez le statut et contrôlez votre NAS Synology",
-      "it": "Ottieni lo stato e controlla la tua Synology NAS",
-      "es": "Obtenga el estado y controle su NAS Synology",
-      "pl": "Uzyskaj status i kontroluj swój NAS Synology",
-      "zh-cn": "获取状态并控制您的 NAS Synology"
-    },
-    "platform": "Javascript/Node.js",
-    "license": "MIT",
-    "authors": [
-      "instalator"
-    ],
-    "mode": "daemon",
-    "main": "main.js",
-    "icon": "synology.png",
-    "enabled": false,
-    "messagebox": true,
-    "loglevel": "info",
-    "compact": true,
-    "materialize": true,
-    "adminUI": {
-      "config": "json"
-    },
-    "jsonConfig": true,
-    "tier": 2,
-    "connectionType": "local",
-    "dataSource": "poll",
-    "type": "infrastructure",
-    "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
-    "plugins": {
-      "sentry": {
-        "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
-      }
-    },
-    "keywords": [
-      "synology NAS control"
-    ],
-    "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
-    "dependencies": [
-      {
-        "js-controller": ">=3.2.0"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=5.1.28"
-      }
-    ],
-    "messages": [
-      {
-        "condition": {
-          "operand": "and",
-          "rules": [
-            "oldVersion<2.1.0",
-            "newVersion>=2.1.0"
-          ]
+    "common": {
+        "name": "synology",
+        "version": "3.0.1",
+        "news": {
+            "3.0.1": {
+                "en": "A Typo in RegEx for Mac-Address has been corrected.\nDependencies have been updated.",
+                "de": "Ein Typo in RegEx für Mac-Addressen wurde korrigiert.\nAbhängigkeiten wurden aktualisiert.",
+                "ru": "Исправлена Typo в RegEx для Mac-Address.\nОбновлены зависимости.",
+                "pt": "Um Typo em RegEx para Mac-Address foi corrigido.\nAs dependências foram atualizadas.",
+                "nl": "Een Typo in RegEx voor Mac-Address is gecorrigeerd.\nAfhankelijkheid is geüpdateerd.",
+                "fr": "Un Typo de RegEx pour Mac-Address a été corrigé.\nLes dépendances ont été mises à jour.",
+                "it": "Un Typo su RegEx per Mac-Address è stato corretto.\nLe dipendenze sono state aggiornate.",
+                "es": "Se ha corregido un Typo en RegEx para Mac-Address.\nSe han actualizado las dependencias.",
+                "pl": "Typo w RegEx dla Mac-Address zostało poprawione.\nW zależności zostały zaktualizowane.",
+                "uk": "A Typo в RegEx для Mac-Address було виправлено.\nОновлено залежність.",
+                "zh-cn": "已经对麦斯的RegEx的Typo进行了纠正。.\n情况已经更新。."
+            },
+            "3.0.0": {
+                "en": "Added WOL to awake Synology NAS server\nOnly node 16 or higher supported",
+                "de": "Hinzugefügt WOL zu wecken Synology NAS Server\nNur Knoten 16 oder höher unterstützt",
+                "ru": "Добавлен WOL для пробуждения сервера Synology NAS\nТолько узел 16 или выше поддерживается",
+                "pt": "Adicionado WOL para despertar servidor Synology NAS\nApenas nó 16 ou superior suportado",
+                "nl": "Voeg WOL toe om Synology NAS server wakker te maken\nAlleen node 16 of hoger ondersteuning",
+                "fr": "Ajouté WOL au serveur de NAS Synology\nSeulement node 16 ou plus supporté",
+                "it": "Aggiunto WOL per svegliare Synology NAS server\nSolo nodo 16 o superiore supportato",
+                "es": "Añadido WOL para despertar el servidor NAS de Synology\nSólo el nodo 16 o mayor apoyo",
+                "pl": "Added WOL to awake Synology NAS serwer NAS\nTylko węzeł 16 lub więcej",
+                "uk": "Додано WOL до сервера синології авекії NAS\nТільки вузол 16 або вище підтримується",
+                "zh-cn": "增加WOL,以瓦塞·桑科纳斯服务器\n只有16个或以上的支助"
+            },
+            "2.1.13": {
+                "en": "Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)\nSeveral base modules have been updated.",
+                "de": "Code wurde für die bevorstehende Version des js-Controllers vorbereitet. Referenz auf utils.controller Dir wurde entfernt. (#198)\nMehrere Basismodule wurden aktualisiert.",
+                "ru": "Код был подготовлен для предстоящего релиза js-controller. Ссылка на utils.controller Dir был удален. (#198)\nОбновлены несколько базовых модулей.",
+                "pt": "O código foi preparado para a próxima versão js-controller. Referência a utils.controller Dir foi removido. (#198)\nVários módulos de base foram atualizados.",
+                "nl": "De code is voorbereid op het opkomen van Js-controller vrijlating. Referentie tot utils. Dir is verwijderd\nEr zijn meerdere basismodules geüpdateerd.",
+                "fr": "Le code a été préparé pour la prochaine libération de js-controller. Référence à utils.controller Dir a été enlevé. (#198)\nPlusieurs modules de base ont été mis à jour.",
+                "it": "Codice è stato preparato per il prossimo rilascio js-controller. Riferimento utils.controller Dir è stato rimosso. (#198)\nDiversi moduli di base sono stati aggiornati.",
+                "es": "El código ha sido preparado para la próxima liberación js-controller. Referencia a utils.controller Dir ha sido eliminado. (#198)\nSe han actualizado varios módulos de base.",
+                "pl": "Kod został przygotowany do nadchodzącego wydania js-controllera. Odwołuje się do narzędzi. Zwolniony został (#198)\nZaktualizowano kilka modułów bazowych.",
+                "uk": "Код був підготовлений для майбутнього релізу js-controller. Посилання на utils.controller Зняття циркулі. (#198)\nБуло оновлено кілька базових модулів.",
+                "zh-cn": "已编制了即将释放的小册子的守则。 提及使用费。 他们已被撤职。\n更新了几个基单元。."
+            },
+            "2.1.12": {
+                "en": "Logging of password in clear text has been removed.",
+                "de": "Die Protokollierung des Passworts im Klartext wurde entfernt.",
+                "ru": "Запись пароля в ясном тексте удалена.",
+                "pt": "O registro de senha em texto claro foi removido.",
+                "nl": "Er is veel wachtwoord verwijderd.",
+                "fr": "La saisie du mot de passe dans un texte clair a été supprimée.",
+                "it": "La registrazione della password in testo chiaro è stata rimossa.",
+                "es": "Se ha eliminado la contraseña en texto claro.",
+                "pl": "Zdarza się, że fragment tekstu jawnego został usunięty.",
+                "uk": "Зняття пароля в чіткому тексті.",
+                "zh-cn": "删除了明确案文中的密码。."
+            },
+            "2.1.11": {
+                "en": "The adapter has been adapted to be compatible with node14.",
+                "de": "Der Adapter wurde angepasst, um mit node14 kompatibel zu sein.",
+                "ru": "Адаптер адаптирован к совместимости с node14.",
+                "pt": "O adaptador foi adaptado para ser compatível com o node14.",
+                "nl": "De adapter is aangepast om vergelijkbaar te zijn met Node14.",
+                "fr": "L'adaptateur a été adapté pour être compatible avec node14.",
+                "it": "L'adattatore è stato adattato per essere compatibile con node14.",
+                "es": "El adaptador ha sido adaptado para ser compatible con nodo14.",
+                "pl": "Adaptator jest kompatybilny z węzłem 14.",
+                "uk": "Адаптер був адаптований до сумісності з node14.",
+                "zh-cn": "适应者已适应与第14号不相符。."
+            },
+            "2.1.10": {
+                "en": "Handling of passwords containing special characters (i.e. a dollar sign) has been fixed (#180)\nBase modules have been updated as suggested by dependabot.",
+                "de": "Die Handhabung von Passwörtern mit Sonderzeichen (d.h. Dollarzeichen) wurde behoben (#180)\nBasismodule wurden wie von dependabot vorgeschlagen aktualisiert.",
+                "ru": "Обработка паролей, содержащих специальные символы (т.е. знак доллара) была зафиксирована (#180)\nБазовые модули были обновлены в качестве предложенного в зависимости от.",
+                "pt": "Manipulação de senhas contendo caracteres especiais (ou seja, um sinal de dólar) foi corrigido (#180)\nMódulos base foram atualizados como sugerido por dependeabot.",
+                "nl": "De wachtwoorden bevatten speciale personages\nBasismodules zijn geüpdateerd door afhankelijkheid.",
+                "fr": "La manipulation de mots de passe contenant des caractères spéciaux (c.-à-d. un signe en dollars) a été corrigée (#180)\nLes modules de base ont été mis à jour comme l ' a suggéré le fonctionnaire.",
+                "it": "La gestione delle password contenenti caratteri speciali (cioè un segno di dollaro) è stata fissata (#180)\nI moduli base sono stati aggiornati come suggerito da dipendeabot.",
+                "es": "Se ha fijado el manejo de contraseñas que contienen caracteres especiales (es decir, un signo de dólar) (#180)\nLos módulos de base se han actualizado según lo sugerido por dependabot.",
+                "pl": "Umieszczenie hasła zawierającego specjalne znaki (np. znak dolarowy) zostało ustalone (#180)\nModuły bazowe zostały zaktualizowane w zależności od bota.",
+                "uk": "Обробка паролів, що містять спеціальні символи (тобто знак долара) була виправлена (#180)\nОновлено базові модулі, запропоновані залежною.",
+                "zh-cn": "已确定含有特殊性质的密码(即美元签名)\n基地单元已按依赖性药物的建议更新。."
+            },
+            "2.1.9": {
+                "en": "Try to prevent account locks when using 2FA on restarts of the NAS",
+                "de": "Es wird versucht Kontosperren zu verhindern, wenn 2FA bei Neustarts des NAS aktiviert ist.",
+                "ru": "Попробуйте предотвратить замки аккаунта при использовании 2FA на перезагрузках НАН",
+                "pt": "Tente evitar bloqueios de conta ao usar 2FA em reinicializações do NAS",
+                "nl": "Probeer rekeningsloten te voorkomen als je 2FA gebruikt voor herstart van de NASA",
+                "fr": "Essayez d'éviter les verrous de compte lors de l'utilisation de 2FA sur les redémarrages du NAS",
+                "it": "Cerca di evitare le serrature dell'account quando si utilizza 2FA su riavvio del NAS",
+                "es": "Trate de prevenir las cerraduras de cuenta al utilizar 2FA en reinicios del NAS",
+                "pl": "Próba zapobiegania zamknięciu w przypadku ponownego uruchomienia NAS na podstawie 2FA",
+                "zh-cn": "利用《国家体系》的其它条款防止账户锁定",
+                "uk": "Спробуйте запобігти блокуванню облікових записів під час використання 2FA під час перезапуску NAS"
+            }
         },
-        "title": {
-          "en": "Re-enter the 2FA Secret after Update!",
-          "de": "Geben Sie das 2FA-Geheimnis nach dem Update erneut ein!",
-          "ru": "Повторно введите секрет 2FA после обновления!",
-          "pt": "Reinsira o 2FA Secret após a atualização!",
-          "nl": "Voer het 2FA-geheim opnieuw in na de update!",
-          "fr": "Entrez à nouveau le secret 2FA après la mise à jour !",
-          "it": "Inserisci nuovamente il segreto 2FA dopo l'aggiornamento!",
-          "es": "¡Vuelva a ingresar el secreto 2FA después de la actualización!",
-          "pl": "Wprowadź ponownie Sekret 2FA po aktualizacji!",
-          "zh-cn": "更新后重新输入2FA Secret！"
+        "titleLang": {
+            "en": "Synology NAS",
+            "de": "Synology NAS",
+            "ru": "Synology NAS",
+            "pt": "Synology NAS",
+            "nl": "Synology NAS",
+            "fr": "Synology NAS",
+            "it": "Synology NAS",
+            "es": "Synology NAS",
+            "pl": "Synology NAS",
+            "zh-cn": "Synology NAS",
+            "uk": "Synology NAS"
         },
-        "text": {
-          "en": "After installing this update the 2FA secret used to access the Synology needs to be re-entered in the Instance-Settings!",
-          "de": "Nach der Installation dieses Updates muss das 2FA-Geheimnis für den Zugriff auf die Synology in den Instanz-Einstellungen neu eingegeben werden!",
-          "ru": "После установки этого обновления секрет 2FA, используемый для доступа к Synology, необходимо повторно ввести в настройках экземпляра!",
-          "pt": "Depois de instalar esta atualização, o segredo 2FA usado para acessar o Synology precisa ser reinserido nas configurações da instância!",
-          "nl": "Na het installeren van deze update moet het 2FA-geheim dat wordt gebruikt om toegang te krijgen tot Synology opnieuw worden ingevoerd in de Instance-Settings!",
-          "fr": "Après avoir installé cette mise à jour, le secret 2FA utilisé pour accéder au Synology doit être ressaisi dans les paramètres d'instance !",
-          "it": "Dopo aver installato questo aggiornamento, il segreto 2FA utilizzato per accedere a Synology deve essere reinserito nelle impostazioni dell'istanza!",
-          "es": "Después de instalar esta actualización, el secreto 2FA utilizado para acceder a Synology debe volver a ingresarse en la configuración de la instancia.",
-          "pl": "Po zainstalowaniu tej aktualizacji klucz 2FA używany do uzyskiwania dostępu do Synology należy ponownie wprowadzić w ustawieniach instancji!",
-          "zh-cn": "安装此更新后，用于访问 Synology 的 2FA 密码需要在实例设置中重新输入！"
+        "desc": {
+            "en": "Get status and control your NAS Synology",
+            "de": "Erhalten Sie Status und steuern Sie Ihre NAS Synology",
+            "ru": "Позволяет получать статус и управлять NAS Synology",
+            "pt": "Obtenha status e controle sua NAS Synology",
+            "nl": "Krijg status en controleer uw NAS Synology",
+            "fr": "Obtenez le statut et contrôlez votre NAS Synology",
+            "it": "Ottieni lo stato e controlla la tua Synology NAS",
+            "es": "Obtenga el estado y controle su NAS Synology",
+            "pl": "Uzyskaj status i kontroluj swój NAS Synology",
+            "zh-cn": "获取状态并控制您的 NAS Synology",
+            "uk": "Отримайте статус і керуйте своїм NAS Synology"
         },
-        "level": "warn",
-        "buttons": [
-          "agree",
-          "cancel"
+        "platform": "Javascript/Node.js",
+        "license": "MIT",
+        "authors": [
+            "instalator"
+        ],
+        "mode": "daemon",
+        "main": "main.js",
+        "icon": "synology.png",
+        "enabled": false,
+        "messagebox": true,
+        "loglevel": "info",
+        "compact": true,
+        "materialize": true,
+        "adminUI": {
+            "config": "json"
+        },
+        "jsonConfig": true,
+        "tier": 2,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "type": "infrastructure",
+        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
+        "plugins": {
+            "sentry": {
+                "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
+            }
+        },
+        "keywords": [
+            "synology NAS control"
+        ],
+        "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
+        "dependencies": [
+            {
+                "js-controller": ">=3.2.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.1.28"
+            }
+        ],
+        "messages": [
+            {
+                "condition": {
+                    "operand": "and",
+                    "rules": [
+                        "oldVersion<2.1.0",
+                        "newVersion>=2.1.0"
+                    ]
+                },
+                "title": {
+                    "en": "Re-enter the 2FA Secret after Update!",
+                    "de": "Geben Sie das 2FA-Geheimnis nach dem Update erneut ein!",
+                    "ru": "Повторно введите секрет 2FA после обновления!",
+                    "pt": "Reinsira o 2FA Secret após a atualização!",
+                    "nl": "Voer het 2FA-geheim opnieuw in na de update!",
+                    "fr": "Entrez à nouveau le secret 2FA après la mise à jour !",
+                    "it": "Inserisci nuovamente il segreto 2FA dopo l'aggiornamento!",
+                    "es": "¡Vuelva a ingresar el secreto 2FA después de la actualización!",
+                    "pl": "Wprowadź ponownie Sekret 2FA po aktualizacji!",
+                    "zh-cn": "更新后重新输入2FA Secret！",
+                    "uk": "Повторно введіть секрет 2FA після оновлення!"
+                },
+                "text": {
+                    "en": "After installing this update the 2FA secret used to access the Synology needs to be re-entered in the Instance-Settings!",
+                    "de": "Nach der Installation dieses Updates muss das 2FA-Geheimnis für den Zugriff auf die Synology in den Instanz-Einstellungen neu eingegeben werden!",
+                    "ru": "После установки этого обновления секрет 2FA, используемый для доступа к Synology, необходимо повторно ввести в настройках экземпляра!",
+                    "pt": "Depois de instalar esta atualização, o segredo 2FA usado para acessar o Synology precisa ser reinserido nas configurações da instância!",
+                    "nl": "Na het installeren van deze update moet het 2FA-geheim dat wordt gebruikt om toegang te krijgen tot Synology opnieuw worden ingevoerd in de Instance-Settings!",
+                    "fr": "Après avoir installé cette mise à jour, le secret 2FA utilisé pour accéder au Synology doit être ressaisi dans les paramètres d'instance !",
+                    "it": "Dopo aver installato questo aggiornamento, il segreto 2FA utilizzato per accedere a Synology deve essere reinserito nelle impostazioni dell'istanza!",
+                    "es": "Después de instalar esta actualización, el secreto 2FA utilizado para acceder a Synology debe volver a ingresarse en la configuración de la instancia.",
+                    "pl": "Po zainstalowaniu tej aktualizacji klucz 2FA używany do uzyskiwania dostępu do Synology należy ponownie wprowadzić w ustawieniach instancji!",
+                    "zh-cn": "安装此更新后，用于访问 Synology 的 2FA 密码需要在实例设置中重新输入！",
+                    "uk": "Після встановлення цього оновлення секрет 2FA, який використовується для доступу до Synology, потрібно повторно ввести в налаштуваннях екземпляра!"
+                },
+                "level": "warn",
+                "buttons": [
+                    "agree",
+                    "cancel"
+                ]
+            }
         ]
-      }
+    },
+    "native": {
+        "host": "localhost",
+        "port": "5000",
+        "login": "admin",
+        "password": "",
+        "2fa_checkbox": false,
+        "2fa_code": "",
+        "https": false,
+        "version": "6.2.2",
+        "polling": 100,
+        "slowPollingTime": 60000,
+        "ss": true,
+        "as": true,
+        "dl": true,
+        "ssh_port": 22
+    },
+    "encryptedNative": [
+        "password",
+        "2fa_code"
+    ],
+    "protectedNative": [
+        "password",
+        "2fa_code"
+    ],
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "",
+            "type": "meta",
+            "common": {
+                "name": "Synology",
+                "type": "meta.user"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "If connected to Synology",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.reboot",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Reboot NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.shutdown",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Shutdown NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "commands.wake",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Wake NAS",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "DiskStationManager.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DiskStationManager",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "FileStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "DownloadStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "AudioStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "AudioStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "VideoStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "VideoStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "VideoStation_DTV.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "VideoStation_DTV",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "SurveillanceStation.sendMethod",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "SurveillanceStation",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "SurveillanceStation.getSnapshotCamera",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Get snapshot by camera number",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.add_url_download",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Add download URL or magnet link",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.add_hash_download",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Add to Hash Downloads",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.pause_task",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Pause the download",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.resume_task",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Resume the download",
+                "type": "string",
+                "read": false,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.folder",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "The folder to download",
+                "type": "string",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.shedule_enabled",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Status and control of scheduled",
+                "type": "boolean",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.shedule_emule_enabled",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Status and control of scheduled",
+                "type": "boolean",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.activeTask",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Number of incomplete downloads",
+                "type": "number",
+                "read": true,
+                "write": false,
+                "def": 0
+            },
+            "native": {}
+        },
+        {
+            "_id": "DownloadStation.listTasks",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "An array with incomplete downloads",
+                "type": "string",
+                "read": true,
+                "write": false,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sharing.create",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Generate one or more sharing link(s) by file/folder path(s).",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sharing.delete",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Delete one or more sharing links.",
+                "type": "object",
+                "read": true,
+                "write": true,
+                "def": ""
+            },
+            "native": {}
+        },
+        {
+            "_id": "FileStation.sharing.clear_invalid",
+            "type": "state",
+            "common": {
+                "role": "button",
+                "name": "Remove all expired and broken sharing links.",
+                "type": "boolean",
+                "read": false,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        }
     ]
-  },
-  "native": {
-    "host": "localhost",
-    "port": "5000",
-    "login": "admin",
-    "password": "",
-    "2fa_checkbox": false,
-    "2fa_code": "",
-    "https": false,
-    "version": "6.2.2",
-    "polling": 100,
-    "slowPollingTime": 60000,
-    "ss": true,
-    "as": true,
-    "dl": true,
-    "ssh_port": 22
-  },
-  "encryptedNative": [
-    "password",
-    "2fa_code"
-  ],
-  "protectedNative": [
-    "password",
-    "2fa_code"
-  ],
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "",
-      "type": "meta",
-      "common": {
-        "name": "Synology",
-        "type": "meta.user"
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "role": "indicator.connected",
-        "name": "If connected to Synology",
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "commands.reboot",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Reboot NAS",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "commands.shutdown",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Shutdown NAS",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "commands.wake",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Wake NAS",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "DiskStationManager.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "DiskStationManager",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "FileStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "DownloadStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "AudioStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "AudioStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "VideoStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "VideoStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "VideoStation_DTV.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "VideoStation_DTV",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "SurveillanceStation.sendMethod",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "SurveillanceStation",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "SurveillanceStation.getSnapshotCamera",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Get snapshot by camera number",
-        "type": "string",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.add_url_download",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Add download URL or magnet link",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.add_hash_download",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Add to Hash Downloads",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.pause_task",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Pause the download",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.resume_task",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Resume the download",
-        "type": "string",
-        "read": false,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.folder",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "The folder to download",
-        "type": "string",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.shedule_enabled",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Status and control of scheduled",
-        "type": "boolean",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.shedule_emule_enabled",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Status and control of scheduled",
-        "type": "boolean",
-        "read": true,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.activeTask",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Number of incomplete downloads",
-        "type": "number",
-        "read": true,
-        "write": false,
-        "def": 0
-      },
-      "native": {}
-    },
-    {
-      "_id": "DownloadStation.listTasks",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "An array with incomplete downloads",
-        "type": "string",
-        "read": true,
-        "write": false,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sharing.create",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Generate one or more sharing link(s) by file/folder path(s).",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sharing.delete",
-      "type": "state",
-      "common": {
-        "role": "state",
-        "name": "Delete one or more sharing links.",
-        "type": "object",
-        "read": true,
-        "write": true,
-        "def": ""
-      },
-      "native": {}
-    },
-    {
-      "_id": "FileStation.sharing.clear_invalid",
-      "type": "state",
-      "common": {
-        "role": "button",
-        "name": "Remove all expired and broken sharing links.",
-        "type": "boolean",
-        "read": false,
-        "write": true,
-        "def": false
-      },
-      "native": {}
-    }
-  ]
 }

@@ -121,40 +121,46 @@
             "zh-cn": "获取状态并控制您的 NAS Synology",
             "uk": "Отримайте статус і керуйте своїм NAS Synology"
         },
-        "platform": "Javascript/Node.js",
-        "license": "MIT",
         "authors": [
-            "instalator"
+            "instalator",
+            "mcm1957 <mcm57@gmx.at>"
         ],
-        "mode": "daemon",
-        "main": "main.js",
+        "keywords": [
+            "synology NAS control",
+            "synology",
+            "DSM",
+            "NAS"
+        ],
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
+        "platform": "Javascript/Node.js",
         "icon": "synology.png",
         "enabled": false,
-        "messagebox": true,
+        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
+        "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
         "loglevel": "info",
+        "tier": 2,
+        "mode": "daemon",
+        "messagebox": true,
         "compact": true,
         "materialize": true,
         "adminUI": {
             "config": "json"
         },
         "jsonConfig": true,
-        "tier": 2,
         "connectionType": "local",
         "dataSource": "poll",
         "type": "infrastructure",
-        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.synology/master/admin/synology.png",
         "plugins": {
             "sentry": {
                 "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"
             }
         },
-        "keywords": [
-            "synology NAS control"
-        ],
-        "readme": "https://github.com/iobroker-community-adapters/ioBroker.synology/blob/master/README.md",
         "dependencies": [
             {
-                "js-controller": ">=3.2.0"
+                "js-controller": ">=5.0.0"
             }
         ],
         "globalDependencies": [

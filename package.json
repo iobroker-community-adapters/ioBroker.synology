@@ -10,6 +10,10 @@
     {
       "name": "instalator",
       "email": "vvvalt@mail.ru"
+    },
+    {
+      "name": "mcm1957",
+      "email": "mcm57@gmx.at"
     }
   ],
   "homepage": "https://github.com/iobroker-community-adapters/ioBroker.synology",
@@ -24,7 +28,7 @@
     "url": "https://github.com/iobroker-community-adapters/ioBroker.synology"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.0.4",

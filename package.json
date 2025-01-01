@@ -31,7 +31,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.1.6",
+    "@iobroker/adapter-core": "^3.2.3",
     "moment": "^2.30.1",
     "simple-ssh": "^1.1.1",
     "syno": "git+https://git@github.com/MeisterTR/syno.git",

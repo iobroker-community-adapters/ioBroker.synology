@@ -20,7 +20,7 @@
     "Mac address": "MAC-Adresse",
     "(optional, used for Wake on LAN)": "(optional, wird für Wake on LAN verwendet)",
     "IP address": "IP-Adresse",
-    "Port": "Hafen",
+    "Port": "Port",
     "(Standard 5001)": "(Standard 5001)",
     "User": "Benutzer",
     "Password": "Passwort",

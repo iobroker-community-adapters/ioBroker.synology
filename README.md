@@ -82,6 +82,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
      ### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires js-controller >= 6.0.11 now
+- (copilot) Adapter requires admin >= 7.6.17 now
 * (copilot) **CI/CD**: Updated ioBroker Copilot Instructions template from v0.4.0 to v0.4.2
 
 ### 3.1.0 (2024-04-07)
@@ -261,6 +263,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## License
 The MIT License (MIT)
 
+
+Copyright (c) 2026 iobroker-community-adapters <iobroker-community-adapters@gmx.de>  
 Copyright (c) 2024, iobroker-community-adapters <iobroker-community-adapters@gmx.de>
 Copyright (c) 2021-2023 instalator <vvvalt@mail.ru>, ioBroker Community-Developers
 

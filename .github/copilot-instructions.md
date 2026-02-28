@@ -1,25 +1,3 @@
-
-# Template for ioBroker Adapter Copilot Instructions
-
-This is the template file that should be copied to your ioBroker adapter repository as `.github/copilot-instructions.md`.
-
-## How to Use This Template
-
-**Prerequisites:** Ensure you have GitHub Copilot already set up and working in your repository before using this template. If you need help with basic setup, see the [Prerequisites & Setup Guide](README.md#🛠️-prerequisites--basic-github-copilot-setup) in the main repository.
-
-1. Copy this entire content
-2. Save it as `.github/copilot-instructions.md` in your adapter repository
-3. Customize the sections marked with `[CUSTOMIZE]` if needed
-4. Commit the file to enable GitHub Copilot integration
-
-**Note:** If downloading via curl, use the sed command to remove the template comment block:
-```bash
-curl -o .github/copilot-instructions.md https://raw.githubusercontent.com/DrozmotiX/ioBroker-Copilot-Instructions/main/template.md
-sed -i '/^<!--$/,/^-->$/d' .github/copilot-instructions.md
-```
-
----
-
 # ioBroker Adapter Development with GitHub Copilot
 
 **Version:** 0.5.7

@@ -74,33 +74,64 @@ jobs:
           echo "update_needed=$UPDATE_NEEDED" >> $GITHUB_OUTPUT
           echo "setup_needed=$SETUP_NEEDED" >> $GITHUB_OUTPUT
           
-      - name: Check for existing issues
+      - name: Check for and close existing issues
         id: issue-check
+        if: steps.version-check.outputs.setup_needed == 'true' || steps.version-check.outputs.update_needed == 'true'
         uses: actions/github-script@v7
         with:
           script: |
+            console.log('🔍 Checking for existing copilot setup/update issues...');
+            
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: 'copilot-setup,automation'
+              per_page: 100,
+              creator: 'github-actions[bot]'
             });
             
-            const setupIssues = issues.filter(issue => 
-              issue.title.includes('Setup ioBroker') || 
-              issue.title.includes('Update ioBroker') ||
-              issue.title.includes('Copilot')
-            );
-            
-            core.setOutput('has_existing_issue', setupIssues.length > 0);
-            core.setOutput('existing_count', setupIssues.length);
+            // Look for existing issues created by github-actions[bot] that match copilot-related title patterns
+            const setupIssues = issues.filter(issue => {
+              const title = issue.title.toLowerCase();
+              const hasKeywords = title.includes('copilot') && (
+                title.includes('setup') || 
+                title.includes('update') ||
+                title.includes('instructions') ||
+                title.includes('template')
+              );
+              return hasKeywords;
+            });
             
             if (setupIssues.length > 0) {
-              console.log(`Found ${setupIssues.length} existing copilot setup/update issue(s)`);
+              console.log(`📋 Found ${setupIssues.length} existing copilot setup/update issue(s):`);
+              
+              // Close ALL existing issues with a comment
+              for (const issue of setupIssues) {
+                console.log(`  - Closing #${issue.number}: ${issue.title}`);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '🤖 Closing this issue as a new version check has been triggered. A new issue will be created with the latest information.'
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+              }
+              
+              console.log(`✅ Closed ${setupIssues.length} existing issue(s)`);
+            } else {
+              console.log('✅ No existing copilot-related issues found');
             }
             
+            core.setOutput('has_existing_issue', 'false');
+            core.setOutput('existing_count', '0');
+            
       - name: Create initial setup issue
-        if: steps.version-check.outputs.setup_needed == 'true' && steps.issue-check.outputs.has_existing_issue == 'false'
+        if: steps.version-check.outputs.setup_needed == 'true'
         uses: actions/github-script@v7
         with:
           script: |

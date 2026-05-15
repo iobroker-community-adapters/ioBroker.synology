@@ -262,6 +262,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ### 0.0.3 (2018-01-03)
 * (instalator) initial
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 The MIT License (MIT)
 

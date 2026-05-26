@@ -146,7 +146,6 @@
     "mode": "daemon",
     "messagebox": true,
     "compact": true,
-    "materialize": true,
     "adminUI": {
       "config": "json"
     },

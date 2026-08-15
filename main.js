@@ -3,9 +3,9 @@
 
 const utils = require('@iobroker/adapter-core');
 const Syno = require('syno');
-const fs = require('fs');
+const fs = require('node:fs');
 const moment = require('moment');
-const path = require('path');
+const path = require('node:path');
 const simpleSSH = require('simple-ssh');
 const wol = require('wol');
 

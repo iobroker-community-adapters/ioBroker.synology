@@ -8,6 +8,7 @@ const moment = require('moment');
 const path = require('path');
 const simpleSSH = require('simple-ssh');
 const wol = require('wol');
+const { createSnapshotLink } = require('./lib/snapshotLink.js');
 
 let adapter;
 let syno;
@@ -450,11 +451,7 @@ function addLinkSnapShot() {
     Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
         if (nameCam !== undefined) {
             const camId = states.SurveillanceStation.cameras[nameCam].id;
-            let _sid = syno.sessions.SurveillanceStation ? syno.sessions.SurveillanceStation._sid :'';
-            if (typeof _sid === 'undefined') {
-                _sid = syno.sessions.SurveillanceStation;
-            }
-            states.SurveillanceStation.cameras[nameCam]['linkSnapshot'] = `${syno.protocol}://${syno.host}:${syno.port}/webapi/entry.cgi?api=SYNO.SurveillanceStation.Camera&method=GetSnapshot&version=7&cameraId= ${camId}&_sid=${_sid}`;
+            states.SurveillanceStation.cameras[nameCam].linkSnapshot = createSnapshotLink(syno, camId);
         }
     });
 }
@@ -520,6 +517,8 @@ function parselistCameras(res) {
             }
             states.SurveillanceStation.cameras[arr[i].name].host = arr[i].host || arr[i].ip;
             states.SurveillanceStation.cameras[arr[i].name].id = arr[i].id;
+            // Rebuild immediately, including when a camera was recreated with the same name.
+            states.SurveillanceStation.cameras[arr[i].name].linkSnapshot = createSnapshotLink(syno, arr[i].id);
             states.SurveillanceStation.cameras[arr[i].name].port = arr[i].port;
             states.SurveillanceStation.cameras[arr[i].name].model = arr[i].model;
             states.SurveillanceStation.cameras[arr[i].name].vendor = arr[i].vendor;

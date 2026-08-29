@@ -82,6 +82,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
      ### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+- (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
 - (copilot) Adapter requires node.js >= 22 now
 - (iobroker-bot) Adapter requires node.js >= 20 now.
 - (copilot) Adapter requires admin >= 7.7.22 now

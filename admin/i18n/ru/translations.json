@@ -19,7 +19,7 @@
     "version": "Версия API",
     "Mac address": "MAC-адрес",
     "(optional, used for Wake on LAN)": "(опционально, используется для Wake on LAN)",
-    "IP address": "айпи адрес",
+    "IP address": "IP-адрес",
     "Port": "Порт",
     "(Standard 5001)": "(Стандарт 5001)",
     "User": "Пользователь",

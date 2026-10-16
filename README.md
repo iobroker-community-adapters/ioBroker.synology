@@ -81,7 +81,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 <!--
      ### **WORK IN PROGRESS**
 -->
-### 3.2.1-alpha.0 (2026-10-16)
+### **WORK IN PROGRESS**
 - (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
 
 ### 3.2.0 (2026-10-16)

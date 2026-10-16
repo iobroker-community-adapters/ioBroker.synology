@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.2.0",
+    "version": "3.2.1-alpha.0",
     "news": {
+      "3.2.1-alpha.0": {
+        "en": "Rebuild the snapshot link immediately when a camera ID changes.",
+        "de": "Bei Änderung der Kamera-ID den Snapshot-Link sofort neu.",
+        "ru": "Сразу же восстановите ссылку на снимок при изменении идентификатора камеры.",
+        "pt": "Reconstrua o link da foto assim que o ID da câmera mudar.",
+        "nl": "Herbouw de link naar de momentopname onmiddellijk wanneer een camera-ID verandert.",
+        "fr": "Recréez le lien de la photo dès que l'identifiant de la caméra change.",
+        "it": "Ricostruisca subito lo snapshot link quando cambia l'ID.",
+        "es": "Reconstruir el enlace de la instantánea al cambiar el ID de la cámara.",
+        "pl": "Odbuduj łącze migawki natychmiast po zmianie identyfikatora aparatu.",
+        "uk": "Відновіть посилання на знімок відразу після зміни ідентифікатора камери.",
+        "zh-cn": "当摄像机 ID 发生变化时，立即重建快照链接。"
+      },
       "3.2.0": {
         "en": "Adapter requires node.js >= 20 now.\nAdapter requires admin >= 7.7.22 now\nAdapter requires js-controller >= 6.0.11 now\nDependencies have been updated.",
         "de": "Adapter benötigt jetzt node.js >= 20.\nAdapter benötigt jetzt admin >= 7.7.22\nAdapter benötigt jetzt JS-Controller >= 6.0.11\nAbhängigkeiten wurden aktualisiert.",
@@ -80,19 +93,6 @@
         "pl": "Zdarza się, że fragment tekstu jawnego został usunięty.",
         "uk": "Зняття пароля в чіткому тексті.",
         "zh-cn": "删除了明确案文中的密码。."
-      },
-      "2.1.11": {
-        "en": "The adapter has been adapted to be compatible with node14.",
-        "de": "Der Adapter wurde angepasst, um mit node14 kompatibel zu sein.",
-        "ru": "Адаптер адаптирован к совместимости с node14.",
-        "pt": "O adaptador foi adaptado para ser compatível com o node14.",
-        "nl": "De adapter is aangepast om vergelijkbaar te zijn met Node14.",
-        "fr": "L'adaptateur a été adapté pour être compatible avec node14.",
-        "it": "L'adattatore è stato adattato per essere compatibile con node14.",
-        "es": "El adaptador ha sido adaptado para ser compatible con nodo14.",
-        "pl": "Adaptator jest kompatybilny z węzłem 14.",
-        "uk": "Адаптер був адаптований до сумісності з node14.",
-        "zh-cn": "适应者已适应与第14号不相符。."
       }
     },
     "titleLang": {

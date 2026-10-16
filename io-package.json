@@ -149,7 +149,6 @@
     "adminUI": {
       "config": "json"
     },
-    "jsonConfig": true,
     "connectionType": "local",
     "dataSource": "poll",
     "type": "infrastructure",

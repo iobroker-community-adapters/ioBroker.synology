@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.2.1-alpha.0",
+    "version": "3.2.1-alpha.1",
     "news": {
+      "3.2.1-alpha.1": {
+        "en": "Rebuild the snapshot link immediately when a camera ID changes.",
+        "de": "Bei Änderung der Kamera-ID den Snapshot-Link sofort neu.",
+        "ru": "Сразу же восстановите ссылку на снимок при изменении идентификатора камеры.",
+        "pt": "Reconstrua o link da foto assim que o ID da câmera mudar.",
+        "nl": "Herbouw de link naar de momentopname onmiddellijk wanneer een camera-ID verandert.",
+        "fr": "Recréez le lien de la photo dès que l'identifiant de la caméra change.",
+        "it": "Ricostruisca subito lo snapshot link quando cambia l'ID.",
+        "es": "Reconstruir el enlace de la instantánea al cambiar el ID de la cámara.",
+        "pl": "Odbuduj łącze migawki natychmiast po zmianie identyfikatora aparatu.",
+        "uk": "Відновіть посилання на знімок відразу після зміни ідентифікатора камери.",
+        "zh-cn": "当摄像机 ID 发生变化时，立即重建快照链接。"
+      },
       "3.2.0": {
         "en": "Adapter requires node.js >= 20 now.\nAdapter requires admin >= 7.7.22 now\nAdapter requires js-controller >= 6.0.11 now\nDependencies have been updated.",
         "de": "Adapter benötigt jetzt node.js >= 20.\nAdapter benötigt jetzt admin >= 7.7.22\nAdapter benötigt jetzt JS-Controller >= 6.0.11\nAbhängigkeiten wurden aktualisiert.",

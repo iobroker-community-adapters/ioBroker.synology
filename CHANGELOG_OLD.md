@@ -3,7 +3,6 @@
 *(McM1957) Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)
 *(McM1957) Several base modules have been updated.
 
-
 ## 2.1.12 (2022-10-26)
 *(McM1957) Logging of password in clear text has been removed.
 

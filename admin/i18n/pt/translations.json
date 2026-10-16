@@ -19,7 +19,7 @@
     "version": "Versão da API",
     "Mac address": "endereço MAC",
     "(optional, used for Wake on LAN)": "(opcional, usado para Wake on LAN)",
-    "IP address": "endereço de IP",
+    "IP address": "endereço IP",
     "Port": "Porta",
     "(Standard 5001)": "(Padrão 5001)",
     "User": "Do utilizador",

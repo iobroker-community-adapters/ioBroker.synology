@@ -1153,7 +1153,7 @@ function pollSmartAttributes() {
 
         const diskName = disks[index++];
         const disk = states.DiskStationManager.hdd_info[diskName];
-        sendSSH(`smartctl -A -d sat ${disk.diskPath}`, (stdout, exitCode) => {
+        sendSSH(`smartctl -A -d sat ${disk.diskPath}`, (stdout, exitCode, stderr) => {
             if (adapterUnloading) {
                 smartPollInProgress = false;
                 return;
@@ -1167,7 +1167,8 @@ function pollSmartAttributes() {
                     }
                 }
             } else {
-                adapter.log.warn(`Could not read SMART attributes for ${disk.diskno} (${disk.diskPath}); smartctl exited with code ${exitCode}`);
+                const details = String(stderr || '').trim().replace(/\s+/g, ' ').slice(0, 300);
+                adapter.log.warn(`Could not read SMART attributes for ${disk.diskno} (${disk.diskPath}); smartctl exited with code ${exitCode}${details ? `: ${details}` : ''}`);
             }
             pollNextDisk();
         }, true);
@@ -1455,11 +1456,7 @@ function sendSSH(method, cb, nonFatal = false) {
         ssh.exec(sshcmd, {
             err: (err) => {
                 if (nonFatal) {
-                    adapter.log.warn(`SSH command failed: ${String(err)}`);
-                    if (!completed) {
-                        completed = true;
-                        cb && cb('', -1, err);
-                    }
+                    debug(`SSH command stderr: ${String(err)}`);
                 } else {
                     error('SSH Error:', err);
                 }

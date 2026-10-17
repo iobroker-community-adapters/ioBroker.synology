@@ -11,9 +11,12 @@ const simpleSSH = require('simple-ssh');
 const wol = require('wol');
 const { createSnapshotLink } = require('./lib/snapshotLink.js');
 const { createKeyedQueue, createRtspUrl, getCameraCodec, isH265 } = require('./lib/rtspSnapshot.js');
+const { parseSmartAttributes } = require('./lib/smartAttributes.js');
 
 let adapter;
 let syno;
+let smartPollInProgress = false;
+let adapterUnloading = false;
 let timeOutPoll;
 let timeOutReconnect;
 let pollTime;
@@ -28,11 +31,15 @@ let slowPollingTime;
 let dir;
 let old_states;
 let timeOut;
-let adapterUnloading = false;
 // let pathInstance;
 const verifiedObjects = {};
 const activeH265Captures = new Set();
 const enqueueH265Snapshot = createKeyedQueue();
+const verifiedChannels = new Set();
+const smartAttributeMetadata = {
+    Temperature_Celsius: {role: 'value.temperature', type: 'number', unit: '°C'},
+    Power_On_Hours: {role: 'value.interval', type: 'number', unit: 'h'}
+};
 let wolTries = 3;
 let wolTimer = null;
 
@@ -428,6 +435,7 @@ const PollCmd = {
         {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
         {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parselistTasks},
         {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parselistRadios},
+        pollSmartAttributes,
         addLinkSnapShot,
         getLiveViewPathCamera
     ]
@@ -1274,8 +1282,9 @@ function parseInfoSystem(res) {
     if (res && res.hdd_info) {
         res.hdd_info.forEach((key) => {
             const diskname = `${key.diskType.toLowerCase().replace(' ', '_')}_${key.diskno.toLowerCase().replace(' ', '_')}`;
-            states.DiskStationManager.hdd_info[diskname] = {
+            const diskInfo = {
                 'diskno':          key.diskno,
+                'diskPath':        key.diskPath,
                 'model':           key.model.replace(/\s{2,}/g, ''),
                 'overview_status': key.status,
                 'ebox_order':      parseInt(key.ebox_order, 10),
@@ -1283,6 +1292,9 @@ function parseInfoSystem(res) {
                 'storage_pool':    key.volume,
                 'capacity':        parseFloat(((key.capacity / 1073741824).toFixed(2)))
             };
+            const previousDisk = states.DiskStationManager.hdd_info[diskname];
+            diskInfo.smart = previousDisk && previousDisk.smart ? previousDisk.smart : {};
+            states.DiskStationManager.hdd_info[diskname] = diskInfo;
         });
         if (res.vol_info) {
             res.vol_info.forEach((key) => {
@@ -1298,6 +1310,47 @@ function parseInfoSystem(res) {
             });
         }
     }
+}
+
+function pollSmartAttributes() {
+    if (!adapter.config.smart_over_ssh || smartPollInProgress || adapterUnloading) return;
+    const disks = Object.keys(states.DiskStationManager.hdd_info).filter((diskName) => {
+        const disk = states.DiskStationManager.hdd_info[diskName];
+        return typeof disk.diskPath === 'string' && /^\/dev\/[A-Za-z0-9_-]+$/.test(disk.diskPath);
+    });
+    if (!disks.length) return;
+
+    smartPollInProgress = true;
+    let index = 0;
+    const pollNextDisk = () => {
+        if (adapterUnloading || index >= disks.length) {
+            smartPollInProgress = false;
+            return;
+        }
+
+        const diskName = disks[index++];
+        const disk = states.DiskStationManager.hdd_info[diskName];
+        sendSSH(`smartctl -A -d sat ${disk.diskPath}`, (stdout, exitCode, stderr) => {
+            if (adapterUnloading) {
+                smartPollInProgress = false;
+                return;
+            }
+            const attributes = parseSmartAttributes(stdout);
+            if (Object.keys(attributes).length) {
+                const currentDisk = states.DiskStationManager.hdd_info[diskName];
+                if (currentDisk) {
+                    for (const name of Object.keys(attributes)) {
+                        currentDisk.smart[name] = attributes[name];
+                    }
+                }
+            } else {
+                const details = String(stderr || '').trim().replace(/\s+/g, ' ').slice(0, 300);
+                adapter.log.warn(`Could not read SMART attributes for ${disk.diskno} (${disk.diskPath}); smartctl exited with code ${exitCode}${details ? `: ${details}` : ''}`);
+            }
+            pollNextDisk();
+        }, true);
+    };
+    pollNextDisk();
 }
 
 function parseInstallingPackets(res) {
@@ -1575,7 +1628,8 @@ function send(api, method, params, cb) {
 }
 
 
-function sendSSH(method, cb) {
+function sendSSH(method, cb, nonFatal = false) {
+    let completed = false;
     try {
         const ssh = new simpleSSH({
             host: adapter.config.host,
@@ -1592,15 +1646,39 @@ function sendSSH(method, cb) {
         debug( 'SSH:' + sshcmd4log);
         ssh.exec(sshcmd, {
             err: (err) => {
-                error('SSH Error:', err);
+                if (nonFatal) {
+                    debug(`SSH command stderr: ${String(err)}`);
+                } else {
+                    error('SSH Error:', err);
+                }
             },
-            exit: () => {
-                cb && cb();
+            exit: (code, stdout, stderr) => {
+                if (!completed) {
+                    completed = true;
+                    cb && cb(stdout, code, stderr);
+                }
             }
-        }).start();
+        }).start({
+            fail: (err) => {
+                if (completed) return;
+                completed = true;
+                if (nonFatal) {
+                    adapter.log.warn(`SSH connection failed: ${String(err)}`);
+                    cb && cb('', -1, err);
+                } else {
+                    error('SSH Error:', err);
+                }
+            }
+        });
 
     } catch (e) {
-        error('--- SSH Error ', JSON.stringify(e));
+        if (nonFatal && !completed) {
+            completed = true;
+            adapter.log.warn(`SSH command failed: ${String(e)}`);
+            cb && cb('', -1, e);
+        } else {
+            error('--- SSH Error ', JSON.stringify(e));
+        }
     }
 }
 
@@ -1615,6 +1693,25 @@ async function setStates() {
                         if (typeof states[_api][_type][key] == 'object') {
                             //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
                             for (const key2 of Object.keys(states[_api][_type][key])) {
+                                if (_api === 'DiskStationManager' && _type === 'hdd_info' && key2 === 'smart') {
+                                    const channelId = `${_api}.${_type}.${key}.smart`;
+                                    if (!verifiedChannels.has(channelId)) {
+                                        await adapter.extendObjectAsync(channelId, {
+                                            type: 'channel',
+                                            common: {name: 'SMART'},
+                                            native: {}
+                                        });
+                                        verifiedChannels.add(channelId);
+                                    }
+                                    for (const attribute of Object.keys(states[_api][_type][key].smart)) {
+                                        if (!old_states[_api][_type][key].smart) old_states[_api][_type][key].smart = {};
+                                        if (states[_api][_type][key].smart[attribute] !== old_states[_api][_type][key].smart[attribute]) {
+                                            old_states[_api][_type][key].smart[attribute] = states[_api][_type][key].smart[attribute];
+                                            await setObject(`${channelId}.${attribute}`, states[_api][_type][key].smart[attribute]);
+                                        }
+                                    }
+                                    continue;
+                                }
                                 //adapter.log.error('*********' + states[_api][_type][key][key2]);
                                 if (!Object.prototype.hasOwnProperty.call(old_states[_api][_type], key)) {
                                     old_states[_api][_type][key] = {};
@@ -1672,6 +1769,8 @@ async function setObject(id, val) {
             common.write = objects[_id].write;
             //common.def = objects[_id].val;
         }
+        const smartAttribute = id.startsWith('DiskStationManager.hdd_info.') && id.includes('.smart.') ? smartAttributeMetadata[_id] : undefined;
+        if (smartAttribute) Object.assign(common, smartAttribute, {read: true, write: false});
         if (id.includes('FileStation.info.items.')) {
             common.type = 'object';
         }
@@ -1685,7 +1784,7 @@ async function setObject(id, val) {
                     type: 'state', common, native: {}
                 });
             } else {
-                if (JSON.stringify(obj.common) !== JSON.stringify(common) && objects[_id] !== undefined) {
+                if (JSON.stringify(obj.common) !== JSON.stringify(common) && (objects[_id] !== undefined || smartAttribute)) {
                     await adapter.extendObjectAsync(id, {common: common});
                 }
                 if (_id === 'player_name') {

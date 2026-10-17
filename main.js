@@ -14,6 +14,7 @@ const { parseSmartAttributes } = require('./lib/smartAttributes.js');
 let adapter;
 let syno;
 let smartPollInProgress = false;
+let adapterUnloading = false;
 let timeOutPoll;
 let timeOutReconnect;
 let pollTime;
@@ -81,6 +82,7 @@ function startAdapter(options) {
         name:         'synology',
         ready:        main,
         unload:       callback => {
+            adapterUnloading = true;
             timeOutPoll && clearTimeout(timeOutPoll);
             timeOutReconnect && clearTimeout(timeOutReconnect);
             timeOut && clearTimeout(timeOut);

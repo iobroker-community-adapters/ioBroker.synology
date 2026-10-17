@@ -9,9 +9,11 @@ const path = require('node:path');
 const simpleSSH = require('simple-ssh');
 const wol = require('wol');
 const { createSnapshotLink } = require('./lib/snapshotLink.js');
+const { parseSmartAttributes } = require('./lib/smartAttributes.js');
 
 let adapter;
 let syno;
+let smartPollInProgress = false;
 let timeOutPoll;
 let timeOutReconnect;
 let pollTime;
@@ -412,6 +414,7 @@ const PollCmd = {
         {api: 'as', method: 'listRemotePlayers', params: {type: 'all', additional: 'subplayer_list'}, ParseFunction: parseListRemotePlayers},
         {api: 'dl', method: 'listTasks', params: {}, ParseFunction: parselistTasks},
         {api: 'as', method: 'listRadios', params: {container: 'Favorite', limit: 1000, library: 'shared', sort_direction: 'ASC'}, ParseFunction: parselistRadios},
+        pollSmartAttributes,
         addLinkSnapShot,
         getLiveViewPathCamera
     ]
@@ -1098,8 +1101,9 @@ function parseInfoSystem(res) {
     if (res && res.hdd_info) {
         res.hdd_info.forEach((key) => {
             const diskname = `${key.diskType.toLowerCase().replace(' ', '_')}_${key.diskno.toLowerCase().replace(' ', '_')}`;
-            states.DiskStationManager.hdd_info[diskname] = {
+            const diskInfo = {
                 'diskno':          key.diskno,
+                'diskPath':        key.diskPath,
                 'model':           key.model.replace(/\s{2,}/g, ''),
                 'overview_status': key.status,
                 'ebox_order':      parseInt(key.ebox_order, 10),
@@ -1107,6 +1111,13 @@ function parseInfoSystem(res) {
                 'storage_pool':    key.volume,
                 'capacity':        parseFloat(((key.capacity / 1073741824).toFixed(2)))
             };
+            const previousDisk = states.DiskStationManager.hdd_info[diskname];
+            if (previousDisk) {
+                for (const name of Object.keys(previousDisk)) {
+                    if (name.startsWith('smart_')) diskInfo[name] = previousDisk[name];
+                }
+            }
+            states.DiskStationManager.hdd_info[diskname] = diskInfo;
         });
         if (res.vol_info) {
             res.vol_info.forEach((key) => {
@@ -1122,6 +1133,46 @@ function parseInfoSystem(res) {
             });
         }
     }
+}
+
+function pollSmartAttributes() {
+    if (!adapter.config.smart_over_ssh || smartPollInProgress || adapterUnloading) return;
+    const disks = Object.keys(states.DiskStationManager.hdd_info).filter((diskName) => {
+        const disk = states.DiskStationManager.hdd_info[diskName];
+        return typeof disk.diskPath === 'string' && /^\/dev\/[A-Za-z0-9_-]+$/.test(disk.diskPath);
+    });
+    if (!disks.length) return;
+
+    smartPollInProgress = true;
+    let index = 0;
+    const pollNextDisk = () => {
+        if (adapterUnloading || index >= disks.length) {
+            smartPollInProgress = false;
+            return;
+        }
+
+        const diskName = disks[index++];
+        const disk = states.DiskStationManager.hdd_info[diskName];
+        sendSSH(`smartctl -A -d sat ${disk.diskPath}`, (stdout, exitCode) => {
+            if (adapterUnloading) {
+                smartPollInProgress = false;
+                return;
+            }
+            const attributes = parseSmartAttributes(stdout);
+            if (Object.keys(attributes).length) {
+                const currentDisk = states.DiskStationManager.hdd_info[diskName];
+                if (currentDisk) {
+                    for (const name of Object.keys(attributes)) {
+                        currentDisk[`smart_${name}`] = attributes[name];
+                    }
+                }
+            } else {
+                adapter.log.warn(`Could not read SMART attributes for ${disk.diskno} (${disk.diskPath}); smartctl exited with code ${exitCode}`);
+            }
+            pollNextDisk();
+        }, true);
+    };
+    pollNextDisk();
 }
 
 function parseInstallingPackets(res) {
@@ -1385,7 +1436,8 @@ function send(api, method, params, cb) {
 }
 
 
-function sendSSH(method, cb) {
+function sendSSH(method, cb, nonFatal = false) {
+    let completed = false;
     try {
         const ssh = new simpleSSH({
             host: adapter.config.host,
@@ -1402,15 +1454,32 @@ function sendSSH(method, cb) {
         debug( 'SSH:' + sshcmd4log);
         ssh.exec(sshcmd, {
             err: (err) => {
-                error('SSH Error:', err);
+                if (nonFatal) {
+                    adapter.log.warn(`SSH command failed: ${String(err)}`);
+                    if (!completed) {
+                        completed = true;
+                        cb && cb('', -1, err);
+                    }
+                } else {
+                    error('SSH Error:', err);
+                }
             },
-            exit: () => {
-                cb && cb();
+            exit: (code, stdout, stderr) => {
+                if (!completed) {
+                    completed = true;
+                    cb && cb(stdout, code, stderr);
+                }
             }
         }).start();
 
     } catch (e) {
-        error('--- SSH Error ', JSON.stringify(e));
+        if (nonFatal && !completed) {
+            completed = true;
+            adapter.log.warn(`SSH command failed: ${String(e)}`);
+            cb && cb('', -1, e);
+        } else {
+            error('--- SSH Error ', JSON.stringify(e));
+        }
     }
 }
 

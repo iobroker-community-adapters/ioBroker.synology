@@ -3,12 +3,14 @@
 
 const utils = require('@iobroker/adapter-core');
 const Syno = require('syno');
+const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const moment = require('moment');
 const path = require('node:path');
 const simpleSSH = require('simple-ssh');
 const wol = require('wol');
 const { createSnapshotLink } = require('./lib/snapshotLink.js');
+const { createKeyedQueue, createRtspUrl, getCameraCodec, isH265 } = require('./lib/rtspSnapshot.js');
 
 let adapter;
 let syno;
@@ -21,12 +23,16 @@ let iteration = 0;
 let startTime;
 let endTime;
 let firstStart = true;
+let firstStartInfoStatePromise;
 let slowPollingTime;
 let dir;
 let old_states;
 let timeOut;
+let adapterUnloading = false;
 // let pathInstance;
 const verifiedObjects = {};
+const activeH265Captures = new Set();
+const enqueueH265Snapshot = createKeyedQueue();
 let wolTries = 3;
 let wolTimer = null;
 
@@ -73,11 +79,13 @@ const stateSS = {
 };
 
 function startAdapter(options) {
+    adapterUnloading = false;
     return adapter = utils.adapter(Object.assign({}, options, {
         systemConfig: true,
         name:         'synology',
         ready:        main,
         unload:       callback => {
+            adapterUnloading = true;
             timeOutPoll && clearTimeout(timeOutPoll);
             timeOutReconnect && clearTimeout(timeOutReconnect);
             timeOut && clearTimeout(timeOut);
@@ -87,12 +95,18 @@ function startAdapter(options) {
                     wolTimer = null;
                 }
                 debug('cleaned everything up...');
-                callback();
             } catch (e) {
-                callback();
+                adapter.log.warn(`Error while cleaning up: ${String(e)}`);
             }
+            const captures = [...activeH265Captures];
+            captures.forEach(capture => capture.cancel());
+            Promise.all(captures.map(capture => capture.done)).then(() => callback());
         },
         stateChange:  (id, state) => {
+            if (id && state && !state.ack && firstStart && id.endsWith('.getSnapshotCamera')) {
+                warn('Snapshot request ignored: the first start has not completed yet');
+                return;
+            }
             if (id && state && !state.ack && !firstStart) {
                 debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
                 const ids = id.split('.');
@@ -279,6 +293,7 @@ const objects = {
     cameraNumber:                     {role: 'state', name: 'Camera number', type: 'number', read: true, write: false},
     capacity:                         {role: 'state', name: 'Capacity', type: 'number', unit: 'GB', read: true, write: false},
     clearPlaylist:                    {role: 'button', name: 'Clear current playlist', type: 'boolean', read: false, write: true},
+    codec:                            {role: 'text', name: 'Video codec', type: 'string', read: true, write: false},
     cover:                            {role: 'media.cover', name: 'Media cover (eg. http://{ip}:8082/{state})', type: 'string', read: true, write: false},
     cpu_load:                         {role: 'state', name: 'Cpu load', type: 'number', unit: '%', read: true, write: false},
     current_duration:                 {role: 'media.duration.text', name: 'Playback duration', type: 'string', read: true, write: false},
@@ -301,6 +316,7 @@ const objects = {
     enable_user_home:                 {role: 'state', name: 'User home', type: 'boolean', read: true, write: true},
     enabled:                          {role: 'state', name: 'Is enabled', type: 'boolean', read: true, write: true},
     favoriteRadio:                    {role: 'state', name: 'Favorite playlist Radio', type: 'string', read: true, write: false},
+    firstStartCompleted:              {role: 'indicator', name: 'First start completed', type: 'boolean', read: true, write: false},
     fhd_hardware_transcode:           {role: 'state', name: 'FullHD hardware transcode', type: 'boolean', read: true, write: false},
     genre:                            {role: 'media.genre', name: 'Genre', type: 'string', read: true, write: false},
     geo_lat:                          {role: 'state', name: 'Geo latitude', type: 'number', read: true, write: false},
@@ -477,19 +493,178 @@ function getLiveViewPathCamera() {
 
 function getSnapshotCamera(camid, cb) {
     debug('getSnapshotCamera');
-    const param = {cameraId: camid, preview: true, version: 7};
+    const cameraId = Number(camid);
+    const cameraName = getNameCams(cameraId);
+    const camera = cameraName && states.SurveillanceStation.cameras[cameraName];
+    const param = {cameraId, preview: true, version: 7};
     send('ss', 'getSnapshotCamera', param, async (res) => {
-        if (res && !res.code && !res.message) {
-            const buf = Buffer.from(res, 'binary');
-            try {
-                await adapter.writeFileAsync(adapter.namespace, `snapshotCam_${camid}.jpg`, buf);
-                fs.writeFileSync(`${dir}snapshotCam_${camid}.jpg`, buf);
-            } catch (err) {
-                error('Write snapshot file Error: ', err);
-                return cb && cb(false);
-            }
-            cb && cb(`${dir}snapshotCam_${camid}.jpg`);
+        if (adapterUnloading) return;
+        if (res && res.code === 400 && camera && isH265(camera.codec)) {
+            adapter.log.debug(`Surveillance Station could not create a snapshot for H.265 camera ${cameraName}; trying FFmpeg`);
+            return ensureH265StreamPath(camera, cameraId, (hasPath) => {
+                if (!hasPath) {
+                    adapter.log.error(`Cannot get RTSP stream path for H.265 camera ${cameraName}`);
+                    return cb && cb(false);
+                }
+                captureH265Snapshot(camera, cameraId, (result) => cb && cb(result));
+            });
         }
+        if (!res || res.code || res.message) {
+            adapter.log.warn(`Surveillance Station returned no snapshot for camera ${cameraName || cameraId}: ${res && res.message ? res.message : JSON.stringify(res)}`);
+            return cb && cb(false);
+        }
+
+        try {
+            const buf = Buffer.from(res, 'binary');
+            const filename = `snapshotCam_${cameraId}.jpg`;
+            const localPath = path.join(dir, filename);
+            await adapter.writeFileAsync(adapter.namespace, filename, buf);
+            const fileExistsInDb = await adapter.fileExistsAsync(adapter.namespace, filename);
+            let directoryContents;
+            try {
+                directoryContents = await adapter.readDirAsync(adapter.namespace, '/');
+            } catch (err) {
+                adapter.log.warn(`Cannot read ioBroker file directory ${adapter.namespace}/: ${err.message}`);
+            }
+            fs.writeFileSync(localPath, buf);
+            const localFileSize = fs.statSync(localPath).size;
+            debug(
+                `Snapshot created for camera ${camid}: ioBroker file ${adapter.namespace}/${filename} ${fileExistsInDb ? 'verified' : 'missing'}, directory listing ${directoryContents ? JSON.stringify(directoryContents.map(entry => entry.file)) : 'unavailable'}, local file ${localPath} (${localFileSize} bytes)`,
+            );
+            cb && cb(localPath);
+        } catch (err) {
+            adapter.log.warn(`Cannot create snapshot for camera ${cameraId}: ${err.message}`);
+            cb && cb(false);
+        }
+    });
+}
+
+function captureH265Snapshot(camera, cameraId, cb) {
+    enqueueH265Snapshot(cameraId, () => {
+        if (adapterUnloading) return false;
+        return runH265Snapshot(camera, cameraId);
+    }).then((result) => {
+        if (!adapterUnloading) cb && cb(result);
+    }).catch((err) => {
+        adapter.log.error(`Cannot create H.265 snapshot for camera ${getNameCams(cameraId) || cameraId}: ${String(err)}`);
+        if (!adapterUnloading) cb && cb(false);
+    });
+}
+
+function ensureH265StreamPath(camera, cameraId, cb) {
+    if (adapterUnloading) return;
+    if (camera.linkRtspOverHttpPath) return cb(true);
+    send('ss', 'getLiveViewPathCamera', {idList: String(cameraId)}, (res) => {
+        if (adapterUnloading) return;
+        if (Array.isArray(res)) {
+            res.forEach((item) => {
+                const name = getNameCams(item.id);
+                if (name && states.SurveillanceStation.cameras[name]) {
+                    states.SurveillanceStation.cameras[name].linkMjpegHttpPath = item.mjpegHttpPath;
+                    states.SurveillanceStation.cameras[name].linkMulticstPath = item.multicstPath;
+                    states.SurveillanceStation.cameras[name].linkMxpegHttpPath = item.mxpegHttpPath;
+                    states.SurveillanceStation.cameras[name].linkRtspOverHttpPath = item.rtspOverHttpPath;
+                    states.SurveillanceStation.cameras[name].linkRtspPath = item.rtspPath;
+                }
+            });
+        }
+        cb(!!camera.linkRtspOverHttpPath);
+    });
+}
+
+async function runH265Snapshot(camera, cameraId) {
+    if (adapterUnloading) return false;
+    const cameraName = getNameCams(cameraId) || cameraId;
+    let rtspUrl;
+    try {
+        rtspUrl = createRtspUrl(camera, syno.host);
+        fs.rmSync(path.join(dir, `snapshotCam_${cameraId}.jpg`), {force: true});
+    } catch (err) {
+        adapter.log.error(`Cannot prepare H.265 snapshot for ${cameraName}: ${String(err)}`);
+        return false;
+    }
+
+    const snapshotPath = path.join(dir, `snapshotCam_${cameraId}.jpg`);
+    if (adapterUnloading) return false;
+    return new Promise((resolve) => {
+        let timedOut = false;
+        let timeout;
+        let finished = false;
+        const finish = (result) => {
+            if (finished) return;
+            finished = true;
+            clearTimeout(timeout);
+            activeH265Captures.delete(capture);
+            resolve(result);
+            capture.resolveDone();
+        };
+        let ffmpeg;
+        const capture = {
+            done: Promise.resolve(),
+            resolveDone: () => {},
+            cancel: () => {
+                clearTimeout(timeout);
+                ffmpeg?.kill('SIGKILL');
+            }
+        };
+        capture.done = new Promise(done => { capture.resolveDone = done; });
+        activeH265Captures.add(capture);
+        try {
+            ffmpeg = spawn('ffmpeg', [
+                '-hide_banner', '-loglevel', 'error', '-rtsp_transport', 'tcp',
+                '-i', rtspUrl, '-frames:v', '1', '-q:v', '2', '-y', snapshotPath
+            ], {stdio: 'ignore'});
+        } catch (err) {
+            if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+                adapter.log.error('FFmpeg is not installed or not available in PATH; it is required for H.265 snapshots. Install via SSH on the ioBroker host: sudo apt update && sudo apt install ffmpeg');
+            } else {
+                adapter.log.error(`Could not start FFmpeg for H.265 camera ${cameraName}: ${String(err)}`);
+            }
+            return finish(false);
+        }
+
+        timeout = setTimeout(() => {
+            timedOut = true;
+            ffmpeg.kill('SIGKILL');
+        }, 20000);
+        ffmpeg.once('error', (err) => {
+            if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+                adapter.log.error('FFmpeg is not installed or not available in PATH; it is required for H.265 snapshots. Install via SSH on the ioBroker host: sudo apt update && sudo apt install ffmpeg');
+            } else {
+                adapter.log.error(`Could not start FFmpeg for H.265 camera ${cameraName}: ${String(err)}`);
+            }
+            finish(false);
+        });
+        ffmpeg.once('close', async (code) => {
+            if (finished) return;
+            if (adapterUnloading) {
+                finish(false);
+                return;
+            }
+            if (timedOut) {
+                adapter.log.error(`FFmpeg timed out while creating a snapshot for H.265 camera ${cameraName}`);
+                finish(false);
+                return;
+            }
+            if (code !== 0) {
+                adapter.log.error(`FFmpeg failed to create a snapshot for H.265 camera ${cameraName} (exit code ${code})`);
+                finish(false);
+                return;
+            }
+
+            try {
+                const image = fs.readFileSync(snapshotPath);
+                if (image.length < 4 || image[0] !== 0xff || image[1] !== 0xd8 || image[2] !== 0xff) {
+                    throw new Error('FFmpeg did not produce a valid JPEG image');
+                }
+                if (adapterUnloading) return finish(false);
+                await adapter.writeFileAsync(adapter.namespace, `snapshotCam_${cameraId}.jpg`, image);
+                finish(adapterUnloading ? false : snapshotPath);
+            } catch (err) {
+                adapter.log.error(`No snapshot image was produced for H.265 camera ${cameraName}: ${String(err)}`);
+                finish(false);
+            }
+        });
     });
 }
 /*
@@ -517,6 +692,7 @@ function parselistCameras(res) {
             }
             states.SurveillanceStation.cameras[arr[i].name].host = arr[i].host || arr[i].ip;
             states.SurveillanceStation.cameras[arr[i].name].id = arr[i].id;
+            states.SurveillanceStation.cameras[arr[i].name].codec = getCameraCodec(arr[i], stateSS.videoCodec);
             // Rebuild immediately, including when a camera was recreated with the same name.
             states.SurveillanceStation.cameras[arr[i].name].linkSnapshot = createSnapshotLink(syno, arr[i].id);
             states.SurveillanceStation.cameras[arr[i].name].port = arr[i].port;
@@ -1343,7 +1519,13 @@ function iterator(namePolling) {
     if (iteration > PollCmd[namePolling].length - 1) {
         iteration = 0;
         timeOutPoll && clearTimeout(timeOutPoll);
-        if (namePolling === 'firstPoll') firstStart = false;
+        if (namePolling === 'firstPoll') {
+            firstStart = false;
+            adapter.log.info('FirstStart polling completed');
+            firstStartInfoStatePromise.then(() => setObject('info.firstStartCompleted', true)).catch(err => {
+                adapter.log.warn(`Cannot update first-start status: ${err.message}`);
+            });
+        }
         debug('-----------------------------------------------------------------------------------------------------');
         debug('>>>>>>>>>>>>>>> Read all data, save received data.');
         setStates();
@@ -1364,12 +1546,20 @@ function send(api, method, params, cb) {
     try {
 
         syno[api][method](params, (err, data) => {
-            debug(`Send [${api.toUpperCase()}] [${method}] Error: [${err || 'no error'}] Response: [${JSON.stringify(data)/*typeof data*/}]`);
+            const response = method === 'getSnapshotCamera' && typeof data === 'string'
+                ? `${data.length} binary characters`
+                : JSON.stringify(data);
+            debug(`Send [${api.toUpperCase()}] [${method}] Error: [${err || 'no error'}] Response: [${response}]`);
             data = data || '';
             if (!err) {
                 cb && cb(data);
             } else if (err) {
-                if (method === 'getStatusRemotePlayerStatus') {
+                if ((method === 'getSnapshotCamera' || method === 'getLiveViewPathCamera') && err.code === 400) {
+                    cb && cb(err);
+                } else if (method === 'getLiveViewPathCamera') {
+                    error(`function send: [${api}][${method}]`, err);
+                    cb && cb(false);
+                } else if (method === 'getStatusRemotePlayerStatus') {
                     cb && cb(false);
                 } else {
                     error(`function send: [${api}][${method}]`, err, () => {
@@ -1557,6 +1747,9 @@ function main() {
     if (!adapter.systemConfig) return;
     adapter.subscribeStates('*');
     setInfoConnection(false);
+    firstStartInfoStatePromise = setObject('info.firstStartCompleted', false).catch(err => {
+        adapter.log.warn(`Cannot create first-start status: ${err.message}`);
+    });
     old_states = JSON.parse(JSON.stringify(states));
     pollTime = adapter.config.polling || 100;
     slowPollingTime = adapter.config.slowPollingTime || 60000;
@@ -1611,6 +1804,7 @@ function newSyno() {
             otp:                     adapter.config['twofa_checkbox'] ? (adapter.config['twofa_code'] || 'ASE32YJSBKUOIDPB') :false,
             debug:                   false
         });
+        adapter.log.info('FirstStart polling started');
         queuePolling();
     } catch (e) {
         error('new Syno Error: ', e.message);

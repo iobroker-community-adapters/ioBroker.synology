@@ -1464,7 +1464,18 @@ function sendSSH(method, cb, nonFatal = false) {
                     cb && cb(stdout, code, stderr);
                 }
             }
-        }).start();
+        }).start({
+            fail: (err) => {
+                if (completed) return;
+                completed = true;
+                if (nonFatal) {
+                    adapter.log.warn(`SSH connection failed: ${String(err)}`);
+                    cb && cb('', -1, err);
+                } else {
+                    error('SSH Error:', err);
+                }
+            }
+        });
 
     } catch (e) {
         if (nonFatal && !completed) {

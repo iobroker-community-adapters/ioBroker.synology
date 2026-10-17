@@ -78,9 +78,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-<!--
-     ### **WORK IN PROGRESS**
--->
+### WORK IN PROGRESS
+- (Voodoo2man) Changed SSH error logging from debug to warn.
+
 ### 3.2.1 (2026-10-16)
 - (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
 

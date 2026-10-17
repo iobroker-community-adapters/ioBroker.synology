@@ -1637,7 +1637,8 @@ function error(src, e, cb) {
         message = e.message;
     }
     if (!~src.indexOf('getSongCover')){
-        adapter.log.debug(`*** ERROR : src: ${src || 'unknown'} code: ${code} message: ${message}`);
+        const logLevel = src === 'SSH Error:' || src === '--- SSH Error ' ? 'warn' : 'debug';
+        adapter.log[logLevel](`*** ERROR : src: ${src || 'unknown'} code: ${code} message: ${message}`);
     }
     if (code === 400 || /*code === 500 || */code === 'ECONNREFUSED' || code === 'ETIMEDOUT' || code === 'EHOSTUNREACH' || (code === 404 && message.includes('2-step'))){
         timeOutReconnect && clearTimeout(timeOutReconnect);

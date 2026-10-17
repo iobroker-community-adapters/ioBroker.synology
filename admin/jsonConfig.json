@@ -85,6 +85,36 @@
             "md": 4,
             "lg": 3
         },
+        "smart_over_ssh": {
+            "type": "checkbox",
+            "label": {
+                "en": "Read SMART attributes via SSH",
+                "de": "SMART-Attribute über SSH auslesen",
+                "ru": "Читать атрибуты SMART через SSH",
+                "pt": "Ler atributos SMART via SSH",
+                "nl": "SMART-attributen lezen via SSH",
+                "fr": "Lire les attributs SMART via SSH",
+                "it": "Leggi gli attributi SMART tramite SSH",
+                "es": "Leer atributos SMART mediante SSH",
+                "pl": "Odczytuj atrybuty SMART przez SSH",
+                "zh-cn": "通过 SSH 读取 SMART 属性"
+            },
+            "help": {
+                "en": "Requires SSH access and sudo permissions on the NAS. Disabled by default.",
+                "de": "Erfordert SSH-Zugriff und sudo-Berechtigungen auf dem NAS. Standardmäßig deaktiviert.",
+                "ru": "Требуется SSH-доступ и права sudo на NAS. По умолчанию отключено.",
+                "pt": "Requer acesso SSH e permissões sudo no NAS. Desativado por padrão.",
+                "nl": "SSH-toegang en sudo-rechten op de NAS zijn vereist. Standaard uitgeschakeld.",
+                "fr": "Nécessite un accès SSH et des droits sudo sur le NAS. Désactivé par défaut.",
+                "it": "Richiede accesso SSH e permessi sudo sul NAS. Disattivato per impostazione predefinita.",
+                "es": "Requiere acceso SSH y permisos sudo en el NAS. Desactivado de forma predeterminada.",
+                "pl": "Wymaga dostępu SSH i uprawnień sudo na serwerze NAS. Domyślnie wyłączone.",
+                "zh-cn": "需要 NAS 上的 SSH 访问权限和 sudo 权限。默认关闭。"
+            },
+            "sm": 12,
+            "md": 4,
+            "lg": 3
+        },
         "version": {
             "newLine": true,
             "type": "select",

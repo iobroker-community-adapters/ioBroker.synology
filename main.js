@@ -1581,7 +1581,7 @@ async function setObject(id, val) {
             common.write = objects[_id].write;
             //common.def = objects[_id].val;
         }
-        const smartAttribute = id.includes('.DiskStationManager.hdd_info.') && id.includes('.smart.') ? smartAttributeMetadata[_id] : undefined;
+        const smartAttribute = id.startsWith('DiskStationManager.hdd_info.') && id.includes('.smart.') ? smartAttributeMetadata[_id] : undefined;
         if (smartAttribute) Object.assign(common, smartAttribute, {read: true, write: false});
         if (id.includes('FileStation.info.items.')) {
             common.type = 'object';

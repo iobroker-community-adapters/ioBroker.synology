@@ -1,4 +1,8 @@
 # Older changes
+## 3.0.0 (2023-09-07)
+* (Standarduser) Added WOL to awake Synology NAS server
+* (bluefox) Only node 16 or higher supported
+
 ## 2.1.13 (2022-11-05)
 *(McM1957) Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)
 *(McM1957) Several base modules have been updated.

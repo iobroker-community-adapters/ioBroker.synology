@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.2.1",
+    "version": "3.3.0",
     "news": {
+      "3.3.0": {
+        "en": "Added a guarded FFmpeg fallback for H.265 camera snapshots.\nAdded optional SMART attribute polling over SSH.\nChanged SSH error logging from debug to warn.",
+        "de": "Schütztes FFmpeg-Fallback für H.265-Kamerashots hinzugefügt.\nOptionale SMART-Attributabfrage über SSH.\nSSH-Log von Debug zu Warnung geändert.",
+        "ru": "Добавлен защищенный запасной вариант FFmpeg для снимков камеры H.265.\nДобавлен дополнительный опрос атрибутов SMART через SSH.\nИзменено ведение журнала ошибок SSH с отладки на предупреждение.",
+        "pt": "Foi adicionado um FFmpeg protegido para fotos H.265.\nFoi adicionada a pesquisa de atributos SMART via SSH.\nMudou o log de erro SSH de debug para warn.",
+        "nl": "Een bewaakte FFmpeg-noodoplossing toegevoegd voor snapshots van H.265-camera's.\nOptionele ondervraging van SMART-kenmerken via SSH toegevoegd.\nSSH-foutregistratie is gewijzigd van debug naar waarschuwing.",
+        "fr": "Ajout d'un repli FFmpeg protégé pour les photos H.265.\nAjout d'un sondage d'attributs SMART en option via SSH.\nLe journal des erreurs SSH est passé de Debug à Warn.",
+        "it": "Aggiunto un fallback FFmpeg protetto per le foto H.265.\nAggiunto il polling SMART opzionale su SSH.\nLog SSH modificato da debug a warn.",
+        "es": "Se ha añadido un FFmpeg protegido para las fotos H.265.\nSe añadió el sondeo opcional de atributos SMART por SSH.\nCambió el registro de errores de SSH de debug a warn.",
+        "pl": "Dodano strzeżony zapasowy FFmpeg dla migawek aparatu H.265.\nDodano opcjonalne badanie atrybutu SMART nad SSH.\nZmieniono rejestrowanie błędów SSH z debugowania na ostrzeżenie.",
+        "uk": "Додано захищену резервну копію FFmpeg для знімків камери H.265.\nДодано додаткове опитування атрибутів SMART через SSH.\nЗмінено реєстрацію помилок SSH з налагодження на попередження.",
+        "zh-cn": "为 H.265 摄像机快照添加了受保护的 FFmpeg 后备功能。\n添加了通过 SSH 进行可选的 SMART 属性轮询。\n将 SSH 错误记录从调试更改为警告。"
+      },
       "3.2.1": {
         "en": "Rebuild the snapshot link immediately when a camera ID changes.",
         "de": "Bei Änderung der Kamera-ID den Snapshot-Link sofort neu.",
@@ -80,19 +93,6 @@
         "pl": "Kod został przygotowany do nadchodzącego wydania js-controllera. Odwołuje się do narzędzi. Zwolniony został (#198)\nZaktualizowano kilka modułów bazowych.",
         "uk": "Код був підготовлений для майбутнього релізу js-controller. Посилання на utils.controller Зняття циркулі. (#198)\nБуло оновлено кілька базових модулів.",
         "zh-cn": "已编制了即将释放的小册子的守则。 提及使用费。 他们已被撤职。\n更新了几个基单元。."
-      },
-      "2.1.12": {
-        "en": "Logging of password in clear text has been removed.",
-        "de": "Die Protokollierung des Passworts im Klartext wurde entfernt.",
-        "ru": "Запись пароля в ясном тексте удалена.",
-        "pt": "O registro de senha em texto claro foi removido.",
-        "nl": "Er is veel wachtwoord verwijderd.",
-        "fr": "La saisie du mot de passe dans un texte clair a été supprimée.",
-        "it": "La registrazione della password in testo chiaro è stata rimossa.",
-        "es": "Se ha eliminado la contraseña en texto claro.",
-        "pl": "Zdarza się, że fragment tekstu jawnego został usunięty.",
-        "uk": "Зняття пароля в чіткому тексті.",
-        "zh-cn": "删除了明确案文中的密码。."
       }
     },
     "titleLang": {

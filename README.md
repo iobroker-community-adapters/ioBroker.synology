@@ -78,10 +78,11 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.3.0 (2026-10-17)
 - (Voodoo2man) Added a guarded FFmpeg fallback for H.265 camera snapshots.
 - (Voodoo2man) Added optional SMART attribute polling over SSH.
 - (Voodoo2man) Changed SSH error logging from debug to warn.
+
 ### 3.2.1 (2026-10-16)
 - (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
 
@@ -98,14 +99,6 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ### 3.0.1 (2023-10-01)
 * (Standarduser) A Typo in RegEx for Mac-Address has been corrected.
 * (McM1957) Dependencies have been updated.
-
-### 3.0.0 (2023-09-07)
-* (Standarduser) Added WOL to awake Synology NAS server
-* (bluefox) Only node 16 or higher supported
-
-
-
-
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

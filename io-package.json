@@ -224,7 +224,8 @@
     "ss": true,
     "as": true,
     "dl": true,
-    "ssh_port": 22
+    "ssh_port": 22,
+    "smart_over_ssh": false
   },
   "encryptedNative": [
     "password",

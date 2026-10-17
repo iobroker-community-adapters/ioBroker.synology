@@ -31,6 +31,10 @@ let timeOut;
 // let pathInstance;
 const verifiedObjects = {};
 const verifiedChannels = new Set();
+const smartAttributeMetadata = {
+    Temperature_Celsius: {role: 'value.temperature', type: 'number', unit: '°C'},
+    Power_On_Hours: {role: 'value.interval', type: 'number', unit: 'h'}
+};
 let wolTries = 3;
 let wolTimer = null;
 
@@ -1577,6 +1581,8 @@ async function setObject(id, val) {
             common.write = objects[_id].write;
             //common.def = objects[_id].val;
         }
+        const smartAttribute = id.includes('.DiskStationManager.hdd_info.') && id.includes('.smart.') ? smartAttributeMetadata[_id] : undefined;
+        if (smartAttribute) Object.assign(common, smartAttribute, {read: true, write: false});
         if (id.includes('FileStation.info.items.')) {
             common.type = 'object';
         }
@@ -1590,7 +1596,7 @@ async function setObject(id, val) {
                     type: 'state', common, native: {}
                 });
             } else {
-                if (JSON.stringify(obj.common) !== JSON.stringify(common) && objects[_id] !== undefined) {
+                if (JSON.stringify(obj.common) !== JSON.stringify(common) && (objects[_id] !== undefined || smartAttribute)) {
                     await adapter.extendObjectAsync(id, {common: common});
                 }
                 if (_id === 'player_name') {

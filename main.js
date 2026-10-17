@@ -29,6 +29,7 @@ let old_states;
 let timeOut;
 // let pathInstance;
 const verifiedObjects = {};
+const verifiedChannels = new Set();
 let wolTries = 3;
 let wolTimer = null;
 
@@ -1112,11 +1113,7 @@ function parseInfoSystem(res) {
                 'capacity':        parseFloat(((key.capacity / 1073741824).toFixed(2)))
             };
             const previousDisk = states.DiskStationManager.hdd_info[diskname];
-            if (previousDisk) {
-                for (const name of Object.keys(previousDisk)) {
-                    if (name.startsWith('smart_')) diskInfo[name] = previousDisk[name];
-                }
-            }
+            diskInfo.smart = previousDisk && previousDisk.smart ? previousDisk.smart : {};
             states.DiskStationManager.hdd_info[diskname] = diskInfo;
         });
         if (res.vol_info) {
@@ -1163,7 +1160,7 @@ function pollSmartAttributes() {
                 const currentDisk = states.DiskStationManager.hdd_info[diskName];
                 if (currentDisk) {
                     for (const name of Object.keys(attributes)) {
-                        currentDisk[`smart_${name}`] = attributes[name];
+                        currentDisk.smart[name] = attributes[name];
                     }
                 }
             } else {
@@ -1491,6 +1488,25 @@ async function setStates() {
                         if (typeof states[_api][_type][key] == 'object') {
                             //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
                             for (const key2 of Object.keys(states[_api][_type][key])) {
+                                if (_api === 'DiskStationManager' && _type === 'hdd_info' && key2 === 'smart') {
+                                    const channelId = `${_api}.${_type}.${key}.smart`;
+                                    if (!verifiedChannels.has(channelId)) {
+                                        await adapter.extendObjectAsync(channelId, {
+                                            type: 'channel',
+                                            common: {name: 'SMART'},
+                                            native: {}
+                                        });
+                                        verifiedChannels.add(channelId);
+                                    }
+                                    for (const attribute of Object.keys(states[_api][_type][key].smart)) {
+                                        if (!old_states[_api][_type][key].smart) old_states[_api][_type][key].smart = {};
+                                        if (states[_api][_type][key].smart[attribute] !== old_states[_api][_type][key].smart[attribute]) {
+                                            old_states[_api][_type][key].smart[attribute] = states[_api][_type][key].smart[attribute];
+                                            await setObject(`${channelId}.${attribute}`, states[_api][_type][key].smart[attribute]);
+                                        }
+                                    }
+                                    continue;
+                                }
                                 //adapter.log.error('*********' + states[_api][_type][key][key2]);
                                 if (!Object.prototype.hasOwnProperty.call(old_states[_api][_type], key)) {
                                     old_states[_api][_type][key] = {};

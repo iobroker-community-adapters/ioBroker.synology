@@ -370,7 +370,7 @@ const objects = {
     write: false,
   },
   capacity: {
-    role: "state",
+    role: "value",
     name: "Capacity",
     type: "number",
     unit: "GB",

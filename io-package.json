@@ -219,7 +219,7 @@
     "2fa_code": "",
     "https": false,
     "version": "6.2.2",
-    "polling": 100,
+    "polling": 10000,
     "slowPollingTime": 60000,
     "ss": true,
     "as": true,

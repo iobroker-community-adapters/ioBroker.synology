@@ -78,6 +78,12 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+### WORK IN PROGRESS
+- (@Voodoo2man) Improved polling defaults, connection logging, and handling of invalid credentials.
+- (@Voodoo2man) Filtered harmless SSH notices and bound timers to the adapter lifecycle.
+- (@Voodoo2man) Corrected semantic roles for system, volume, download, and surveillance states.
+- (@Voodoo2man) Migrated linting to ESLint 9 with the ioBroker standard configuration.
+
 ### 3.3.0 (2026-10-17)
 - (Voodoo2man) Added a guarded FFmpeg fallback for H.265 camera snapshots.
 - (Voodoo2man) Added optional SMART attribute polling over SSH.

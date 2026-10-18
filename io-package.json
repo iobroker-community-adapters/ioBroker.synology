@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.3.0",
+    "version": "3.3.1",
     "news": {
+      "3.3.1": {
+        "en": "Improved polling defaults, connection logging, and handling of invalid credentials.\nFiltered harmless SSH notices and bound timers to the adapter lifecycle.\nCorrected semantic roles for system, volume, download, and surveillance states.\nCorrected the hard disk capacity state role.\nMigrated linting to ESLint 9 with the ioBroker standard configuration.",
+        "de": "Verbesserte Abfragestandards, Logging und Umgang mit ungültigen Zugangsdaten.\nFiltert harmlose SSH-Hinweise und bindet Timer an Adapter-Lifecycle.\nKorrigierte Semantik für System, Volumen, Download und Überwachung.\nDie Festplattenzustands-Rolle wurde korrigiert.\nLinting mit der ioBroker-Standardkonfiguration auf ESLint 9 migriert.",
+        "ru": "Улучшены настройки опроса по умолчанию, ведение журнала подключений и обработка недействительных учетных данных.\nОтфильтрованные безвредные уведомления SSH и привязанные таймеры к жизненному циклу адаптера.\nИсправлены семантические роли для состояний системы, тома, загрузки и наблюдения.\nИсправлена роль состояния емкости жесткого диска.\nПеренесено линтинг на ESLint 9 со стандартной конфигурацией IOBroker.",
+        "pt": "Padrões de pesquisa, registro de conexão e tratamento de credenciais inválidas.\nFiltrou avisos SSH inofensivos e limitou o ciclo de vida do adaptador.\nCorrigiu as funções semânticas do sistema, volume, download e vigilância.\nCorrigida a função de estado do HD.\nMigrou o linting para ESLint 9 com a configuração padrão IOBroker.",
+        "nl": "Verbeterde standaardinstellingen voor peilingen, logboekregistratie van verbindingen en verwerking van ongeldige inloggegevens.\nOnschadelijke SSH-meldingen gefilterd en timers gekoppeld aan de levenscyclus van de adapter.\nGecorrigeerde semantische rollen voor systeem-, volume-, download- en bewakingsstatussen.\nDe rol van de capaciteitsstatus van de harde schijf is gecorrigeerd.\nLinting gemigreerd naar ESLint 9 met de standaardconfiguratie van IOBroker.",
+        "fr": "Paramètres de sondage par défaut, journalisation des connexions et gestion des codes non valides.\nNotifications SSH inoffensives filtrées et minuteries liées au cycle de vie de l'adaptateur.\nRôles sémantiques corrigés pour le système, le volume, le téléchargement et la surveillance.\nL'état de la capacité du disque dur a été corrigé.\nJ'ai migré le linting vers ESLint 9 avec la configuration standard IObroker.",
+        "it": "Impostazioni di polling, log delle connessioni e gestione di credenziali non valide.\nAvvisi SSH innocui filtrati e legati al ciclo di vita dell'adattatore.\nRuoli semantici corretti per sistema, volume, download e sorveglianza.\nCorretto il ruolo di capacità del disco fisso.\nLinting migrato a ESLint 9 con la configurazione standard IObroker.",
+        "es": "Se mejoraron los valores de sondeo, el registro de conexiones y la gestión de credenciales no válidas.\nFiltró avisos SSH inofensivos y vinculó temporizadores al adaptador.\nSe corrigieron las funciones semánticas de los estados de sistema, volumen, descarga y vigilancia.\nSe corrigió el rol de estado de capacidad del disco duro.\nMigró Linting a ESLint 9 con la configuración estándar de IOBroker.",
+        "pl": "Poprawiono ustawienia domyślne ankietowania, rejestrowanie połączeń i obsługa nieprawidłowych danych uwierzytelniających.\nFiltrowane nieszkodliwe powiadomienia SSH i powiązane timery z cyklem życia adaptera.\nPoprawione role semantyczne dla stanów systemu, objętości, pobierania i nadzoru.\nPoprawiono rolę stanu pojemności dysku twardego.\nMigrowane linting do eSlint 9 ze standardową konfiguracją iOBroker.",
+        "uk": "Покращено налаштування опитування за замовчуванням, журналювання з'єднань та обробка недійсних облікових даних.\nВідфільтровані нешкідливі повідомлення SSH та прив'язані таймери до життєвого циклу адаптера.\nВиправлені семантичні ролі для стану системи, обсягу, завантаження та спостереження.\nВиправлена роль стану ємності жорсткого диска.\nПеренесення ворсу на ESLint 9 зі стандартною конфігурацією IObroker.",
+        "zh-cn": "改进了轮询默认值、连接记录和对无效凭据的处理。\n过滤了无害的 SSH 通知，并将计时器绑定到适配器生命周期。\n更正了系统、音量、下载和监控状态的语义角色。\n更正了硬盘容量状态的角色。\n使用 ioBroker 标准配置将 linting 迁移到了 ESLint 9。"
+      },
       "3.3.0": {
         "en": "Added a guarded FFmpeg fallback for H.265 camera snapshots.\nAdded optional SMART attribute polling over SSH.\nChanged SSH error logging from debug to warn.",
         "de": "Schütztes FFmpeg-Fallback für H.265-Kamerashots hinzugefügt.\nOptionale SMART-Attributabfrage über SSH.\nSSH-Log von Debug zu Warnung geändert.",
@@ -80,19 +93,6 @@
         "pl": "Added WOL to awake Synology NAS serwer NAS\nTylko węzeł 16 lub więcej",
         "uk": "Додано WOL до сервера синології авекії NAS\nТільки вузол 16 або вище підтримується",
         "zh-cn": "增加WOL,以瓦塞·桑科纳斯服务器\n只有16个或以上的支助"
-      },
-      "2.1.13": {
-        "en": "Code has been prepared for upcoming js-controller release. Reference to utils.controllerDir has been removed. (#198)\nSeveral base modules have been updated.",
-        "de": "Code wurde für die bevorstehende Version des js-Controllers vorbereitet. Referenz auf utils.controller Dir wurde entfernt. (#198)\nMehrere Basismodule wurden aktualisiert.",
-        "ru": "Код был подготовлен для предстоящего релиза js-controller. Ссылка на utils.controller Dir был удален. (#198)\nОбновлены несколько базовых модулей.",
-        "pt": "O código foi preparado para a próxima versão js-controller. Referência a utils.controller Dir foi removido. (#198)\nVários módulos de base foram atualizados.",
-        "nl": "De code is voorbereid op het opkomen van Js-controller vrijlating. Referentie tot utils. Dir is verwijderd\nEr zijn meerdere basismodules geüpdateerd.",
-        "fr": "Le code a été préparé pour la prochaine libération de js-controller. Référence à utils.controller Dir a été enlevé. (#198)\nPlusieurs modules de base ont été mis à jour.",
-        "it": "Codice è stato preparato per il prossimo rilascio js-controller. Riferimento utils.controller Dir è stato rimosso. (#198)\nDiversi moduli di base sono stati aggiornati.",
-        "es": "El código ha sido preparado para la próxima liberación js-controller. Referencia a utils.controller Dir ha sido eliminado. (#198)\nSe han actualizado varios módulos de base.",
-        "pl": "Kod został przygotowany do nadchodzącego wydania js-controllera. Odwołuje się do narzędzi. Zwolniony został (#198)\nZaktualizowano kilka modułów bazowych.",
-        "uk": "Код був підготовлений для майбутнього релізу js-controller. Посилання на utils.controller Зняття циркулі. (#198)\nБуло оновлено кілька базових модулів.",
-        "zh-cn": "已编制了即将释放的小册子的守则。 提及使用费。 他们已被撤职。\n更新了几个基单元。."
       }
     },
     "titleLang": {

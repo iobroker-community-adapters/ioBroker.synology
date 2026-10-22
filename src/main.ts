@@ -3482,7 +3482,31 @@ function main(): void {
       }
     },
   );
-  newSyno();
+  void migrateLegacyTwoFactorSetting().then(newSyno);
+}
+
+async function migrateLegacyTwoFactorSetting(): Promise<void> {
+  if (adapter.config.twofa_checkbox !== true) {
+    return;
+  }
+
+  adapter.config["2fa_checkbox"] = true;
+  adapter.config.twofa_checkbox = false;
+  try {
+    await adapter.extendForeignObjectAsync(
+      `system.adapter.${adapter.namespace}`,
+      {
+        native: {
+          "2fa_checkbox": true,
+          twofa_checkbox: false,
+        },
+      },
+    );
+  } catch (err) {
+    adapter.log.warn(
+      `Could not persist legacy two-factor setting migration: ${String(err)}`,
+    );
+  }
 }
 
 function newSyno(): void {
@@ -3510,7 +3534,7 @@ function newSyno(): void {
       apiVersion: apiVersion,
       otp: isTwoFactorEnabled()
         ? adapter.config["2fa_code"] ||
-          adapter.config["twofa_code"] ||
+          adapter.config.twofa_code ||
           "ASE32YJSBKUOIDPB"
         : false,
       debug: false,
@@ -3527,7 +3551,7 @@ function isTwoFactorEnabled(): boolean {
   if (typeof configuredValue === "boolean") {
     return configuredValue;
   }
-  return adapter.config["twofa_checkbox"] === true;
+  return adapter.config.twofa_checkbox === true;
 }
 
 function setInfoConnection(val: boolean): void {

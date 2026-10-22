@@ -2937,11 +2937,7 @@ function sendPolling(namePolling: PollName): void {
               iteration = -1;
             }
           }
-          if (
-            adapter.config["2fa_checkbox"] &&
-            firstStart &&
-            !timeOutReconnect
-          ) {
+          if (isTwoFactorEnabled() && firstStart && !timeOutReconnect) {
             timeOut && adapter.clearTimeout(timeOut);
             timeOut = adapter.setTimeout(() => {
               iterator(namePolling);
@@ -3512,7 +3508,7 @@ function newSyno(): void {
       passwd: adapter.config.password || "",
       protocol: adapter.config.https ? "https" : "http",
       apiVersion: apiVersion,
-      otp: adapter.config["2fa_checkbox"]
+      otp: isTwoFactorEnabled()
         ? adapter.config["2fa_code"] ||
           adapter.config["twofa_code"] ||
           "ASE32YJSBKUOIDPB"
@@ -3524,6 +3520,13 @@ function newSyno(): void {
   } catch (e) {
     error("new Syno Error: ", e);
   }
+}
+
+function isTwoFactorEnabled(): boolean {
+  return (
+    adapter.config["2fa_checkbox"] === true ||
+    adapter.config["twofa_checkbox"] === true
+  );
 }
 
 function setInfoConnection(val: boolean): void {

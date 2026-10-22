@@ -11,6 +11,7 @@ declare global {
   namespace ioBroker {
     interface AdapterConfig extends _AdapterConfig {
       mac?: string;
+      twofa_checkbox?: boolean;
       twofa_code?: string;
     }
   }

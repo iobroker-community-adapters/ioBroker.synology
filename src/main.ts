@@ -3523,10 +3523,11 @@ function newSyno(): void {
 }
 
 function isTwoFactorEnabled(): boolean {
-  return (
-    adapter.config["2fa_checkbox"] === true ||
-    adapter.config["twofa_checkbox"] === true
-  );
+  const configuredValue = adapter.config["2fa_checkbox"];
+  if (typeof configuredValue === "boolean") {
+    return configuredValue;
+  }
+  return adapter.config["twofa_checkbox"] === true;
 }
 
 function setInfoConnection(val: boolean): void {

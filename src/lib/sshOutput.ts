@@ -3,9 +3,9 @@
 /**
  * Filters harmless sudo prompts and missing-home notices from SSH stderr.
  *
- * @param {string} output SSH stderr output.
+ * @param output SSH stderr output.
  */
-function filterSshStderr(output) {
+function filterSshStderr(output: string): string {
   return String(output || "")
     .split(/\r?\n/)
     .filter((line) => {
@@ -22,4 +22,4 @@ function filterSshStderr(output) {
     .join("\n");
 }
 
-module.exports = { filterSshStderr };
+export { filterSshStderr };

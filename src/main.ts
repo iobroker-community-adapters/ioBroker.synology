@@ -1,49 +1,58 @@
 "use strict";
 // @ts-check
 
-const utils = require("@iobroker/adapter-core");
-const Syno = require("syno");
-const { spawn } = require("node:child_process");
-const fs = require("node:fs");
-const moment = require("moment");
-const path = require("node:path");
-const simpleSSH = require("simple-ssh");
-const wol = require("wol");
-const { createSnapshotLink } = require("./lib/snapshotLink.js");
-const {
+import * as adapterCore from "@iobroker/adapter-core";
+import Syno from "syno";
+import { spawn } from "node:child_process";
+import * as fs from "node:fs";
+import moment from "moment";
+import * as path from "node:path";
+import SimpleSSH from "simple-ssh";
+import * as wol from "wol";
+import { createSnapshotLink } from "./lib/snapshotLink.js";
+import {
   createKeyedQueue,
   createRtspUrl,
   getCameraCodec,
   isH265,
-} = require("./lib/rtspSnapshot.js");
-const { parseSmartAttributes } = require("./lib/smartAttributes.js");
-const { filterSshStderr } = require("./lib/sshOutput.js");
+} from "./lib/rtspSnapshot.js";
+import { parseSmartAttributes } from "./lib/smartAttributes.js";
+import { filterSshStderr } from "./lib/sshOutput.js";
 
-let adapter;
-let syno;
+const utils = adapterCore as typeof adapterCore & {
+  adapter(options: ioBroker.AdapterOptions): ioBroker.Adapter;
+};
+
+let adapter: ioBroker.Adapter;
+let syno: InstanceType<typeof Syno> | null = null;
 let smartPollInProgress = false;
 let adapterUnloading = false;
-let timeOutPoll;
-let timeOutReconnect;
-let pollTime;
+let timeOutPoll: ioBroker.Timeout | undefined;
+let timeOutReconnect: ioBroker.Timeout | undefined;
+let pollTime: number;
 let connect = false;
 let connectionEstablished = false;
 let authenticationFailed = false;
 let iteration = 0;
 // let queueCmd = null;
-let startTime;
-let endTime;
+let startTime: number;
+let endTime: number;
 let firstStart = true;
-let firstStartInfoStatePromise;
-let slowPollingTime;
-let dir;
-let old_states;
-let timeOut;
+let firstStartInfoStatePromise: Promise<void>;
+let slowPollingTime: number;
+let dir: string;
+let old_states: typeof states;
+let timeOut: ioBroker.Timeout | undefined;
 // let pathInstance;
-const verifiedObjects = {};
-const activeH265Captures = new Set();
+const verifiedObjects: Record<string, string> = {};
+interface H265Capture {
+  done: Promise<void>;
+  resolveDone: () => void;
+  cancel: () => void;
+}
+const activeH265Captures = new Set<H265Capture>();
 const enqueueH265Snapshot = createKeyedQueue();
-const verifiedChannels = new Set();
+const verifiedChannels = new Set<string>();
 const smartAttributeMetadata = {
   Temperature_Celsius: {
     role: "value.temperature",
@@ -53,9 +62,14 @@ const smartAttributeMetadata = {
   Power_On_Hours: { role: "value.interval", type: "number", unit: "h" },
 };
 let wolTries = 3;
-let wolTimer = null;
+let wolTimer: ioBroker.Timeout | undefined;
+const states = {} as AdapterStates;
 
-const stateSS = {
+const stateSS: {
+  recStatus: Record<string, string>;
+  videoCodec: Record<string, string>;
+  camStatus: Record<string, string>;
+} = {
   recStatus: {
     0: "None recording schedule",
     1: "Continue recording schedule",
@@ -97,14 +111,18 @@ const stateSS = {
   },
 };
 
-function startAdapter(options) {
+function startAdapter(
+  options: ioBroker.AdapterOptions = {} as ioBroker.AdapterOptions,
+): ioBroker.Adapter {
   adapterUnloading = false;
   return (adapter = utils.adapter(
     Object.assign({}, options, {
       systemConfig: true,
       name: "synology",
       ready: main,
-      unload: (callback) => {
+      unload: (
+        callback: Parameters<NonNullable<ioBroker.AdapterOptions["unload"]>>[0],
+      ) => {
         adapterUnloading = true;
         timeOutPoll && adapter.clearTimeout(timeOutPoll);
         timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
@@ -124,7 +142,12 @@ function startAdapter(options) {
           callback(),
         );
       },
-      stateChange: (id, state) => {
+      stateChange: (
+        id: Parameters<NonNullable<ioBroker.AdapterOptions["stateChange"]>>[0],
+        state: Parameters<
+          NonNullable<ioBroker.AdapterOptions["stateChange"]>
+        >[1],
+      ) => {
         if (
           id &&
           state &&
@@ -248,15 +271,19 @@ function startAdapter(options) {
           const command = ids[ids.length - 1].toString();
           switch (command) {
             case "wake":
-              debug(`Try to wake on LAN with mac ${syno.mac}`);
-              wake(syno.mac);
+              if (syno) {
+                debug(`Try to wake on LAN with mac ${syno.mac}`);
+                wake(syno.mac);
+              }
               break;
             default:
               console.log(name);
           }
         }
       },
-      message: (obj) => {
+      message: (
+        obj: Parameters<NonNullable<ioBroker.AdapterOptions["message"]>>[0],
+      ) => {
         if (typeof obj === "object" && obj.command) {
           debug(`message ******* ${JSON.stringify(obj)}`);
           if (obj.command === "getSnapshot" && obj.message.camId) {
@@ -273,13 +300,13 @@ function startAdapter(options) {
   ));
 }
 
-function wake(mac) {
+function wake(mac: string): void {
   const macRegex = /^(([0-9A-Fa-f]{2}[:-]?){5}[0-9A-Fa-f]{2})$/;
   if (mac && macRegex.test(mac) && mac !== "00:00:00:00:00:00") {
-    wol.wake(mac, (err, res) => {
+    wol.wake(mac, (err: Error | null, res?: boolean) => {
       wolTries = wolTries - 1;
       if (err) {
-        debug(err);
+        debug(String(err));
         wolTries = 3;
       }
       if (wolTries > 0) {
@@ -299,7 +326,117 @@ function wake(mac) {
   }
 }
 
-const states = {
+interface CameraState {
+  [key: string]: unknown;
+  id?: number;
+  codec?: string;
+  linkSnapshot?: string;
+  linkMjpegHttpPath?: string;
+  linkMulticstPath?: string;
+  linkMxpegHttpPath?: string;
+  linkRtspOverHttpPath?: string;
+  linkRtspPath?: string;
+}
+
+type SnapshotResult = string | false;
+type SnapshotCallback = (result: SnapshotResult) => void;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function formatUnknown(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return String(value);
+  }
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint"
+  ) {
+    return value.toString();
+  }
+  return JSON.stringify(value) ?? "[unserializable value]";
+}
+
+interface DiskState {
+  [key: string]: unknown;
+  diskno?: string;
+  diskPath?: string;
+  smart: Record<string, number | string>;
+}
+
+interface VolumeState {
+  [key: string]: unknown;
+}
+
+interface PlayerState {
+  [key: string]: unknown;
+  online?: boolean;
+  playlist_total?: number;
+  duration_sec?: number;
+  song_id?: number | string;
+  playlist?: string;
+  Browser?: string;
+}
+
+interface RemotePlayerStatus {
+  state: string;
+  index: number | string;
+  position: number;
+  playlist_total: number;
+  volume: number;
+  subplayer_volume: number;
+  song: {
+    id: number;
+    title: string;
+    path: string;
+    additional: {
+      song_tag: Record<string, unknown>;
+      song_audio: { bitrate: number; duration: number };
+    };
+  };
+  play_mode: { repeat: string; shuffle: boolean };
+}
+
+interface AudioPlaylistResponse {
+  songs?: Array<{ id: number | string; title: string; path: string }>;
+}
+
+interface ServiceState {
+  name: string;
+  installed: boolean;
+}
+
+interface AdapterStates {
+  DiskStationManager: {
+    info: Record<string, unknown>;
+    hdd_info: Record<string, DiskState>;
+    vol_info: Record<string, VolumeState>;
+  };
+  FileStation: {
+    info: Record<string, unknown>;
+    sharing: Record<string, unknown>;
+  };
+  DownloadStation: Record<string, unknown>;
+  AudioStation: {
+    info: Record<string, unknown>;
+    players: Record<string, PlayerState>;
+  };
+  VideoStation: { info: Record<string, unknown> };
+  VideoStation_DTV: { info: Record<string, unknown> };
+  SurveillanceStation: {
+    info: Record<string, unknown>;
+    cameras: Record<string, CameraState>;
+    HomeMode: Record<string, unknown>;
+  };
+  api: Record<string, ServiceState>;
+}
+
+Object.assign(states, {
   DiskStationManager: { info: {}, hdd_info: {}, vol_info: {} },
   FileStation: { info: {}, sharing: {} },
   DownloadStation: { info: {} },
@@ -316,9 +453,22 @@ const states = {
     dtv: { name: "dtVideoStation_DTV", installed: false },
     ss: { name: "SurveillanceStation", installed: false },
   },
-};
+});
 
-const objects = {
+type StateValueType = "string" | "number" | "boolean" | "object";
+interface StateMetadata {
+  name: string;
+  role: string;
+  type: StateValueType;
+  unit?: string;
+  min?: string | number;
+  max?: string | number;
+  states?: ioBroker.StateCommon["states"];
+  read?: boolean;
+  write?: boolean;
+}
+
+const objects: Record<string, StateMetadata> = {
   album: {
     role: "media.album",
     name: "Album",
@@ -1153,7 +1303,18 @@ const objects = {
   },
 };
 
-const PollCmd = {
+type PollApi = "dsm" | "fs" | "dl" | "as" | "vs" | "dtv" | "ss";
+type PollName = "firstPoll" | "fastPoll" | "slowPoll";
+interface PollRequest {
+  api: PollApi;
+  method: string;
+  params: Record<string, unknown>;
+  ParseFunction: (...args: never[]) => void;
+}
+type PollFunction = (...args: never[]) => unknown;
+type PollTask = PollRequest | PollFunction;
+
+const PollCmd: Record<PollName, PollTask[]> = {
   firstPoll: [
     {
       api: "dsm",
@@ -1271,17 +1432,18 @@ const PollCmd = {
 
 /************************ SurveillanceStation ***********************/
 
-const getIdsCams = () => {
-  const ids = [];
+const getIdsCams = (): string => {
+  const ids: Array<string | number> = [];
   Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
-    if (nameCam !== undefined) {
-      ids.push(states.SurveillanceStation.cameras[nameCam].id);
+    const id = states.SurveillanceStation.cameras[nameCam].id;
+    if (id !== undefined) {
+      ids.push(id);
     }
   });
   return ids.join(",");
 };
 
-const getNameCams = (id) => {
+const getNameCams = (id: string | number): string | undefined => {
   for (const nameCam in states.SurveillanceStation.cameras) {
     if (
       !Object.prototype.hasOwnProperty.call(
@@ -1297,10 +1459,14 @@ const getNameCams = (id) => {
   }
 };
 
-function switchCam(name, command, val) {
+function switchCam(name: string, command: string, val: unknown): void {
   const method = val ? "enableCamera" : "disableCamera";
   if (name !== "undefined" && states.SurveillanceStation.cameras[name]) {
-    const camId = states.SurveillanceStation.cameras[name].id.toString();
+    const cameraId = states.SurveillanceStation.cameras[name].id;
+    if (cameraId === undefined) {
+      return;
+    }
+    const camId = cameraId.toString();
     send("ss", method, {
       cameraIds: camId,
       blIncludeDeletedCam: false,
@@ -1309,42 +1475,59 @@ function switchCam(name, command, val) {
   }
 }
 
-function addLinkSnapShot() {
+function addLinkSnapShot(): void {
   debug("addLinkSnapShot");
+  if (!syno) {
+    return;
+  }
+  const synologyClient = syno;
   Object.keys(states.SurveillanceStation.cameras).forEach((nameCam) => {
     if (nameCam !== undefined) {
       const camId = states.SurveillanceStation.cameras[nameCam].id;
-      states.SurveillanceStation.cameras[nameCam].linkSnapshot =
-        createSnapshotLink(syno, camId);
+      if (camId !== undefined) {
+        states.SurveillanceStation.cameras[nameCam].linkSnapshot =
+          createSnapshotLink(synologyClient, camId);
+      }
     }
   });
 }
 
-function getLiveViewPathCamera() {
+function getLiveViewPathCamera(): void {
   debug("getLiveViewPathCamera");
   const ids = getIdsCams();
   if (ids) {
     send("ss", "getLiveViewPathCamera", { idList: ids }, (res) => {
-      if (res && !res.code && !res.message) {
-        res.forEach((obj) => {
-          const nameCam = getNameCams(obj.id);
-          states.SurveillanceStation.cameras[nameCam]["linkMjpegHttpPath"] =
-            obj.mjpegHttpPath;
-          states.SurveillanceStation.cameras[nameCam]["linkMulticstPath"] =
-            obj.multicstPath;
-          states.SurveillanceStation.cameras[nameCam]["linkMxpegHttpPath"] =
-            obj.mxpegHttpPath;
-          states.SurveillanceStation.cameras[nameCam]["linkRtspOverHttpPath"] =
-            obj.rtspOverHttpPath;
-          states.SurveillanceStation.cameras[nameCam]["linkRtspPath"] =
-            obj.rtspPath;
+      if (Array.isArray(res)) {
+        res.forEach((item: Record<string, unknown>) => {
+          if (item.id === undefined || item.id === null) {
+            return;
+          }
+          const nameCam = getNameCams(item.id as string | number);
+          const camera = nameCam && states.SurveillanceStation.cameras[nameCam];
+          if (camera) {
+            if (typeof item.mjpegHttpPath === "string") {
+              camera.linkMjpegHttpPath = item.mjpegHttpPath;
+            }
+            if (typeof item.multicstPath === "string") {
+              camera.linkMulticstPath = item.multicstPath;
+            }
+            if (typeof item.mxpegHttpPath === "string") {
+              camera.linkMxpegHttpPath = item.mxpegHttpPath;
+            }
+            if (typeof item.rtspOverHttpPath === "string") {
+              camera.linkRtspOverHttpPath = item.rtspOverHttpPath;
+            }
+            if (typeof item.rtspPath === "string") {
+              camera.linkRtspPath = item.rtspPath;
+            }
+          }
         });
       }
     });
   }
 }
 
-function getSnapshotCamera(camid, cb) {
+function getSnapshotCamera(camid: unknown, cb?: SnapshotCallback): void {
   debug("getSnapshotCamera");
   const cameraId = Number(camid);
   const cameraName = getNameCams(cameraId);
@@ -1354,25 +1537,32 @@ function getSnapshotCamera(camid, cb) {
     if (adapterUnloading) {
       return;
     }
-    if (res && res.code === 400 && camera && isH265(camera.codec)) {
+    const responseError =
+      typeof res === "object" && res !== null
+        ? (res as { code?: number; message?: unknown })
+        : undefined;
+    if (responseError?.code === 400 && camera && isH265(camera.codec)) {
       adapter.log.debug(
         `Surveillance Station could not create a snapshot for H.265 camera ${cameraName}; trying FFmpeg`,
       );
-      return ensureH265StreamPath(camera, cameraId, (hasPath) => {
+      return ensureH265StreamPath(camera, cameraId, (hasPath: boolean) => {
         if (!hasPath) {
           adapter.log.error(
             `Cannot get RTSP stream path for H.265 camera ${cameraName}`,
           );
           return cb && cb(false);
         }
-        captureH265Snapshot(camera, cameraId, (result) => cb && cb(result));
+        captureH265Snapshot(camera, cameraId, (result) => cb?.(result));
       });
     }
-    if (!res || res.code || res.message) {
+    if (
+      typeof res !== "string" ||
+      (responseError && (responseError.code || responseError.message))
+    ) {
       adapter.log.warn(
-        `Surveillance Station returned no snapshot for camera ${cameraName || cameraId}: ${res && res.message ? res.message : JSON.stringify(res)}`,
+        `Surveillance Station returned no snapshot for camera ${cameraName || cameraId}: ${responseError?.message ? formatUnknown(responseError.message) : JSON.stringify(res)}`,
       );
-      return cb && cb(false);
+      return cb?.(false);
     }
 
     try {
@@ -1389,47 +1579,55 @@ function getSnapshotCamera(camid, cb) {
         directoryContents = await adapter.readDirAsync(adapter.namespace, "/");
       } catch (err) {
         adapter.log.warn(
-          `Cannot read ioBroker file directory ${adapter.namespace}/: ${err.message}`,
+          `Cannot read ioBroker file directory ${adapter.namespace}/: ${String(err)}`,
         );
       }
       fs.writeFileSync(localPath, buf);
       const localFileSize = fs.statSync(localPath).size;
       debug(
-        `Snapshot created for camera ${camid}: ioBroker file ${adapter.namespace}/${filename} ${fileExistsInDb ? "verified" : "missing"}, directory listing ${directoryContents ? JSON.stringify(directoryContents.map((entry) => entry.file)) : "unavailable"}, local file ${localPath} (${localFileSize} bytes)`,
+        `Snapshot created for camera ${formatUnknown(camid)}: ioBroker file ${adapter.namespace}/${filename} ${fileExistsInDb ? "verified" : "missing"}, directory listing ${directoryContents ? JSON.stringify(directoryContents.map((entry) => entry.file)) : "unavailable"}, local file ${localPath} (${localFileSize} bytes)`,
       );
-      cb && cb(localPath);
+      cb?.(localPath);
     } catch (err) {
       adapter.log.warn(
-        `Cannot create snapshot for camera ${cameraId}: ${err.message}`,
+        `Cannot create snapshot for camera ${cameraId}: ${String(err)}`,
       );
-      cb && cb(false);
+      cb?.(false);
     }
   });
 }
 
-function captureH265Snapshot(camera, cameraId, cb) {
+function captureH265Snapshot(
+  camera: CameraState,
+  cameraId: number,
+  cb?: SnapshotCallback,
+): void {
   enqueueH265Snapshot(cameraId, () => {
     if (adapterUnloading) {
       return false;
     }
     return runH265Snapshot(camera, cameraId);
   })
-    .then((result) => {
+    .then((result: SnapshotResult) => {
       if (!adapterUnloading) {
-        cb && cb(result);
+        cb?.(result);
       }
     })
-    .catch((err) => {
+    .catch((err: unknown) => {
       adapter.log.error(
         `Cannot create H.265 snapshot for camera ${getNameCams(cameraId) || cameraId}: ${String(err)}`,
       );
       if (!adapterUnloading) {
-        cb && cb(false);
+        cb?.(false);
       }
     });
 }
 
-function ensureH265StreamPath(camera, cameraId, cb) {
+function ensureH265StreamPath(
+  camera: CameraState,
+  cameraId: number,
+  cb: (hasPath: boolean) => void,
+): void {
   if (adapterUnloading) {
     return;
   }
@@ -1444,15 +1642,22 @@ function ensureH265StreamPath(camera, cameraId, cb) {
       res.forEach((item) => {
         const name = getNameCams(item.id);
         if (name && states.SurveillanceStation.cameras[name]) {
-          states.SurveillanceStation.cameras[name].linkMjpegHttpPath =
-            item.mjpegHttpPath;
-          states.SurveillanceStation.cameras[name].linkMulticstPath =
-            item.multicstPath;
-          states.SurveillanceStation.cameras[name].linkMxpegHttpPath =
-            item.mxpegHttpPath;
-          states.SurveillanceStation.cameras[name].linkRtspOverHttpPath =
-            item.rtspOverHttpPath;
-          states.SurveillanceStation.cameras[name].linkRtspPath = item.rtspPath;
+          const target = states.SurveillanceStation.cameras[name];
+          if (typeof item.mjpegHttpPath === "string") {
+            target.linkMjpegHttpPath = item.mjpegHttpPath;
+          }
+          if (typeof item.multicstPath === "string") {
+            target.linkMulticstPath = item.multicstPath;
+          }
+          if (typeof item.mxpegHttpPath === "string") {
+            target.linkMxpegHttpPath = item.mxpegHttpPath;
+          }
+          if (typeof item.rtspOverHttpPath === "string") {
+            target.linkRtspOverHttpPath = item.rtspOverHttpPath;
+          }
+          if (typeof item.rtspPath === "string") {
+            target.linkRtspPath = item.rtspPath;
+          }
         }
       });
     }
@@ -1460,14 +1665,20 @@ function ensureH265StreamPath(camera, cameraId, cb) {
   });
 }
 
-async function runH265Snapshot(camera, cameraId) {
+async function runH265Snapshot(
+  camera: CameraState,
+  cameraId: number,
+): Promise<SnapshotResult> {
   if (adapterUnloading) {
+    return false;
+  }
+  if (!syno) {
     return false;
   }
   const cameraName = getNameCams(cameraId) || cameraId;
   let rtspUrl;
   try {
-    rtspUrl = createRtspUrl(camera, syno.host);
+    rtspUrl = createRtspUrl({ ...camera, id: cameraId }, syno.host);
     fs.rmSync(path.join(dir, `snapshotCam_${cameraId}.jpg`), { force: true });
   } catch (err) {
     adapter.log.error(
@@ -1480,28 +1691,28 @@ async function runH265Snapshot(camera, cameraId) {
   if (adapterUnloading) {
     return false;
   }
-  return new Promise((resolve) => {
+  return new Promise<SnapshotResult>((resolve) => {
     let timedOut = false;
-    let timeout;
     let finished = false;
-    const finish = (result) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      adapter.clearTimeout(timeout);
-      activeH265Captures.delete(capture);
-      resolve(result);
-      capture.resolveDone();
-    };
-    let ffmpeg;
+    let ffmpeg: ReturnType<typeof spawn> | undefined;
+    const timeoutRef: { current?: ioBroker.Timeout } = {};
     const capture = {
       done: Promise.resolve(),
       resolveDone: () => {},
       cancel: () => {
-        adapter.clearTimeout(timeout);
+        adapter.clearTimeout(timeoutRef.current);
         ffmpeg?.kill("SIGKILL");
       },
+    };
+    const finish = (result: SnapshotResult): void => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      adapter.clearTimeout(timeoutRef.current);
+      activeH265Captures.delete(capture);
+      resolve(result);
+      capture.resolveDone();
     };
     capture.done = new Promise((done) => {
       capture.resolveDone = done;
@@ -1540,7 +1751,7 @@ async function runH265Snapshot(camera, cameraId) {
       return finish(false);
     }
 
-    timeout = adapter.setTimeout(() => {
+    timeoutRef.current = adapter.setTimeout(() => {
       timedOut = true;
       ffmpeg.kill("SIGKILL");
     }, 20000);
@@ -1617,66 +1828,89 @@ function parselistEvents(res) {
     }
 }
 */
-function parselistCameras(res) {
+interface SynologyCamera {
+  id: number;
+  name?: string;
+  newName?: string;
+  host?: string;
+  ip?: string;
+  port?: number;
+  model?: string;
+  vendor?: string;
+  videoType?: string;
+  detailInfo?: { camVideoType?: string };
+  videoCodec?: string | number;
+  status: string | number;
+  recStatus: string | number;
+  enabled?: boolean;
+}
+
+function parselistCameras(res: { cameras: SynologyCamera[] }): void {
   debug(`listCameras - Response: ${JSON.stringify(res)}`);
   const arr = res.cameras;
-  arr.forEach((k, i) => {
-    if (arr[i].newName) {
-      arr[i].name = arr[i].newName; // DSM 7
+  arr.forEach((cameraData) => {
+    if (cameraData.newName) {
+      cameraData.name = cameraData.newName; // DSM 7
     }
 
-    if (arr[i].name) {
-      if (states.SurveillanceStation.cameras[arr[i].name] === undefined) {
-        states.SurveillanceStation.cameras[arr[i].name] = {};
+    if (cameraData.name) {
+      if (states.SurveillanceStation.cameras[cameraData.name] === undefined) {
+        states.SurveillanceStation.cameras[cameraData.name] = {};
       }
-      states.SurveillanceStation.cameras[arr[i].name].host =
-        arr[i].host || arr[i].ip;
-      states.SurveillanceStation.cameras[arr[i].name].id = arr[i].id;
-      states.SurveillanceStation.cameras[arr[i].name].codec = getCameraCodec(
-        arr[i],
-        stateSS.videoCodec,
-      );
+      states.SurveillanceStation.cameras[cameraData.name].host =
+        cameraData.host || cameraData.ip;
+      states.SurveillanceStation.cameras[cameraData.name].id = cameraData.id;
+      states.SurveillanceStation.cameras[cameraData.name].codec =
+        getCameraCodec(cameraData, stateSS.videoCodec);
       // Rebuild immediately, including when a camera was recreated with the same name.
-      states.SurveillanceStation.cameras[arr[i].name].linkSnapshot =
-        createSnapshotLink(syno, arr[i].id);
-      states.SurveillanceStation.cameras[arr[i].name].port = arr[i].port;
-      states.SurveillanceStation.cameras[arr[i].name].model = arr[i].model;
-      states.SurveillanceStation.cameras[arr[i].name].vendor = arr[i].vendor;
-      states.SurveillanceStation.cameras[arr[i].name].videoCodec =
-        stateSS.videoCodec[arr[i].videoCodec];
-      states.SurveillanceStation.cameras[arr[i].name].status =
-        stateSS.camStatus[arr[i].status];
-      states.SurveillanceStation.cameras[arr[i].name].recStatus =
-        stateSS.recStatus[arr[i].recStatus];
-      states.SurveillanceStation.cameras[arr[i].name].enabled = arr[i].enabled;
-      states.SurveillanceStation.cameras[arr[i].name].motionDetected = false;
-      states.SurveillanceStation.cameras[arr[i].name].motionDetected =
-        arr[i].recStatus === 2;
+      if (syno) {
+        states.SurveillanceStation.cameras[cameraData.name].linkSnapshot =
+          createSnapshotLink(syno, cameraData.id);
+      }
+      states.SurveillanceStation.cameras[cameraData.name].port =
+        cameraData.port;
+      states.SurveillanceStation.cameras[cameraData.name].model =
+        cameraData.model;
+      states.SurveillanceStation.cameras[cameraData.name].vendor =
+        cameraData.vendor;
+      states.SurveillanceStation.cameras[cameraData.name].videoCodec =
+        cameraData.videoCodec === undefined
+          ? undefined
+          : stateSS.videoCodec[String(cameraData.videoCodec)];
+      states.SurveillanceStation.cameras[cameraData.name].status =
+        stateSS.camStatus[String(cameraData.status)];
+      states.SurveillanceStation.cameras[cameraData.name].recStatus =
+        stateSS.recStatus[String(cameraData.recStatus)];
+      states.SurveillanceStation.cameras[cameraData.name].enabled =
+        cameraData.enabled;
+      states.SurveillanceStation.cameras[cameraData.name].motionDetected =
+        false;
+      states.SurveillanceStation.cameras[cameraData.name].motionDetected =
+        cameraData.recStatus === 2;
     }
   });
 }
 
-function parseInfoHomeMode(res) {
+function parseInfoHomeMode(res: Record<string, unknown>): void {
   debug(`InfoHomeMode - Response: ${JSON.stringify(res)}`);
-  states.SurveillanceStation.HomeMode["status_on"] = res.on;
-  states.SurveillanceStation.HomeMode["notify_on"] = res.notify_on;
-  states.SurveillanceStation.HomeMode["onetime_disable_on"] =
+  states.SurveillanceStation.HomeMode.status_on = res.on;
+  states.SurveillanceStation.HomeMode.notify_on = res.notify_on;
+  states.SurveillanceStation.HomeMode.onetime_disable_on =
     res.onetime_disable_on;
-  states.SurveillanceStation.HomeMode["onetime_disable_time"] = unixToDate(
-    res.onetime_disable_time,
+  states.SurveillanceStation.HomeMode.onetime_disable_time = unixToDate(
+    res.onetime_disable_time as number,
   );
-  states.SurveillanceStation.HomeMode["onetime_enable_on"] =
-    res.onetime_enable_on;
-  states.SurveillanceStation.HomeMode["onetime_enable_time"] = unixToDate(
-    res.onetime_enable_time,
+  states.SurveillanceStation.HomeMode.onetime_enable_on = res.onetime_enable_on;
+  states.SurveillanceStation.HomeMode.onetime_enable_time = unixToDate(
+    res.onetime_enable_time as number,
   );
-  states.SurveillanceStation.HomeMode["geo_lat"] = res.geo_lat;
-  states.SurveillanceStation.HomeMode["geo_lng"] = res.geo_lng;
-  states.SurveillanceStation.HomeMode["geo_radius"] = res.geo_radius;
-  states.SurveillanceStation.HomeMode["wifi_ssid"] = res.wifi_ssid;
+  states.SurveillanceStation.HomeMode.geo_lat = res.geo_lat;
+  states.SurveillanceStation.HomeMode.geo_lng = res.geo_lng;
+  states.SurveillanceStation.HomeMode.geo_radius = res.geo_radius;
+  states.SurveillanceStation.HomeMode.wifi_ssid = res.wifi_ssid;
 }
 
-function parseSSInfo(res) {
+function parseSSInfo(res: Record<string, unknown>): void {
   states.SurveillanceStation.info.CMSMinVersion = res.CMSMinVersion;
   states.SurveillanceStation.info.cameraNumber = res.cameraNumber;
   states.SurveillanceStation.info.isLicenseEnough = res.isLicenseEnough;
@@ -1694,20 +1928,26 @@ function parseSSInfo(res) {
 
 /*********************** DownloadStation ************************/
 
-function addDownload(command, url, cb) {
+function addDownload(command: string, url: unknown, cb?: () => void): void {
   if (url) {
     debug("addDownload");
+    let uri = formatUnknown(url);
     if (command === "add_hash_download") {
-      url = `magnet:?xt=urn:btih:${url}`;
+      uri = `magnet:?xt=urn:btih:${uri}`;
     }
-    const param = { type: "url", create_list: true, uri: [url], version: 2 };
+    const param: Record<string, unknown> = {
+      type: "url",
+      create_list: true,
+      uri: [uri],
+      version: 2,
+    };
     adapter.getState("DownloadStation.folder", (err, state) => {
       if (!err && state) {
         param.destination = state.val;
       }
-      send("dl", "createTask", param, (res) => {
-        if (res && res.message) {
-          error("addDownload Error: ", res.message);
+      send("dl", "createTask", param, (res: unknown) => {
+        if (isRecord(res) && res.message) {
+          error("addDownload Error: ", formatUnknown(res.message));
         }
         cb && cb();
       });
@@ -1717,7 +1957,7 @@ function addDownload(command, url, cb) {
   }
 }
 
-function setConfigSchedule(command, val) {
+function setConfigSchedule(command: string, val: unknown): void {
   debug("setConfigSchedule");
   let param;
   if (command === "shedule_enabled") {
@@ -1726,32 +1966,39 @@ function setConfigSchedule(command, val) {
   if (command === "shedule_emule_enabled") {
     param = { emule_enabled: val };
   }
-  send("dl", "setConfigSchedule", param, (res) => {
-    if (res && res.message) {
-      error("setConfigSchedule Error: ", res.message);
+  send("dl", "setConfigSchedule", param, (res: unknown) => {
+    if (isRecord(res) && res.message) {
+      error("setConfigSchedule Error: ", formatUnknown(res.message));
     }
   });
 }
 
-function pauseTask(command, val) {
+function pauseTask(command: string, val: unknown): void {
   debug("pauseTask");
   let param;
   let method;
-  const ids = [];
-  if (!~val.toString().indexOf("dbid_") && val !== "all") {
-    param = { id: `dbid_${val}` };
+  const taskIds: string[] = [];
+  const taskValue = String(val);
+  if (!~taskValue.indexOf("dbid_") && val !== "all") {
+    param = { id: `dbid_${taskValue}` };
   } else if (val === "all") {
     try {
-      const arr = JSON.parse(states.DownloadStation.listTasks);
-      if (arr && arr.length > 0) {
-        arr.forEach((key) => ids.push(key.id));
-        param = { id: ids.join(",") };
+      const arr: unknown = JSON.parse(
+        formatUnknown(states.DownloadStation.listTasks ?? "[]"),
+      );
+      if (Array.isArray(arr) && arr.length > 0) {
+        arr.forEach((task: unknown) => {
+          if (isRecord(task) && task.id !== undefined) {
+            taskIds.push(formatUnknown(task.id));
+          }
+        });
+        param = { id: taskIds.join(",") };
       }
     } catch {
       // ignore
     }
   } else {
-    param = { id: val };
+    param = { id: taskValue };
   }
   if (command === "pause_task") {
     method = "pauseTask";
@@ -1759,38 +2006,44 @@ function pauseTask(command, val) {
   if (command === "resume_task") {
     method = "resumeTask";
   }
-  send("dl", method, param, (res) => {
-    if (res && res.message) {
-      adapter.log.error(`pauseTask Error: ${res.message}`);
+  if (!method) {
+    return;
+  }
+  send("dl", method, param, (res: unknown) => {
+    if (isRecord(res) && res.message) {
+      adapter.log.error(`pauseTask Error: ${formatUnknown(res.message)}`);
     }
   });
 }
 
-function parsegetConfigSchedule(res) {
+function parsegetConfigSchedule(res: Record<string, unknown>): void {
   debug(`getConfigSchedule - Response: ${JSON.stringify(res)}`);
   if (res && !res.message) {
-    states.DownloadStation["shedule_emule_enabled"] = res.emule_enabled;
-    states.DownloadStation["shedule_enabled"] = res.enabled;
+    states.DownloadStation.shedule_emule_enabled = res.emule_enabled;
+    states.DownloadStation.shedule_enabled = res.enabled;
   }
 }
 
-function parselistTasks(res) {
+function parselistTasks(res: {
+  message?: unknown;
+  tasks?: Array<Record<string, unknown>>;
+}): void {
   debug(`listTasks - Response: ${JSON.stringify(res)}`);
   if (res && !res.message) {
-    const task = [];
-    res.tasks.forEach((obj) => {
+    const task: Array<Record<string, unknown>> = [];
+    (res.tasks ?? []).forEach((obj) => {
       if (obj.status !== "finished") {
         task.push(obj);
       }
     });
-    states.DownloadStation["listTasks"] = JSON.stringify(task);
-    states.DownloadStation["activeTask"] = task.length;
+    states.DownloadStation.listTasks = JSON.stringify(task);
+    states.DownloadStation.activeTask = task.length;
   }
 }
 
 /************************* AudioStation *************************/
 
-function clearPlaylist(playerid, cb) {
+function clearPlaylist(playerid: string, cb?: () => void): void {
   const param = {
     id: playerid,
     offset: 0,
@@ -1803,7 +2056,7 @@ function clearPlaylist(playerid, cb) {
   });
 }
 
-function clearPlayerStates(playerid, cb) {
+function clearPlayerStates(playerid: string, cb?: () => void): void {
   debug(`Clearing the player status ${playerid}`);
   states.AudioStation.players[playerid].playlist_total = 0;
   states.AudioStation.players[playerid].volume = 0;
@@ -1828,17 +2081,19 @@ function clearPlayerStates(playerid, cb) {
   cb && cb();
 }
 
-async function getStatusPlayer(cb) {
-  function getOneStatusPlayer(playerid) {
+async function getStatusPlayer(cb?: () => void): Promise<void> {
+  function getOneStatusPlayer(playerid: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       debug(`* getStatusPlayer ${playerid}`);
       const param = {
         id: playerid,
         additional: "song_tag, song_audio, subplayer_volume",
       };
-      send("as", "getStatusRemotePlayerStatus", param, (res) => {
-        if (res && res.state) {
-          let state = res.state;
+      send("as", "getStatusRemotePlayerStatus", param, (response) => {
+        const res = isRecord(response) ? response : undefined;
+        if (res && typeof res.state === "string") {
+          const status = res as unknown as RemotePlayerStatus;
+          let state = status.state;
           if (state === "playing") {
             state = "play";
           } else if (
@@ -1851,8 +2106,11 @@ async function getStatusPlayer(cb) {
           }
           states.AudioStation.players[playerid].state_playing = state;
           states.AudioStation.players[playerid].online = true;
-          if ((res.state === "playing" || res.state === "pause") && res.song) {
-            parseRemotePlayerStatus(playerid, res);
+          if (
+            (status.state === "playing" || status.state === "pause") &&
+            status.song
+          ) {
+            parseRemotePlayerStatus(playerid, status);
             getPlaylist(playerid, () => {
               getSongCover(playerid);
             });
@@ -1865,8 +2123,10 @@ async function getStatusPlayer(cb) {
           states.AudioStation.players[playerid].online = false;
           states.AudioStation.players[playerid].state_playing = "stop";
           clearPlayerStates(playerid);
-          if (res === false && timeOutReconnect) {
-            reject();
+          if (response === false && timeOutReconnect) {
+            reject(
+              new Error("Remote player status unavailable during reconnect"),
+            );
           }
         }
         resolve(true);
@@ -1886,13 +2146,13 @@ async function getStatusPlayer(cb) {
   cb && cb();
 }
 
-function getSongCover(playerid, cb) {
+function getSongCover(playerid: string, cb?: () => void): void {
   debug("getSongCover");
   const track = states.AudioStation.players[playerid].song_id;
   if (track !== old_states.AudioStation.players[playerid].song_id) {
     old_states.AudioStation.players[playerid].song_id = track;
     send("as", "getSongCover", { id: track }, async (res) => {
-      if (res && !res.message) {
+      if (typeof res === "string") {
         const buf = Buffer.from(res, "binary");
         await adapter.writeFileAsync(adapter.namespace, "cover.jpg", buf);
         states.AudioStation.players[playerid].cover =
@@ -1906,7 +2166,7 @@ function getSongCover(playerid, cb) {
   }
 }
 
-function getPlaylist(playerid, cb) {
+function getPlaylist(playerid: string, cb?: () => void): void {
   debug("getPlaylist");
   send("as", "getPlayListRemotePlayer", { id: playerid }, (res) => {
     if (res) {
@@ -1916,15 +2176,16 @@ function getPlaylist(playerid, cb) {
   });
 }
 
-function Browser(playerid, val) {
+function Browser(playerid: string, val: unknown): void {
   debug("Browser");
   let param = {};
   if (val && val !== "/") {
-    if (~val.toString().indexOf("dir_")) {
+    if (formatUnknown(val).includes("dir_")) {
       param = { id: val };
     } else {
       try {
-        const obj = JSON.parse(states.AudioStation.players[playerid].Browser);
+        const obj: { files: Array<{ file: string; id: string | number }> } =
+          JSON.parse(states.AudioStation.players[playerid].Browser ?? "{}");
         for (const dir_id in obj.files) {
           if (!Object.prototype.hasOwnProperty.call(obj.files, dir_id)) {
             continue;
@@ -1939,19 +2200,20 @@ function Browser(playerid, val) {
       }
     }
   }
-  send("as", "listFolders", param, (res) => {
-    const arr = { files: [] };
-    if (res && res.items) {
-      res.items.forEach((k, i) => {
+  send("as", "listFolders", param, (response) => {
+    const arr: { files: Array<Record<string, unknown>> } = { files: [] };
+    if (isRecord(response) && Array.isArray(response.items)) {
+      const items = response.items.filter(isRecord);
+      items.forEach((item) => {
         let filetype = "file";
-        if (res.items[i].type === "folder") {
+        if (item.type === "folder") {
           filetype = "directory";
         }
         arr.files.push({
-          id: res.items[i].id,
-          file: res.items[i].path,
+          id: item.id,
+          file: item.path,
           filetype: filetype,
-          title: res.items[i].title,
+          title: item.title,
         });
       });
       states.AudioStation.players[playerid].Browser = JSON.stringify(arr);
@@ -1960,9 +2222,9 @@ function Browser(playerid, val) {
   });
 }
 
-function PlayControl(playerid, cmd, val) {
+function PlayControl(playerid: string, cmd: string, val: unknown): void {
   debug("PlayControl");
-  const param = {
+  const param: Record<string, unknown> = {
     id: playerid,
     action: cmd,
     value: null,
@@ -1975,8 +2237,8 @@ function PlayControl(playerid, cmd, val) {
     if (cmd === "seek") {
       param.value = parseFloat(
         (
-          (val / 100) *
-          states.AudioStation.players[playerid].duration_sec
+          (Number(val) / 100) *
+          Number(states.AudioStation.players[playerid].duration_sec)
         ).toFixed(4),
       );
     }
@@ -1992,7 +2254,7 @@ function PlayControl(playerid, cmd, val) {
   }
 }
 
-function PlayFolder(playerid, folder) {
+function PlayFolder(playerid: string, folder: unknown): void {
   debug("PlayFolder");
   let param = {};
   if (playerid) {
@@ -2024,7 +2286,7 @@ function PlayFolder(playerid, folder) {
   }
 }
 
-function PlayTrack(playerid, val) {
+function PlayTrack(playerid: string, val: unknown): void {
   debug("PlayTrack");
   let param = {};
   if (playerid) {
@@ -2049,7 +2311,7 @@ function PlayTrack(playerid, val) {
   }
 }
 
-function PlayTrackNum(playerid, val) {
+function PlayTrackNum(playerid: string, val: unknown): void {
   debug("PlayTrackNum");
   if (playerid) {
     send("as", "controlRemotePlayer", {
@@ -2060,10 +2322,12 @@ function PlayTrackNum(playerid, val) {
   }
 }
 
-function PlayTrackId(playerid, val) {
+function PlayTrackId(playerid: string, val: unknown): void {
   debug("PlayTrack");
   try {
-    const arr = JSON.parse(states.AudioStation.players[playerid].playlist);
+    const arr: Array<{ id: string | number }> = JSON.parse(
+      states.AudioStation.players[playerid].playlist ?? "[]",
+    );
     const track = arr.findIndex((item) => item.id === val);
     if (track) {
       send("as", "controlRemotePlayer", {
@@ -2079,11 +2343,13 @@ function PlayTrackId(playerid, val) {
   }
 }
 
-function parseListRemotePlayers(res) {
+function parseListRemotePlayers(res: {
+  players: Array<{ id: string | number; name: string }>;
+}): void {
   debug(`ListRemotePlayers - Response: ${JSON.stringify(res)}`);
   //states.AudioStation.info.RemotePlayers = JSON.stringify(res.players);
   res.players.forEach((player) => {
-    const playerid = player.id;
+    const playerid = String(player.id);
     if (states.AudioStation.players[playerid] === undefined) {
       states.AudioStation.players[playerid] = {};
       states.AudioStation.players[playerid].online = true;
@@ -2101,10 +2367,13 @@ function parseListRemotePlayers(res) {
   });
 }
 
-function parseRemotePlayerStatus(playerid, res) {
+function parseRemotePlayerStatus(
+  playerid: string,
+  res: RemotePlayerStatus,
+): void {
   debug(`RemotePlayerStatus - Response: ${JSON.stringify(res)}`);
   try {
-    if (res && res.index !== undefined) {
+    if (res.index !== undefined) {
       const seek = parseFloat(
         (
           (res.position / res.song.additional.song_audio.duration) *
@@ -2112,7 +2381,7 @@ function parseRemotePlayerStatus(playerid, res) {
         ).toFixed(4),
       );
       states.AudioStation.players[playerid].current_play = parseInt(
-        res.index,
+        String(res.index),
         10,
       );
       states.AudioStation.players[playerid].playlist_total = res.playlist_total;
@@ -2154,20 +2423,23 @@ function parseRemotePlayerStatus(playerid, res) {
   }
 }
 
-function parsePlayListRemotePlayer(playerid, res) {
+function parsePlayListRemotePlayer(
+  playerid: string,
+  res: AudioPlaylistResponse,
+): void {
   debug(`PlayListRemotePlayer - Response: ${JSON.stringify(res)}`);
   try {
-    const playlist = [];
+    const playlist: Array<Record<string, unknown>> = [];
     if (res && res.songs) {
       const arr = res.songs;
-      arr.forEach((k, i) => {
+      arr.forEach((song, i) => {
         playlist[i] = {
-          id: arr[i].id,
+          id: song.id,
           artist: "",
           album: "",
           bitrate: 0,
-          title: arr[i].title,
-          file: arr[i].path,
+          title: song.title,
+          file: song.path,
           genre: "",
           year: 0,
           len: "00:00",
@@ -2182,21 +2454,28 @@ function parsePlayListRemotePlayer(playerid, res) {
   }
 }
 
-function parselistRadios(res) {
+function parselistRadios(res: {
+  message?: unknown;
+  radios?: Array<{
+    id: string | number;
+    desc?: string;
+    title: string;
+    url: string;
+  }>;
+}): void {
   debug(`listRadios - Response: ${JSON.stringify(res)}`);
   if (res && !res.message) {
     try {
-      const radio_playlist = [];
+      const radio_playlist: Array<Record<string, unknown>> = [];
       if (res.radios) {
-        const arr = res.radios;
-        arr.forEach((k, i) => {
+        res.radios.forEach((radio, i) => {
           radio_playlist[i] = {
-            id: arr[i].id,
+            id: radio.id,
             artist: "",
             album: "",
-            bitrate: arr[i].desc ? arr[i].desc.match(/\(.*?(\d+)/)[1] : "",
-            title: arr[i].title,
-            file: arr[i].url,
+            bitrate: radio.desc?.match(/\(.*?(\d+)/)?.[1] ?? "",
+            title: radio.title,
+            file: radio.url,
             genre: "",
             year: 0,
             len: "00:00",
@@ -2217,14 +2496,20 @@ function parselistRadios(res) {
 
 /*********************** FileStation ************************/
 
-function CreateSharing(command, link) {
+function CreateSharing(command: string, link: unknown): void {
   debug("CreateSharings");
-  let params_set = {};
+  let params_set: Record<string, unknown> = {};
   if (link) {
     try {
-      params_set = JSON.parse(link);
+      const parsed: unknown = JSON.parse(formatUnknown(link));
+      if (isRecord(parsed)) {
+        params_set = parsed;
+      }
     } catch {
-      error("CreateSharings", `Error JSON parse command ${link}`);
+      error(
+        "CreateSharings",
+        `Error JSON parse command ${formatUnknown(link)}`,
+      );
     }
     if (!("path" in params_set)) {
       params_set.path = link;
@@ -2233,8 +2518,8 @@ function CreateSharing(command, link) {
       params_set.password = "";
     }
     send("fs", "createSharing", params_set, (res) => {
-      if (res) {
-        CreateSharings(res);
+      if (isRecord(res) && Array.isArray(res.links)) {
+        CreateSharings({ links: res.links.filter(isRecord) });
       }
     });
   } else {
@@ -2242,67 +2527,92 @@ function CreateSharing(command, link) {
   }
 }
 
-function DeleteSharing(command, id) {
+function DeleteSharing(command: string, id: unknown): void {
   debug("DeleteSharings");
   if (id) {
-    send("fs", "deleteSharing", { id: id });
+    send("fs", "deleteSharing", { id: formatUnknown(id) });
   } else {
     error("DeleteSharings", "ID not set");
   }
 }
 
-function parseListSharings(res) {
+function parseListSharings(res: {
+  links: Array<Record<string, unknown>>;
+}): void {
   debug(`parseListSharings - Response: ${JSON.stringify(res)}`);
   const arr = res.links;
-  const temp_array = [];
-  arr.forEach((k, i) => {
-    if (arr[i].id) {
+  const temp_array: Array<Record<string, unknown>> = [];
+  arr.forEach((sharing, i) => {
+    if (sharing.id) {
       temp_array[i] = {
-        name: arr[i].name,
-        date_available: arr[i].date_available,
-        date_expired: arr[i].date_expired,
-        expire_times: arr[i].expire_times,
-        enable_upload: arr[i].enable_upload,
-        has_password: arr[i].has_password,
-        id: arr[i].id,
-        isFolder: arr[i].isFolder,
-        link_owner: arr[i].link_owner,
-        limit_size: arr[i].limit_size,
-        path: arr[i].path,
-        qrcode: arr[i].qrcode,
-        status: arr[i].status,
-        url: arr[i].url,
-        request_info: arr[i].request_info,
-        request_name: arr[i].request_name,
+        name: sharing.name,
+        date_available: sharing.date_available,
+        date_expired: sharing.date_expired,
+        expire_times: sharing.expire_times,
+        enable_upload: sharing.enable_upload,
+        has_password: sharing.has_password,
+        id: sharing.id,
+        isFolder: sharing.isFolder,
+        link_owner: sharing.link_owner,
+        limit_size: sharing.limit_size,
+        path: sharing.path,
+        qrcode: sharing.qrcode,
+        status: sharing.status,
+        url: sharing.url,
+        request_info: sharing.request_info,
+        request_name: sharing.request_name,
       };
     }
   });
-  states.FileStation.sharing["list"] = JSON.stringify(temp_array);
+  states.FileStation.sharing.list = JSON.stringify(temp_array);
 }
 
-function CreateSharings(res) {
+function CreateSharings(res: {
+  links: Array<{ url?: unknown; qrcode?: unknown }>;
+}): void {
   debug(`parseCreateSharings - Response: ${JSON.stringify(res)}`);
   const arr = res.links;
-  states.FileStation.sharing["last_url"] = JSON.stringify(arr[0].url);
-  states.FileStation.sharing["last_qrcode"] = JSON.stringify(arr[0].qrcode);
+  states.FileStation.sharing.last_url = JSON.stringify(arr[0].url);
+  states.FileStation.sharing.last_qrcode = JSON.stringify(arr[0].qrcode);
 }
 
 /************************** DSM ****************************/
 
-function parseInfoSystem(res) {
+function parseInfoSystem(res: {
+  hdd_info?: Array<{
+    diskType: string;
+    diskno: string;
+    diskPath: string;
+    model: string;
+    status: string;
+    ebox_order: string | number;
+    temp: number;
+    volume: string;
+    capacity: number;
+  }>;
+  vol_info?: Array<{
+    name: string;
+    status: string;
+    total_size: number;
+    used_size: number;
+    desc?: string;
+    vol_desc?: string;
+  }>;
+}): void {
   debug(`InfoSystem - Response: ${JSON.stringify(res)}`);
   if (res && res.hdd_info) {
     res.hdd_info.forEach((key) => {
       const diskname = `${key.diskType.toLowerCase().replace(" ", "_")}_${key.diskno.toLowerCase().replace(" ", "_")}`;
-      const diskInfo = {
+      const diskInfo: DiskState = {
         diskno: key.diskno,
         diskPath: key.diskPath,
         model: key.model.replace(/\s{2,}/g, ""),
         overview_status: key.status,
-        ebox_order: parseInt(key.ebox_order, 10),
+        ebox_order: parseInt(String(key.ebox_order), 10),
         temperature: key.temp,
         storage_pool: key.volume,
         capacity: parseFloat((key.capacity / 1073741824).toFixed(2)),
+        smart: {},
       };
       const previousDisk = states.DiskStationManager.hdd_info[diskname];
       diskInfo.smart =
@@ -2325,7 +2635,7 @@ function parseInfoSystem(res) {
   }
 }
 
-function pollSmartAttributes() {
+function pollSmartAttributes(): void {
   if (
     !adapter.config.smart_over_ssh ||
     smartPollInProgress ||
@@ -2348,7 +2658,7 @@ function pollSmartAttributes() {
 
   smartPollInProgress = true;
   let index = 0;
-  const pollNextDisk = () => {
+  const pollNextDisk = (): void => {
     if (adapterUnloading || index >= disks.length) {
       smartPollInProgress = false;
       return;
@@ -2372,7 +2682,7 @@ function pollSmartAttributes() {
             }
           }
         } else {
-          const details = String(stderr || "")
+          const details = formatUnknown(stderr || "")
             .trim()
             .replace(/\s+/g, " ")
             .slice(0, 300);
@@ -2388,7 +2698,9 @@ function pollSmartAttributes() {
   pollNextDisk();
 }
 
-function parseInstallingPackets(res) {
+function parseInstallingPackets(res: {
+  packages?: Record<string, boolean> | Array<{ id: string }>;
+}): void {
   debug(`InstallingPackets - Response: ${JSON.stringify(res)}`);
   if (res && res.packages) {
     if (!Array.isArray(res.packages)) {
@@ -2402,7 +2714,7 @@ function parseInstallingPackets(res) {
             continue;
           }
           if (states.api[name].name === fullname) {
-            states.api[name]["installed"] = res.packages[fullname];
+            states.api[name].installed = res.packages[fullname];
           }
         }
       }
@@ -2422,16 +2734,19 @@ function parseInstallingPackets(res) {
   }
 }
 
-function parseInfo(res, api) {
+function parseInfo(res: Record<string, unknown>, api: PollApi): void {
   debug(`Info - Response: ${JSON.stringify(res)}`);
   if (states.api[api].installed) {
     const apiName = states.api[api].name;
     if (apiName !== "SurveillanceStation") {
+      const stateGroup = (
+        states as unknown as Record<string, { info: Record<string, unknown> }>
+      )[apiName];
       Object.keys(res).forEach((key) => {
         if (key === "version") {
-          states[apiName].info[key] = parseInt(res[key]);
+          stateGroup.info[key] = parseInt(String(res[key]), 10);
         } else {
-          states[apiName].info[key] = res[key];
+          stateGroup.info[key] = res[key];
           if (
             apiName === "DiskStationManager" &&
             firstStart &&
@@ -2447,8 +2762,8 @@ function parseInfo(res, api) {
   }
 }
 
-function setAllInstalledForDsm7(VersionString) {
-  if (VersionString === null) {
+function setAllInstalledForDsm7(VersionString: unknown): void {
+  if (typeof VersionString !== "string") {
     return;
   }
   const VersionMatch = VersionString.match(/^DSM ([0-9]+)\./);
@@ -2458,57 +2773,65 @@ function setAllInstalledForDsm7(VersionString) {
   const VersionNumString = VersionMatch[1];
   info(`DSM ${VersionNumString}`);
 
-  if (VersionNumString === "7" || VersionNumString === 7) {
+  if (VersionNumString === "7") {
     info("DSM 7 detected, set all to true");
-    states.api["dl"].installed = true;
-    states.api["as"].installed = true;
-    states.api["vs"].installed = true;
-    states.api["ss"].installed = true;
+    states.api.dl.installed = true;
+    states.api.as.installed = true;
+    states.api.vs.installed = true;
+    states.api.ss.installed = true;
   }
 }
 
-function parseTempInfo(res) {
+function parseTempInfo(res: Record<string, unknown>): void {
   debug(`TempInfo - Response: ${JSON.stringify(res)}`);
   states.DiskStationManager.info.temperature = res.temperature;
   states.DiskStationManager.info.temperature_warn = res.temperature_warn;
   states.DiskStationManager.info.time = res.time;
-  states.DiskStationManager.info.uptime = parseInt(res.uptime);
+  states.DiskStationManager.info.uptime = parseInt(String(res.uptime), 10);
 }
 
-function parseSystemUtilization(res) {
+function parseSystemUtilization(res: Record<string, unknown>): void {
   debug(`SystemUtilization - Response: ${JSON.stringify(res)}`);
-  if (res && res.cpu) {
-    states.DiskStationManager.info["cpu_load"] = parseInt(res.cpu.user_load);
-    states.DiskStationManager.info["memory_usage"] = parseInt(
-      res.memory.real_usage,
+  if (isRecord(res.cpu) && isRecord(res.memory)) {
+    states.DiskStationManager.info.cpu_load = parseInt(
+      String(res.cpu.user_load),
+      10,
     );
-    states.DiskStationManager.info["memory_size"] = parseInt(
-      res.memory.memory_size,
+    states.DiskStationManager.info.memory_usage = parseInt(
+      String(res.memory.real_usage),
+      10,
+    );
+    states.DiskStationManager.info.memory_size = parseInt(
+      String(res.memory.memory_size),
+      10,
     );
   }
 }
 
-function parseSystemStatus(res) {
+function parseSystemStatus(res: Record<string, unknown>): void {
   debug(`SystemStatus - Response: ${JSON.stringify(res)}`);
-  states.DiskStationManager.info["is_disk_wcache_crashed"] =
+  states.DiskStationManager.info.is_disk_wcache_crashed =
     res.is_disk_wcache_crashed;
-  states.DiskStationManager.info["is_system_crashed"] = res.is_system_crashed;
-  states.DiskStationManager.info["upgrade_ready"] = res.upgrade_ready;
+  states.DiskStationManager.info.is_system_crashed = res.is_system_crashed;
+  states.DiskStationManager.info.upgrade_ready = res.upgrade_ready;
 }
 
-function sendMethod(name, val) {
-  debug(`sendMethod to ${name} cmd:${val}`);
+function sendMethod(name: string, val: unknown): void {
+  debug(`sendMethod to ${name} cmd:${formatUnknown(val)}`);
   const api = isInstalled(name);
   if (api) {
-    let json, param;
+    let param;
     try {
-      json = JSON.parse(val);
-      if (!json.method) {
-        error("sendMethod", `Error command - ${val} Method not specified`);
+      const parsed: unknown = JSON.parse(String(val));
+      if (!isRecord(parsed) || typeof parsed.method !== "string") {
+        error(
+          "sendMethod",
+          `Error command - ${formatUnknown(val)} Method not specified`,
+        );
       } else {
-        const method = json.method;
-        if (typeof json.params === "object") {
-          param = json.params;
+        const method = parsed.method;
+        if (isRecord(parsed.params)) {
+          param = parsed.params;
         } else {
           param = {};
         }
@@ -2527,9 +2850,9 @@ function sendMethod(name, val) {
   }
 }
 
-function queuePolling() {
+function queuePolling(): void {
   iteration = 0;
-  let namePolling = "";
+  let namePolling: PollName;
   if (endTime - startTime > slowPollingTime) {
     startTime = new Date().getTime();
     namePolling = "slowPoll";
@@ -2542,7 +2865,7 @@ function queuePolling() {
   sendPolling(namePolling);
 }
 
-function sendPolling(namePolling) {
+function sendPolling(namePolling: PollName): void {
   if (authenticationFailed) {
     return;
   }
@@ -2564,6 +2887,10 @@ function sendPolling(namePolling) {
       debug(
         `* Get info from (${namePolling}) api: ${api.toUpperCase()} method: ${method} params: ${JSON.stringify(params)}`,
       );
+      if (!syno) {
+        iterator(namePolling);
+        return;
+      }
       try {
         syno[api][method](params, (err, res) => {
           debug(
@@ -2580,14 +2907,7 @@ function sendPolling(namePolling) {
               setInfoConnection(true);
             }
             connect = true;
-            if (typeof poll.ParseFunction === "function") {
-              poll.ParseFunction(res, api);
-            } else {
-              error(
-                "ParseFunction",
-                `syno[${api}][${method}] Error - Not Function!`,
-              );
-            }
+            poll.ParseFunction(res as never, api as never);
           } else if (err) {
             if (
               api === "ss" &&
@@ -2618,7 +2938,7 @@ function sendPolling(namePolling) {
             }
           }
           if (
-            adapter.config["twofa_checkbox"] &&
+            adapter.config["2fa_checkbox"] &&
             firstStart &&
             !timeOutReconnect
           ) {
@@ -2643,7 +2963,7 @@ function sendPolling(namePolling) {
   }
 }
 
-function iterator(namePolling) {
+function iterator(namePolling: PollName): void {
   iteration++;
   if (iteration > PollCmd[namePolling].length - 1) {
     iteration = 0;
@@ -2671,10 +2991,21 @@ function iterator(namePolling) {
   }
 }
 
-function send(api, method, params, cb) {
+type SendCallback = (response: unknown) => void;
+
+function send(
+  api: "dsm" | "fs" | "dl" | "as" | "vs" | "dtv" | "ss",
+  method: string,
+  params?: Record<string, unknown> | SendCallback | null,
+  cb?: SendCallback,
+): void {
   if (typeof params === "function") {
     cb = params;
     params = null;
+  }
+  if (!syno) {
+    cb?.(false);
+    return;
   }
   try {
     syno[api][method](params, (err, data) => {
@@ -2713,10 +3044,12 @@ function send(api, method, params, cb) {
   }
 }
 
-function sendSSH(method, cb, nonFatal = false) {
+type SshCallback = (stdout: string, exitCode: number, stderr: unknown) => void;
+
+function sendSSH(method: string, cb?: SshCallback, nonFatal = false): void {
   let completed = false;
   try {
-    const ssh = new simpleSSH({
+    const ssh = new SimpleSSH({
       host: adapter.config.host,
       port: adapter.config.ssh_port || 22,
       user: adapter.config.login,
@@ -2731,7 +3064,7 @@ function sendSSH(method, cb, nonFatal = false) {
     debug(`SSH:${sshcmd4log}`);
     ssh
       .exec(sshcmd, {
-        err: (err) => {
+        err: (err: string) => {
           const filteredStderr = filterSshStderr(err);
           if (!filteredStderr) {
             return;
@@ -2742,7 +3075,7 @@ function sendSSH(method, cb, nonFatal = false) {
             error("SSH Error:", filteredStderr);
           }
         },
-        exit: (code, stdout, stderr) => {
+        exit: (code: number, stdout: string, stderr: string) => {
           if (!completed) {
             completed = true;
             cb && cb(stdout, code, stderr);
@@ -2750,7 +3083,7 @@ function sendSSH(method, cb, nonFatal = false) {
         },
       })
       .start({
-        fail: (err) => {
+        fail: (err: Error) => {
           if (completed) {
             return;
           }
@@ -2774,17 +3107,45 @@ function sendSSH(method, cb, nonFatal = false) {
   }
 }
 
-async function setStates() {
+async function setStates(): Promise<void> {
   debug("setStates");
+  const currentStates = states as unknown as Record<
+    string,
+    Record<string, unknown>
+  >;
+  const previousStates = old_states as unknown as Record<
+    string,
+    Record<string, unknown>
+  >;
   let ids = "";
-  for (const _api of Object.keys(states)) {
+  for (const _api of Object.keys(currentStates)) {
     if (_api !== "api") {
-      for (const _type of Object.keys(states[_api])) {
-        if (typeof states[_api][_type] == "object") {
-          for (const key of Object.keys(states[_api][_type])) {
-            if (typeof states[_api][_type][key] == "object") {
-              //states[_api][_type][key] = JSON.stringify(states[_api][_type][key]);
-              for (const key2 of Object.keys(states[_api][_type][key])) {
+      const currentApi = currentStates[_api];
+      const previousApi = previousStates[_api];
+      for (const _type of Object.keys(currentApi)) {
+        const currentType = currentApi[_type];
+        const previousType = previousApi[_type];
+        if (
+          typeof currentType === "object" &&
+          currentType !== null &&
+          typeof previousType === "object" &&
+          previousType !== null
+        ) {
+          const currentEntries = currentType as Record<string, unknown>;
+          const previousEntries = previousType as Record<string, unknown>;
+          for (const key of Object.keys(currentEntries)) {
+            const currentValue = currentEntries[key];
+            const previousValue = previousEntries[key];
+            if (typeof currentValue === "object" && currentValue !== null) {
+              const currentItem = currentValue as Record<string, unknown>;
+              const previousItem =
+                typeof previousValue === "object" && previousValue !== null
+                  ? (previousValue as Record<string, unknown>)
+                  : {};
+              if (previousItem !== previousValue) {
+                previousEntries[key] = previousItem;
+              }
+              for (const key2 of Object.keys(currentItem)) {
                 if (
                   _api === "DiskStationManager" &&
                   _type === "hdd_info" &&
@@ -2799,21 +3160,21 @@ async function setStates() {
                     });
                     verifiedChannels.add(channelId);
                   }
-                  for (const attribute of Object.keys(
-                    states[_api][_type][key].smart,
-                  )) {
-                    if (!old_states[_api][_type][key].smart) {
-                      old_states[_api][_type][key].smart = {};
-                    }
-                    if (
-                      states[_api][_type][key].smart[attribute] !==
-                      old_states[_api][_type][key].smart[attribute]
-                    ) {
-                      old_states[_api][_type][key].smart[attribute] =
-                        states[_api][_type][key].smart[attribute];
+                  const currentSmart = currentItem.smart as
+                    Record<string, unknown> | undefined;
+                  if (!currentSmart) {
+                    continue;
+                  }
+                  const previousSmart = (previousItem.smart ??= {}) as Record<
+                    string,
+                    unknown
+                  >;
+                  for (const attribute of Object.keys(currentSmart)) {
+                    if (currentSmart[attribute] !== previousSmart[attribute]) {
+                      previousSmart[attribute] = currentSmart[attribute];
                       await setObject(
                         `${channelId}.${attribute}`,
-                        states[_api][_type][key].smart[attribute],
+                        currentSmart[attribute],
                       );
                     }
                   }
@@ -2821,36 +3182,29 @@ async function setStates() {
                 }
                 //adapter.log.error('*********' + states[_api][_type][key][key2]);
                 if (
-                  !Object.prototype.hasOwnProperty.call(
-                    old_states[_api][_type],
-                    key,
-                  )
+                  !Object.prototype.hasOwnProperty.call(previousEntries, key)
                 ) {
-                  old_states[_api][_type][key] = {};
+                  previousEntries[key] = {};
                 }
-                if (
-                  states[_api][_type][key][key2] !==
-                  old_states[_api][_type][key][key2]
-                ) {
-                  old_states[_api][_type][key][key2] =
-                    states[_api][_type][key][key2];
+                if (currentItem[key2] !== previousItem[key2]) {
+                  previousItem[key2] = currentItem[key2];
                   ids = `${_api}.${_type}.${key}.${key2}`;
-                  await setObject(ids, states[_api][_type][key][key2]);
+                  await setObject(ids, currentItem[key2]);
                 }
               }
             } else {
-              if (states[_api][_type][key] !== old_states[_api][_type][key]) {
-                old_states[_api][_type][key] = states[_api][_type][key];
+              if (currentValue !== previousValue) {
+                previousEntries[key] = currentValue;
                 ids = `${_api}.${_type}.${key}`;
-                await setObject(ids, states[_api][_type][key]);
+                await setObject(ids, currentValue);
               }
             }
           }
         } else {
-          if (states[_api][_type] !== old_states[_api][_type]) {
-            old_states[_api][_type] = states[_api][_type];
+          if (currentType !== previousType) {
+            previousApi[_type] = currentType;
             ids = `${_api}.${_type}`;
-            await setObject(ids, states[_api][_type]);
+            await setObject(ids, currentType);
           }
         }
       }
@@ -2858,8 +3212,8 @@ async function setStates() {
   }
 }
 
-async function setObject(id, val) {
-  debug(`setObject ${JSON.stringify(id)}, val=${val}`);
+async function setObject(id: string, val: unknown): Promise<void> {
+  debug(`setObject ${JSON.stringify(id)}, val=${formatUnknown(val)}`);
   if (!verifiedObjects[id]) {
     let obj = null;
     try {
@@ -2867,39 +3221,40 @@ async function setObject(id, val) {
     } catch {
       // ignore
     }
-    const common = {
+    const common: StateMetadata & { desc: string } = {
       name: id,
       desc: id,
       type: "string",
       role: "state",
     };
     let hasScopedMetadata = false;
-    let _id = id.split(".");
-    _id = _id[_id.length - 1];
-    if (objects[_id] !== undefined) {
-      common.name = objects[_id].name;
-      common.desc = objects[_id].name;
-      common.role = objects[_id].role;
-      common.type = objects[_id].type;
-      if (objects[_id].unit !== undefined) {
-        common.unit = objects[_id].unit;
+    const objectId = id.split(".").pop() ?? id;
+    if (objects[objectId] !== undefined) {
+      common.name = objects[objectId].name;
+      common.desc = objects[objectId].name;
+      common.role = objects[objectId].role;
+      common.type = objects[objectId].type;
+      if (objects[objectId].unit !== undefined) {
+        common.unit = objects[objectId].unit;
       }
-      if (objects[_id].min !== undefined) {
-        common.min = objects[_id].unit;
+      if (objects[objectId].min !== undefined) {
+        common.min = objects[objectId].unit;
       }
-      if (objects[_id].max !== undefined) {
-        common.max = objects[_id].unit;
+      if (objects[objectId].max !== undefined) {
+        common.max = objects[objectId].unit;
       }
-      if (objects[_id].states !== undefined) {
-        common.states = objects[_id].states;
+      if (objects[objectId].states !== undefined) {
+        common.states = objects[objectId].states;
       }
-      common.read = objects[_id].read;
-      common.write = objects[_id].write;
+      common.read = objects[objectId].read;
+      common.write = objects[objectId].write;
       //common.def = objects[_id].val;
     }
     const smartAttribute =
       id.startsWith("DiskStationManager.hdd_info.") && id.includes(".smart.")
-        ? smartAttributeMetadata[_id]
+        ? smartAttributeMetadata[
+            objectId as keyof typeof smartAttributeMetadata
+          ]
         : undefined;
     if (smartAttribute) {
       Object.assign(common, smartAttribute, { read: true, write: false });
@@ -2948,34 +3303,41 @@ async function setObject(id, val) {
       common.type === "string" &&
       common.type !== typeof val
     ) {
-      common.type = typeof val;
+      common.type = typeof val as StateValueType;
     }
     verifiedObjects[id] = common.type;
     try {
       if (!obj) {
         await adapter.extendObjectAsync(id, {
           type: "state",
-          common,
+          common: common as ioBroker.StateCommon,
           native: {},
         });
       } else {
         if (
           JSON.stringify(obj.common) !== JSON.stringify(common) &&
-          (objects[_id] !== undefined || smartAttribute || hasScopedMetadata)
+          (objects[objectId] !== undefined ||
+            smartAttribute ||
+            hasScopedMetadata)
         ) {
-          await adapter.extendObjectAsync(id, { common: common });
+          await adapter.extendObjectAsync(id, {
+            common: common as ioBroker.StateCommon,
+          });
         }
-        if (_id === "player_name") {
+        if (objectId === "player_name") {
           const ids = id.split(".").slice(0, -1).join(".");
           await adapter.extendObjectAsync(ids, {
             type: "channel",
-            common: { name: val, type: "state" },
+            common: {
+              name: String(val),
+              type: "state",
+            } as ioBroker.ChannelCommon,
             native: { id: val },
           });
         }
       }
     } catch (err) {
-      adapter.log.warn(`Object creation for ${id} nt possible: ${err.message}`);
+      adapter.log.warn(`Object creation for ${id} nt possible: ${String(err)}`);
     }
   }
   if (
@@ -2992,31 +3354,33 @@ async function setObject(id, val) {
     if (verifiedObjects[id] === "boolean") {
       val = !!val;
     } else if (verifiedObjects[id] === "string") {
-      val = val.toString();
+      val = formatUnknown(val);
     } else if (verifiedObjects[id] === "number") {
-      val = parseFloat(val);
+      val = parseFloat(formatUnknown(val));
     } else {
       adapter.log.info(
         `Unexpected value type for ${id}: Expected=${verifiedObjects[id]}, Value=${typeof val}`,
       );
     }
   }
-  await adapter.setStateAsync(id, { val: val, ack: true });
+  await adapter.setStateAsync(id, {
+    val: val as ioBroker.StateValue,
+    ack: true,
+  });
 }
 
-function error(src, e, cb) {
-  const code = e.code;
-  let message;
-  if (e.message === undefined) {
-    message = e;
-  } else {
-    message = e.message;
-  }
+function error(src: string, e: unknown, cb?: (error: unknown) => void): void {
+  const errorValue =
+    typeof e === "object" && e !== null
+      ? (e as { code?: number | string; message?: unknown })
+      : undefined;
+  const code = errorValue?.code;
+  const message = errorValue?.message ?? e;
   if (!~src.indexOf("getSongCover")) {
     const logLevel =
       src === "SSH Error:" || src === "--- SSH Error " ? "warn" : "debug";
     adapter.log[logLevel](
-      `*** ERROR : src: ${src || "unknown"} code: ${code} message: ${message}`,
+      `*** ERROR : src: ${src || "unknown"} code: ${code} message: ${formatUnknown(message)}`,
     );
   }
   if (
@@ -3024,7 +3388,7 @@ function error(src, e, cb) {
     /*code === 500 || */ code === "ECONNREFUSED" ||
     code === "ETIMEDOUT" ||
     code === "EHOSTUNREACH" ||
-    (code === 404 && message.includes("2-step"))
+    (code === 404 && String(message).includes("2-step"))
   ) {
     timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
     timeOutPoll && adapter.clearTimeout(timeOutPoll);
@@ -3044,7 +3408,7 @@ function error(src, e, cb) {
   }
 }
 
-function main() {
+function main(): void {
   if (!adapter.systemConfig) {
     return;
   }
@@ -3078,23 +3442,26 @@ function main() {
   if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as) {
     let result;
     result = PollCmd.fastPoll.filter((item) => {
+      if (typeof item === "function") {
+        return item.name !== "getStatusPlayer" || !!adapter.config.as;
+      }
       return !(
         (item.api === "ss" && !adapter.config.ss) ||
         (item.api === "dl" && !adapter.config.dl) ||
-        ((item.api === "as" ||
-          (typeof item === "function" && item.name === "getStatusPlayer")) &&
-          !adapter.config.as)
+        (item.api === "as" && !adapter.config.as)
       );
     });
     PollCmd.fastPoll = result;
 
     result = PollCmd.slowPoll.filter((item) => {
+      if (typeof item === "function") {
+        return (
+          !["addLinkSnapShot", "getLiveViewPathCamera"].includes(item.name) ||
+          !!adapter.config.ss
+        );
+      }
       return !(
         item.api === "ss" ||
-        (typeof item === "function" &&
-          (item.name === "addLinkSnapShot" ||
-            item.name === "getLiveViewPathCamera") &&
-          !adapter.config.ss) ||
         (item.api === "dl" && !adapter.config.dl) ||
         (item.api === "as" && !adapter.config.as)
       );
@@ -3112,12 +3479,17 @@ function main() {
   adapter.writeFile(
     adapter.namespace,
     "cover.png",
-    fs.readFileSync(`${__dirname}/admin/cover.png`),
+    fs.readFileSync(path.join(__dirname, "../admin/cover.png")),
+    (err) => {
+      if (err) {
+        error("write cover", err);
+      }
+    },
   );
   newSyno();
 }
 
-function newSyno() {
+function newSyno(): void {
   startTime = new Date().getTime();
   endTime = new Date().getTime();
   adapter.log.debug(
@@ -3140,21 +3512,21 @@ function newSyno() {
       passwd: adapter.config.password || "",
       protocol: adapter.config.https ? "https" : "http",
       apiVersion: apiVersion,
-      otp: adapter.config["twofa_checkbox"]
-        ? adapter.config["twofa_code"] || "ASE32YJSBKUOIDPB"
+      otp: adapter.config["2fa_checkbox"]
+        ? adapter.config["2fa_code"] || "ASE32YJSBKUOIDPB"
         : false,
       debug: false,
     });
     adapter.log.debug("FirstStart polling started");
     queuePolling();
   } catch (e) {
-    error("new Syno Error: ", e.message);
+    error("new Syno Error: ", e);
   }
 }
 
-function setInfoConnection(val) {
+function setInfoConnection(val: boolean): void {
   adapter.getState("info.connection", function (err, state) {
-    if (!err && state !== null) {
+    if (!err && state != null) {
       if (state.val === val) {
         // ignore
       } else if (state.val !== val) {
@@ -3166,7 +3538,7 @@ function setInfoConnection(val) {
   });
 }
 
-function rePollAfterCmd() {
+function rePollAfterCmd(): void {
   timeOutPoll && adapter.clearTimeout(timeOutPoll);
   setInfoConnection(false);
   connect = false;
@@ -3174,38 +3546,38 @@ function rePollAfterCmd() {
   queuePolling();
 }
 
-function isInstalled(fullName) {
+function isInstalled(fullName: string): PollApi | false {
   for (const api in states.api) {
     if (!Object.prototype.hasOwnProperty.call(states.api, api)) {
       continue;
     }
     if (states.api[api].name === fullName) {
-      return api;
+      return api as PollApi;
     }
   }
   return false;
 }
 
-function debug(msg) {
+function debug(msg: string): void {
   adapter.log.debug(msg);
 }
-function info(msg) {
+function info(msg: string): void {
   adapter.log.info(msg);
 }
-function warn(msg) {
+function warn(msg: string): void {
   adapter.log.warn(msg);
 }
 
-const unixToDate = (timestamp) => {
+function unixToDate(timestamp: number): string {
   return moment.unix(timestamp).format("DD/MM/YYYY, HH:mm");
-};
+}
 /*
 const dateToUnix = (date) => {
     const ts = moment(date).unix();
     return moment.unix(ts);
 };
 */
-function secToText(sec) {
+function secToText(sec: number): string {
   let res;
   let m = Math.floor(sec / 60);
   const s = sec % 60;
@@ -3219,7 +3591,7 @@ function secToText(sec) {
   return res;
 }
 
-function pad2(num) {
+function pad2(num: number): string {
   const s = num.toString();
   return s.length < 2 ? `0${s}` : s;
 }

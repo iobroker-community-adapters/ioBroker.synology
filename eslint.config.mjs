@@ -5,6 +5,7 @@ export default [
     {
         ignores: [
             '.vscode/',
+            'build/',
             '**/*.test.js',
             'test/**/*.js',
             '*.config.mjs',

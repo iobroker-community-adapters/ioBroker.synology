@@ -2,9 +2,9 @@
   "name": "iobroker.synology",
   "version": "3.3.1",
   "description": "Info and control your NAS Synology",
-  "author": "instalator <vvvalt@mail.ru>",
+  "author": "instalator <Voodoo2man@outlook.de>",
   "contributors": [
-    "instalator <vvvalt@mail.ru>",
+    "instalator <Voodoo2man@outlook.de>",
     "mcm1957 <mcm57@gmx.at>",
     "iobroker-community-adapters <iobroker-community-adapters@gmx.de>"
   ],

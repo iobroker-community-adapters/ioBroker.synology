@@ -79,7 +79,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 ### WORK IN PROGRESS
-- (Voodoo2man) Migrated the adapter from JavaScript to TypeScript.
+- (Voodoo2man) Migrated the adapter from JavaScript to TypeScript and enabled builds for Git-based installations.
 
 ### 3.3.1 (2026-10-18)
 - (Voodoo2man) Improved polling defaults, connection logging, and handling of invalid credentials.

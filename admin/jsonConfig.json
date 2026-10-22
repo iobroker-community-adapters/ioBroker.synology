@@ -1,241 +1,272 @@
 {
-    "type": "panel",
-    "i18n": true,
-    "items": {
-        "host": {
-            "newLine": true,
-            "type": "text",
-            "label": {
-                "en":    "IP address",
-                "de":    "IP Adresse",
-                "ru":    "IP адрес",
-                "pt":    "endereço de IP",
-                "nl":    "IP adres",
-                "fr":    "adresse IP",
-                "it":    "indirizzo IP",
-                "es":    "dirección IP",
-                "pl":    "adres IP",
-                "zh-cn": "IP地址"
-            },
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "port": {
-            "type": "number",
-            "label": "Port",
-            "help": "(Standard 5001)",
-            "step":1,
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "mac": {
-            "type": "text",
-            "label": "Mac address",
-            "help": "(optional, used for Wake on LAN)",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "login": {
-            "newLine": true,
-            "type": "text",
-            "label": "User",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "password": {
-            "type": "password",
-            "label": "Password",
-            "repeat": false,
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "https": {
-            "type": "checkbox",
-            "label": "HTTPS",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "twofa_checkbox": {
-            "type": "checkbox",
-            "label": "2FA",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "twofa_code": {
-            "newLine": true,
-            "type": "text",
-            "hidden": "!data.twofa_checkbox",
-            "label": "2FA Key",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "ssh_port": {
-            "newLine": true,
-            "type": "number",
-            "label": "ssh_port",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "smart_over_ssh": {
-            "type": "checkbox",
-            "label": {
-                "en": "Read SMART attributes via SSH",
-                "de": "SMART-Attribute über SSH auslesen",
-                "ru": "Читать атрибуты SMART через SSH",
-                "pt": "Ler atributos SMART via SSH",
-                "nl": "SMART-attributen lezen via SSH",
-                "fr": "Lire les attributs SMART via SSH",
-                "it": "Leggi gli attributi SMART tramite SSH",
-                "es": "Leer atributos SMART mediante SSH",
-                "pl": "Odczytuj atrybuty SMART przez SSH",
-                "zh-cn": "通过 SSH 读取 SMART 属性"
-            },
-            "help": {
-                "en": "Requires SSH access and sudo permissions on the NAS. Disabled by default.",
-                "de": "Erfordert SSH-Zugriff und sudo-Berechtigungen auf dem NAS. Standardmäßig deaktiviert.",
-                "ru": "Требуется SSH-доступ и права sudo на NAS. По умолчанию отключено.",
-                "pt": "Requer acesso SSH e permissões sudo no NAS. Desativado por padrão.",
-                "nl": "SSH-toegang en sudo-rechten op de NAS zijn vereist. Standaard uitgeschakeld.",
-                "fr": "Nécessite un accès SSH et des droits sudo sur le NAS. Désactivé par défaut.",
-                "it": "Richiede accesso SSH e permessi sudo sul NAS. Disattivato per impostazione predefinita.",
-                "es": "Requiere acceso SSH y permisos sudo en el NAS. Desactivado de forma predeterminada.",
-                "pl": "Wymaga dostępu SSH i uprawnień sudo na serwerze NAS. Domyślnie wyłączone.",
-                "zh-cn": "需要 NAS 上的 SSH 访问权限和 sudo 权限。默认关闭。"
-            },
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "version": {
-            "newLine": true,
-            "type": "select",
-            "label": {
-                "en":    "api Version",
-                "de":    "API-Version",
-                "ru":    "Версия API",
-                "pt":    "Versão da API",
-                "nl":    "API-versie",
-                "fr":    "Version api",
-                "it":    "Versione API",
-                "es":    "Versión api",
-                "pl":    "Wersja interfejsu API",
-                "zh-cn": "api版本"
-            },
-            "noTranslation": true,
-            "options": [
-                {"label": "5.0",        "value": "5.0"},
-                {"label": "5.1",        "value": "5.1"},
-                {"label": "5.2",        "value": "5.2"},
-                {"label": "6.0",        "value": "6.0"},
-                {"label": "6.0.1",      "value": "6.0.1"},
-                {"label": "6.0.2",      "value": "6.0.2"},
-                {"label": "6.0.3",      "value": "6.0.3"},
-                {"label": "6.1",        "value": "6.1"},
-                {"label": "6.1.1",      "value": "6.1.1"},
-                {"label": "6.1.2",      "value": "6.1.2"},
-                {"label": "6.1.3",      "value": "6.1.3"},
-                {"label": "6.1.4",      "value": "6.1.4"},
-                {"label": "6.1.5",      "value": "6.1.5"},
-                {"label": "6.1.6",      "value": "6.1.6"},
-                {"label": "6.1.7",      "value": "6.1.7"},
-                {"label": "6.2",        "value": "6.2"},
-                {"label": "6.2.1",      "value": "6.2.1"},
-                {"label": "6.2.2",      "value": "6.2.2"},
-                {"label": "6.2.3",      "value": "6.2.3"},
-                {"label": "7.x.x",      "value": "7.x.x"}
-              ],
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "polling": {
-            "type": "number",
-            "label": {
-                "en":    "Parameter polling time (ms)",
-                "de":    "Parameterabrufzeit (ms)",
-                "ru":    "Время опроса параметра (мс)",
-                "pt":    "Tempo de pesquisa de parâmetro (ms)",
-                "nl":    "Parameter pollingtijd (ms)",
-                "fr":    "Temps d'interrogation des paramètres (ms)",
-                "it":    "Tempo di polling dei parametri (ms)",
-                "es":    "Tiempo de sondeo de parámetros (ms)",
-                "pl":    "Czas odpytywania parametru (ms)",
-                "zh-cn": "参数轮询时间（毫秒）"
-            },
-            "step": 1,
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "slowPollingTime": {
-            "type": "number",
-            "label": {
-                "en":    "Polling time for additional parameters (ms)",
-                "de":    "Abfragezeit für zusätzliche Parameter (ms)",
-                "ru":    "Время опроса для дополнительных параметров (мс)",
-                "pt":    "Tempo de pesquisa para parâmetros adicionais (ms)",
-                "nl":    "Polling-tijd voor aanvullende parameters (ms)",
-                "fr":    "Temps d'interrogation pour les paramètres supplémentaires (ms)",
-                "it":    "Tempo di polling per parametri aggiuntivi (ms)",
-                "es":    "Tiempo de sondeo para parámetros adicionales (ms)",
-                "pl":    "Czas odpytywania dla dodatkowych parametrów (ms)",
-                "zh-cn": "附加参数的轮询时间（毫秒）"
-            },
-            "step":1,
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "ex": {
-            "type": "header",
-            "text" :{
-                "en":    "Receive data from services",
-                "de":    "Daten von Diensten empfangen",
-                "ru":    "Получать данные от сервисов",
-                "pt":    "Receber dados de serviços",
-                "nl":    "Ontvang gegevens van services",
-                "fr":    "Recevoir des données des services",
-                "it":    "Ricevi dati dai servizi",
-                "es":    "Recibir datos de servicios",
-                "pl":    "Otrzymuj dane z usług",
-                "zh-cn": "从服务接收数据"
-            },
-            "size": 4,
-            "newLine": true
-        },
-        "as": {
-            "newLine": true,
-            "type": "checkbox",
-            "label": "Audio Station",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "dl": {
-            "newLine": true,
-            "type": "checkbox",
-            "label": "Download Station",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        },
-        "ss": {
-            "newLine": true,
-            "type": "checkbox",
-            "label": "Surveillance Station",
-            "sm": 12,
-            "md": 4,
-            "lg": 3
-        }
+  "type": "panel",
+  "i18n": true,
+  "items": {
+    "host": {
+      "newLine": true,
+      "type": "text",
+      "label": {
+        "en": "IP address",
+        "de": "IP Adresse",
+        "ru": "IP адрес",
+        "pt": "endereço de IP",
+        "nl": "IP adres",
+        "fr": "adresse IP",
+        "it": "indirizzo IP",
+        "es": "dirección IP",
+        "pl": "adres IP",
+        "zh-cn": "IP地址"
+      },
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "port": {
+      "type": "number",
+      "label": "Port",
+      "help": "(Standard 5001)",
+      "step": 1,
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "mac": {
+      "type": "text",
+      "label": "Mac address",
+      "help": "(optional, used for Wake on LAN)",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "login": {
+      "newLine": true,
+      "type": "text",
+      "label": "User",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "password": {
+      "type": "password",
+      "label": "Password",
+      "repeat": false,
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "https": {
+      "type": "checkbox",
+      "label": "HTTPS",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "2fa_checkbox": {
+      "type": "checkbox",
+      "label": "2fa_checkbox",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "2fa_code": {
+      "newLine": true,
+      "type": "password",
+            "hidden": "!data[\"2fa_checkbox\"]",
+      "label": "2fa_code",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "ssh_port": {
+      "newLine": true,
+      "type": "number",
+      "label": "ssh_port",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "smart_over_ssh": {
+      "type": "checkbox",
+      "label": {
+        "en": "Read SMART attributes via SSH",
+        "de": "SMART-Attribute über SSH auslesen",
+        "ru": "Читать атрибуты SMART через SSH",
+        "pt": "Ler atributos SMART via SSH",
+        "nl": "SMART-attributen lezen via SSH",
+        "fr": "Lire les attributs SMART via SSH",
+        "it": "Leggi gli attributi SMART tramite SSH",
+        "es": "Leer atributos SMART mediante SSH",
+        "pl": "Odczytuj atrybuty SMART przez SSH",
+        "zh-cn": "通过 SSH 读取 SMART 属性"
+      },
+      "help": {
+        "en": "Requires SSH access and sudo permissions on the NAS. Disabled by default.",
+        "de": "Erfordert SSH-Zugriff und sudo-Berechtigungen auf dem NAS. Standardmäßig deaktiviert.",
+        "ru": "Требуется SSH-доступ и права sudo на NAS. По умолчанию отключено.",
+        "pt": "Requer acesso SSH e permissões sudo no NAS. Desativado por padrão.",
+        "nl": "SSH-toegang en sudo-rechten op de NAS zijn vereist. Standaard uitgeschakeld.",
+        "fr": "Nécessite un accès SSH et des droits sudo sur le NAS. Désactivé par défaut.",
+        "it": "Richiede accesso SSH e permessi sudo sul NAS. Disattivato per impostazione predefinita.",
+        "es": "Requiere acceso SSH y permisos sudo en el NAS. Desactivado de forma predeterminada.",
+        "pl": "Wymaga dostępu SSH i uprawnień sudo na serwerze NAS. Domyślnie wyłączone.",
+        "zh-cn": "需要 NAS 上的 SSH 访问权限和 sudo 权限。默认关闭。"
+      },
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "version": {
+      "newLine": true,
+      "type": "select",
+      "label": {
+        "en": "api Version",
+        "de": "API-Version",
+        "ru": "Версия API",
+        "pt": "Versão da API",
+        "nl": "API-versie",
+        "fr": "Version api",
+        "it": "Versione API",
+        "es": "Versión api",
+        "pl": "Wersja interfejsu API",
+        "zh-cn": "api版本"
+      },
+      "noTranslation": true,
+      "options": [
+        { "label": "5.0", "value": "5.0" },
+        { "label": "5.1", "value": "5.1" },
+        { "label": "5.2", "value": "5.2" },
+        { "label": "6.0", "value": "6.0" },
+        { "label": "6.0.1", "value": "6.0.1" },
+        { "label": "6.0.2", "value": "6.0.2" },
+        { "label": "6.0.3", "value": "6.0.3" },
+        { "label": "6.1", "value": "6.1" },
+        { "label": "6.1.1", "value": "6.1.1" },
+        { "label": "6.1.2", "value": "6.1.2" },
+        { "label": "6.1.3", "value": "6.1.3" },
+        { "label": "6.1.4", "value": "6.1.4" },
+        { "label": "6.1.5", "value": "6.1.5" },
+        { "label": "6.1.6", "value": "6.1.6" },
+        { "label": "6.1.7", "value": "6.1.7" },
+        { "label": "6.2", "value": "6.2" },
+        { "label": "6.2.1", "value": "6.2.1" },
+        { "label": "6.2.2", "value": "6.2.2" },
+        { "label": "6.2.3", "value": "6.2.3" },
+        { "label": "7.x.x", "value": "7.x.x" }
+      ],
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "polling": {
+      "type": "number",
+      "label": {
+        "en": "Parameter polling time (ms)",
+        "de": "Parameterabrufzeit (ms)",
+        "ru": "Время опроса параметра (мс)",
+        "pt": "Tempo de pesquisa de parâmetro (ms)",
+        "nl": "Parameter pollingtijd (ms)",
+        "fr": "Temps d'interrogation des paramètres (ms)",
+        "it": "Tempo di polling dei parametri (ms)",
+        "es": "Tiempo de sondeo de parámetros (ms)",
+        "pl": "Czas odpytywania parametru (ms)",
+        "zh-cn": "参数轮询时间（毫秒）"
+      },
+      "step": 1,
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "slowPollingTime": {
+      "type": "number",
+      "label": {
+        "en": "Polling time for additional parameters (ms)",
+        "de": "Abfragezeit für zusätzliche Parameter (ms)",
+        "ru": "Время опроса для дополнительных параметров (мс)",
+        "pt": "Tempo de pesquisa para parâmetros adicionais (ms)",
+        "nl": "Polling-tijd voor aanvullende parameters (ms)",
+        "fr": "Temps d'interrogation pour les paramètres supplémentaires (ms)",
+        "it": "Tempo di polling per parametri aggiuntivi (ms)",
+        "es": "Tiempo de sondeo para parámetros adicionales (ms)",
+        "pl": "Czas odpytywania dla dodatkowych parametrów (ms)",
+        "zh-cn": "附加参数的轮询时间（毫秒）"
+      },
+      "step": 1,
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "ex": {
+      "type": "header",
+      "text": {
+        "en": "Receive data from services",
+        "de": "Daten von Diensten empfangen",
+        "ru": "Получать данные от сервисов",
+        "pt": "Receber dados de serviços",
+        "nl": "Ontvang gegevens van services",
+        "fr": "Recevoir des données des services",
+        "it": "Ricevi dati dai servizi",
+        "es": "Recibir datos de servicios",
+        "pl": "Otrzymuj dane z usług",
+        "zh-cn": "从服务接收数据"
+      },
+      "size": 4,
+      "newLine": true
+    },
+    "as": {
+      "newLine": true,
+      "type": "checkbox",
+      "label": "Audio Station",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "dl": {
+      "newLine": true,
+      "type": "checkbox",
+      "label": "Download Station",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
+    },
+    "ss": {
+      "newLine": true,
+      "type": "checkbox",
+      "label": "Surveillance Station",
+      "xs": 12,
+      "sm": 12,
+      "md": 4,
+      "lg": 3,
+      "xl": 3
     }
-
+  }
 }

@@ -3513,7 +3513,9 @@ function newSyno(): void {
       protocol: adapter.config.https ? "https" : "http",
       apiVersion: apiVersion,
       otp: adapter.config["2fa_checkbox"]
-        ? adapter.config["2fa_code"] || "ASE32YJSBKUOIDPB"
+        ? adapter.config["2fa_code"] ||
+          adapter.config["twofa_code"] ||
+          "ASE32YJSBKUOIDPB"
         : false,
       debug: false,
     });

@@ -42,19 +42,6 @@
         "uk": "Відновіть посилання на знімок відразу після зміни ідентифікатора камери.",
         "zh-cn": "当摄像机 ID 发生变化时，立即重建快照链接。"
       },
-      "3.2.0": {
-        "en": "Adapter requires node.js >= 20 now.\nAdapter requires admin >= 7.7.22 now\nAdapter requires js-controller >= 6.0.11 now\nDependencies have been updated.",
-        "de": "Adapter benötigt jetzt node.js >= 20.\nAdapter benötigt jetzt admin >= 7.7.22\nAdapter benötigt jetzt JS-Controller >= 6.0.11\nAbhängigkeiten wurden aktualisiert.",
-        "ru": "Теперь для адаптера требуется файл node.js >= 20.\nДля адаптера теперь требуется администратор >= 7.7.22\nТеперь для адаптера требуется js-контроллер >= 6.0.11\nЗависимости обновлены.",
-        "pt": "O adaptador exige node.js >= 20.\nAgora o adaptador exige admin >= 7.7.2\nO adaptador exige js-controller >= 6.0.11\nAs dependências foram atualizadas.",
-        "nl": "Voor de adapter is nu node.js >= 20 nodig.\nAdapter vereist nu admin >= 7.7.22\nVoor de adapter is nu een js-controller >= 6.0.11 nodig\nDe afhankelijkheden zijn bijgewerkt.",
-        "fr": "Adapter nécessite node.js >= 20.\nAdapter nécessite admin >= 7.7.22\nAdapter nécessite JS-Controller >= 6.0.11\nLes dépendances ont été mises à jour.",
-        "it": "Adapter richiede node.js >= 20 ora.\nAdapter richiede admin >= 7.7.2 ora\nAdapter richiede js-controller >= 6.0.11 ora\nLe dipendenze sono aggiornate.",
-        "es": "El adaptador necesita node.js >= 20 ahora.\nEl adaptador necesita admin >= 7.7.22 ahora\nEl adaptador ahora requiere js-controller >= 6.0.11\nSe actualizaron las dependencias.",
-        "pl": "Adapter wymaga teraz node.js >= 20.\nAdapter wymaga administratora >= 7.7.22 teraz\nAdapter wymaga kontrolera js->= 6.0.11 teraz\nZależności zostały zaktualizowane.",
-        "uk": "Тепер адаптер вимагає node.js >= 20.\nАдаптер вимагає адміністратора >= 7.7.22 зараз\nАдаптер вимагає js-контролера >= 6.0.11 зараз\nЗалежності були оновлені.",
-        "zh-cn": "适配器现在需要 node.js >= 20。\n适配器现在需要管理员 >= 7.7.22\n适配器现在需要 js-controller >= 6.0.11\n依赖关系已更新。"
-      },
       "3.1.0": {
         "en": "Adapter requires node.js 18 and js-controller >= 5 now\nDependencies have been updated",
         "de": "Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAbhängigkeiten wurden aktualisiert",
@@ -122,7 +109,7 @@
       "uk": "Отримайте статус і керуйте своїм NAS Synology"
     },
     "authors": [
-      "instalator",
+      "instalator <Voodoo2man@outlook.de>",
       "mcm1957 <mcm57@gmx.at>",
       "iobroker-community-adapters <iobroker-community-adapters@gmx.de>"
     ],
@@ -307,7 +294,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -320,7 +307,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -333,7 +320,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -346,7 +333,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -359,7 +346,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -372,7 +359,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -385,7 +372,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -528,7 +515,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },
@@ -541,7 +528,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": ""
+        "def": {}
       },
       "native": {}
     },

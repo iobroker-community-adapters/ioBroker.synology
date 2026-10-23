@@ -79,7 +79,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 ### WORK IN PROGRESS
-- (Voodoo2man) Corrected object-state defaults and removed an unpublished news version.
+- (Voodoo2man) Corrected object-state defaults, removed unpublished release news and obsolete tooling, and migrated Admin translations.
 
 ### 3.3.2 (2026-10-23)
 - (Voodoo2man) Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.

@@ -78,7 +78,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.3.2 (2026-10-23)
 - (Voodoo2man) Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.
 
 ### 3.3.1 (2026-10-18)
@@ -101,10 +101,6 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 - (copilot) Adapter requires admin >= 7.7.22 now
 - (copilot) Adapter requires js-controller >= 6.0.11 now
 * (McM1957) Dependencies have been updated.
-
-### 3.1.0 (2024-04-07)
-* (mcm1957) Adapter requires node.js 18 and js-controller >= 5 now
-* (mcm1957) Dependencies have been updated
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

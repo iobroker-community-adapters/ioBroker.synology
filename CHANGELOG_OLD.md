@@ -1,4 +1,8 @@
 # Older changes
+## 3.1.0 (2024-04-07)
+* (mcm1957) Adapter requires node.js 18 and js-controller >= 5 now
+* (mcm1957) Dependencies have been updated
+
 ## 3.0.1 (2023-10-01)
 * (Standarduser) A Typo in RegEx for Mac-Address has been corrected.
 * (McM1957) Dependencies have been updated.

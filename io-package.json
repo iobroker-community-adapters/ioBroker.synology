@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "3.3.1",
+    "version": "3.3.2",
     "news": {
+      "3.3.2": {
+        "en": "Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.",
+        "de": "Migrierte den Adapter zu TypeScript, behielt alte 2FA-Einstellungen bei und konfigurierte Runtime-Builds.",
+        "ru": "Переместил адаптер на TypeScript, сохранил устаревшие настройки двухфакторной аутентификации и сконфигурировал сборки во время развертывания npm.",
+        "pt": "Migrou o adaptador para o TypeScript, preservou o 2FA antigo e configurou builds durante a implantação do npm.",
+        "nl": "De adapter is gemigreerd naar TypeScript, oude 2FA-instellingen bewaard gebleven en runtime-builds geconfigureerd tijdens de implementatie van npm.",
+        "fr": "A migré l'adaptateur vers TypeScript, préservé les anciens paramètres 2FA et configuré les builds d'exécution lors du déploiement de NPM.",
+        "it": "Ha migrato l'adattatore a TypeScript, ha mantenuto le vecchie impostazioni 2FA e ha configurato npm.",
+        "es": "Migró el adaptador a TypeScript, conservó la configuración de 2FA antigua y configuró las compilaciones en tiempo de ejecución durante el despliegue de npm.",
+        "pl": "Przeniesiono adapter do TypeScript, zachował starsze ustawienia 2FA i skonfigurował kompilacje wykonawcze podczas wdrażania npm.",
+        "uk": "Перемістив адаптер до TypeScript, зберіг застарілі параметри 2FA та налаштував збірки виконання під час розгортання npm.",
+        "zh-cn": "将适配器迁移到 TypeScript，保留了传统的 2FA 设置，并在 npm 部署期间配置了运行时构建。"
+      },
       "3.3.1": {
         "en": "Improved polling defaults, connection logging, and handling of invalid credentials.\nFiltered harmless SSH notices and bound timers to the adapter lifecycle.\nCorrected semantic roles for system, volume, download, and surveillance states.\nCorrected the hard disk capacity state role.\nMigrated linting to ESLint 9 with the ioBroker standard configuration.",
         "de": "Verbesserte Abfragestandards, Logging und Umgang mit ungültigen Zugangsdaten.\nFiltert harmlose SSH-Hinweise und bindet Timer an Adapter-Lifecycle.\nKorrigierte Semantik für System, Volumen, Download und Überwachung.\nDie Festplattenzustands-Rolle wurde korrigiert.\nLinting mit der ioBroker-Standardkonfiguration auf ESLint 9 migriert.",

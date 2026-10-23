@@ -78,7 +78,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### WORK IN PROGRESS
+### **WORK IN PROGRESS**
 - (Voodoo2man) Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.
 
 ### 3.3.1 (2026-10-18)

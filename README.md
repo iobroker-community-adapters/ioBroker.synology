@@ -78,8 +78,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### WORK IN PROGRESS
-- (Voodoo2man) Corrected object-state defaults, removed unpublished release news and obsolete tooling, and migrated Admin translations.
+### **WORK IN PROGRESS**
+- (GermanBluefox) Fixed crash when polling interval is stored as string (#559)
+- (Voodoo2man) Fixed object state defaults and raised saved polling intervals below 1000 ms to 1000 ms.
+- (Voodoo2man) Removed unpublished release news and obsolete tooling, and migrated Admin translations.
 
 ### 3.3.2 (2026-10-23)
 - (Voodoo2man) Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.

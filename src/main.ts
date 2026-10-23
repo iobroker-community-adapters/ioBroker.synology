@@ -3422,6 +3422,17 @@ function main(): void {
     adapter.log.warn(`Cannot create first-start status: ${err.message}`);
   });
   old_states = JSON.parse(JSON.stringify(states));
+  const configuredPollTime = Number(adapter.config.polling);
+  if (Number.isFinite(configuredPollTime) && configuredPollTime < 1000) {
+    adapter.config.polling = 1000;
+    void adapter
+      .extendForeignObjectAsync(`system.adapter.${adapter.namespace}`, {
+        native: { polling: 1000 },
+      })
+      .catch((err) => {
+        adapter.log.warn(`Could not correct polling interval: ${String(err)}`);
+      });
+  }
   pollTime = toPositiveInt(adapter.config.polling, 10000);
   slowPollingTime = toPositiveInt(adapter.config.slowPollingTime, 60000);
   if (pollTime > slowPollingTime) {

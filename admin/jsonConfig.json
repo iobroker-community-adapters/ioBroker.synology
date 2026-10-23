@@ -193,6 +193,7 @@
         "pl": "Czas odpytywania parametru (ms)",
         "zh-cn": "参数轮询时间（毫秒）"
       },
+      "min": 1000,
       "step": 1,
       "xs": 12,
       "sm": 12,
@@ -214,6 +215,7 @@
         "pl": "Czas odpytywania dla dodatkowych parametrów (ms)",
         "zh-cn": "附加参数的轮询时间（毫秒）"
       },
+      "min": 1000,
       "step": 1,
       "xs": 12,
       "sm": 12,

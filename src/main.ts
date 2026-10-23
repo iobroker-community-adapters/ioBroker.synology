@@ -3404,6 +3404,11 @@ function error(src: string, e: unknown, cb?: (error: unknown) => void): void {
   }
 }
 
+function toPositiveInt(value: unknown, defaultValue: number): number {
+  const num = parseInt(String(value), 10);
+  return Number.isNaN(num) || num <= 0 ? defaultValue : num;
+}
+
 function main(): void {
   if (!adapter.systemConfig) {
     return;
@@ -3417,8 +3422,8 @@ function main(): void {
     adapter.log.warn(`Cannot create first-start status: ${err.message}`);
   });
   old_states = JSON.parse(JSON.stringify(states));
-  pollTime = adapter.config.polling || 10000;
-  slowPollingTime = adapter.config.slowPollingTime || 60000;
+  pollTime = toPositiveInt(adapter.config.polling, 10000);
+  slowPollingTime = toPositiveInt(adapter.config.slowPollingTime, 60000);
   if (pollTime > slowPollingTime) {
     adapter.log.warn(
       "pollTime > slowPollingTime! It is necessary to fix the polling time in the settings",

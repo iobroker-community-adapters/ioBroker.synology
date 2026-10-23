@@ -139,6 +139,7 @@
     "connectionType": "local",
     "dataSource": "poll",
     "type": "infrastructure",
+    "nogit": true,
     "plugins": {
       "sentry": {
         "dsn": "https://3e60c067944048cf90a36421e9902f8f@sentry.iobroker.net/74"

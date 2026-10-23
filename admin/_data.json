@@ -43,17 +43,6 @@
     "binary": true,
     "modifiedAt": 1573453820101
   },
-  "index_m.html": {
-    "createdAt": 1573095144525,
-    "acl": {
-      "owner": "system.user.admin",
-      "ownerGroup": "system.group.user",
-      "permissions": 1636
-    },
-    "mimeType": "text/html",
-    "binary": false,
-    "modifiedAt": 1573453820175
-  },
   "admin.js": {
     "createdAt": 1573095144583,
     "acl": {

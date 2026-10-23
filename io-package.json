@@ -80,19 +80,6 @@
         "pl": "Typo w RegEx dla Mac-Address zostało poprawione.\nW zależności zostały zaktualizowane.",
         "uk": "A Typo в RegEx для Mac-Address було виправлено.\nОновлено залежність.",
         "zh-cn": "已经对麦斯的RegEx的Typo进行了纠正。.\n情况已经更新。."
-      },
-      "3.0.0": {
-        "en": "Added WOL to awake Synology NAS server\nOnly node 16 or higher supported",
-        "de": "Hinzugefügt WOL zu wecken Synology NAS Server\nNur Knoten 16 oder höher unterstützt",
-        "ru": "Добавлен WOL для пробуждения сервера Synology NAS\nТолько узел 16 или выше поддерживается",
-        "pt": "Adicionado WOL para despertar servidor Synology NAS\nApenas nó 16 ou superior suportado",
-        "nl": "Voeg WOL toe om Synology NAS server wakker te maken\nAlleen node 16 of hoger ondersteuning",
-        "fr": "Ajouté WOL au serveur de NAS Synology\nSeulement node 16 ou plus supporté",
-        "it": "Aggiunto WOL per svegliare Synology NAS server\nSolo nodo 16 o superiore supportato",
-        "es": "Añadido WOL para despertar el servidor NAS de Synology\nSólo el nodo 16 o mayor apoyo",
-        "pl": "Added WOL to awake Synology NAS serwer NAS\nTylko węzeł 16 lub więcej",
-        "uk": "Додано WOL до сервера синології авекії NAS\nТільки вузол 16 або вище підтримується",
-        "zh-cn": "增加WOL,以瓦塞·桑科纳斯服务器\n只有16个或以上的支助"
       }
     },
     "titleLang": {
@@ -307,8 +294,7 @@
         "name": "DiskStationManager",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -320,8 +306,7 @@
         "name": "FileStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -333,8 +318,7 @@
         "name": "DownloadStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -346,8 +330,7 @@
         "name": "AudioStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -359,8 +342,7 @@
         "name": "VideoStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -372,8 +354,7 @@
         "name": "VideoStation_DTV",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -385,8 +366,7 @@
         "name": "SurveillanceStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -528,8 +508,7 @@
         "name": "Generate one or more sharing link(s) by file/folder path(s).",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -541,8 +520,7 @@
         "name": "Delete one or more sharing links.",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },

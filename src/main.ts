@@ -2931,6 +2931,8 @@ function sendPolling(namePolling: PollName): void {
           const message = err instanceof Error ? err.message : String(err);
           const errorCode =
             err instanceof SynologyClientError ? err.code : undefined;
+          const isAuthenticationError =
+            err instanceof SynologyClientError && err.authenticationError;
           if (
             api === "ss" &&
             method === "getInfo" &&
@@ -2940,9 +2942,8 @@ function sendPolling(namePolling: PollName): void {
               `sendPolling Error -${message} You are using a hacked version of SS?`,
             );
           } else if (
-            (errorCode === 400 && message.includes("authentication failed")) ||
-            errorCode === 403 ||
-            (errorCode === 404 && message.includes("two-factor"))
+            isAuthenticationError &&
+            (errorCode === 400 || errorCode === 403 || errorCode === 404)
           ) {
             authenticationFailed = true;
             timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
@@ -3396,10 +3397,10 @@ function error(src: string, e: unknown, cb?: (error: unknown) => void): void {
       : undefined;
   const code = errorValue?.code;
   const message = errorValue?.message ?? e;
+  const isAuthenticationError =
+    e instanceof SynologyClientError && e.authenticationError;
   const authenticationError =
-    (code === 400 && String(message).includes("authentication failed")) ||
-    code === 403 ||
-    (code === 404 && String(message).includes("two-factor"));
+    isAuthenticationError && (code === 400 || code === 403 || code === 404);
   if (!~src.indexOf("getSongCover")) {
     const logLevel =
       src === "SSH Error:" || src === "--- SSH Error " ? "warn" : "debug";

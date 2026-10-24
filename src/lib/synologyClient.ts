@@ -52,17 +52,20 @@ const methodAliases: Partial<Record<StationApi, Record<string, string>>> = {
 export class SynologyClientError extends Error {
   readonly code?: number | string;
   readonly causeCode?: string;
+  readonly authenticationError: boolean;
 
   constructor(
     message: string,
     code?: number | string,
     causeCode?: string,
     cause?: unknown,
+    authenticationError = false,
   ) {
     super(message, { cause });
     this.name = "SynologyClientError";
     this.code = code;
     this.causeCode = causeCode;
+    this.authenticationError = authenticationError;
   }
 }
 
@@ -161,6 +164,8 @@ export function createSynologyClient(
       sharedHost.otpCode = totp?.generate();
       try {
         return await originalLogin(sessionName);
+      } catch (error) {
+        throw normalizeSynologyError(error, true);
       } finally {
         sharedHost.otpCode = undefined;
       }
@@ -201,7 +206,10 @@ export async function callSynology(
   }
 }
 
-export function normalizeSynologyError(error: unknown): SynologyClientError {
+export function normalizeSynologyError(
+  error: unknown,
+  authenticationError = false,
+): SynologyClientError {
   if (error instanceof SynologyClientError) {
     return error;
   }
@@ -217,11 +225,11 @@ export function normalizeSynologyError(error: unknown): SynologyClientError {
         ? String(asErrorRecord(source.cause).code)
         : undefined;
   let message = source.message;
-  if (code === 400 && message.includes("account or incorrect password")) {
+  if (authenticationError && code === 400) {
     message = "Synology authentication failed: check the username and password";
-  } else if (code === 403) {
+  } else if (authenticationError && code === 403) {
     message = "Synology two-factor authentication is required";
-  } else if (code === 404) {
+  } else if (authenticationError && code === 404) {
     message = "Synology rejected the two-factor authentication code";
   } else if (code === 106) {
     message = "Synology session expired";
@@ -232,7 +240,13 @@ export function normalizeSynologyError(error: unknown): SynologyClientError {
   } else if (causeCode) {
     message = `Synology network request failed (${causeCode}): ${message}`;
   }
-  return new SynologyClientError(message, code ?? causeCode, causeCode, error);
+  return new SynologyClientError(
+    message,
+    code ?? causeCode,
+    causeCode,
+    error,
+    authenticationError,
+  );
 }
 
 function createTotp(

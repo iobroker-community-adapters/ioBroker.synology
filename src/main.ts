@@ -10,6 +10,8 @@ import SimpleSSH from "simple-ssh";
 import type { Syno } from "syno";
 import * as wol from "wol";
 import { createSnapshotLink } from "./lib/snapshotLink.js";
+import { getCameraStatus } from "./lib/cameraStatus.js";
+import { calculateFreeSize } from "./lib/storageCapacity.js";
 import {
   createKeyedQueue,
   createRtspUrl,
@@ -1274,6 +1276,14 @@ const objects: Record<string, StateMetadata> = {
     read: true,
     write: false,
   },
+  free_size: {
+    role: "value",
+    name: "Free size",
+    type: "number",
+    unit: "GB",
+    read: true,
+    write: false,
+  },
   used_size: {
     role: "value",
     name: "Used size",
@@ -1851,7 +1861,9 @@ interface SynologyCamera {
   videoType?: string;
   detailInfo?: { camVideoType?: string };
   videoCodec?: string | number;
-  status: string | number;
+  status?: string | number;
+  statusId?: string | number;
+  camStatus?: string | number;
   recStatus: string | number;
   enabled?: boolean;
 }
@@ -1889,7 +1901,7 @@ function parselistCameras(res: { cameras: SynologyCamera[] }): void {
           ? undefined
           : stateSS.videoCodec[String(cameraData.videoCodec)];
       states.SurveillanceStation.cameras[cameraData.name].status =
-        stateSS.camStatus[String(cameraData.status)];
+        getCameraStatus(cameraData);
       states.SurveillanceStation.cameras[cameraData.name].recStatus =
         stateSS.recStatus[String(cameraData.recStatus)];
       states.SurveillanceStation.cameras[cameraData.name].enabled =
@@ -2638,6 +2650,7 @@ function parseInfoSystem(res: {
           status: key.status,
           total_size: parseFloat((key.total_size / 1073741824).toFixed(2)),
           used_size: parseFloat((key.used_size / 1073741824).toFixed(2)),
+          free_size: calculateFreeSize(key.total_size, key.used_size),
           used: parseFloat(((key.used_size / key.total_size) * 100).toFixed(2)),
           desc: key.desc || key.vol_desc,
         };

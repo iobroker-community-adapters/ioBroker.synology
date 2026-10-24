@@ -82,6 +82,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 - (GermanBluefox) Fixed crash when polling interval is stored as string (#559)
 - (Voodoo2man) Corrected adapter state defaults and polling interval handling.
 - (Voodoo2man) Migrated Synology API access to the published syno library, retained automatic 2FA and adapter APIs, and required Node.js 24; DSM 5 support was removed.
+- (Voodoo2man) Raised the minimum Admin and js-controller versions.
 
 ### 3.3.2 (2026-10-23)
 - (Voodoo2man) Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.

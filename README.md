@@ -19,9 +19,9 @@ The driver allows you to receive data and manage your Synology NAS server.
 
 If you use 2FA in DSM6/7 see instructions [here](docs/en/template.md)
 
-### Important note for Windows Installations
+### Compatibility
 
-This adapter requires git to be installed at the hist system. Installation media can be found at https://git-scm.com/download/win.
+This adapter requires Node.js 24 or newer. DSM 5 is no longer supported because the current Synology API definitions include DSM 6 and DSM 7 only. Existing DSM 5 settings are not changed automatically; configure a supported DSM version before starting the adapter.
 
 ### Reboot and Shutdown
 The adapter will do this via SSH since v2.1.4, so please set the SSH port in the adapter setttings. You can see it in the Synology settings:
@@ -81,6 +81,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ### **WORK IN PROGRESS**
 - (GermanBluefox) Fixed crash when polling interval is stored as string (#559)
 - (Voodoo2man) Corrected adapter state defaults and polling interval handling.
+- (Voodoo2man) Migrated Synology API access to the published syno library, retained automatic 2FA and adapter APIs, and required Node.js 24; DSM 5 support was removed.
 
 ### 3.3.2 (2026-10-23)
 - (Voodoo2man) Migrated the adapter to TypeScript, preserved legacy 2FA settings, and configured runtime builds during npm deployment.

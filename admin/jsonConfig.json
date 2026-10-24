@@ -152,9 +152,6 @@
       },
       "noTranslation": true,
       "options": [
-        { "label": "5.0", "value": "5.0" },
-        { "label": "5.1", "value": "5.1" },
-        { "label": "5.2", "value": "5.2" },
         { "label": "6.0", "value": "6.0" },
         { "label": "6.0.1", "value": "6.0.1" },
         { "label": "6.0.2", "value": "6.0.2" },
@@ -170,7 +167,6 @@
         { "label": "6.2", "value": "6.2" },
         { "label": "6.2.1", "value": "6.2.1" },
         { "label": "6.2.2", "value": "6.2.2" },
-        { "label": "6.2.3", "value": "6.2.3" },
         { "label": "7.x.x", "value": "7.x.x" }
       ],
       "xs": 12,
@@ -193,8 +189,8 @@
         "pl": "Czas odpytywania parametru (ms)",
         "zh-cn": "参数轮询时间（毫秒）"
       },
-      "min": 1000,
       "step": 1,
+      "min": 1000,
       "xs": 12,
       "sm": 12,
       "md": 4,
@@ -215,8 +211,8 @@
         "pl": "Czas odpytywania dla dodatkowych parametrów (ms)",
         "zh-cn": "附加参数的轮询时间（毫秒）"
       },
-      "min": 1000,
       "step": 1,
+      "min": 1000,
       "xs": 12,
       "sm": 12,
       "md": 4,

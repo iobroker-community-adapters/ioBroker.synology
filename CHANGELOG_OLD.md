@@ -1,4 +1,10 @@
 # Older changes
+## 3.2.0 (2026-10-16)
+- (copilot) Adapter requires node.js >= 22 now
+- (copilot) Adapter requires admin >= 7.7.22 now
+- (copilot) Adapter requires js-controller >= 6.0.11 now
+* (McM1957) Dependencies have been updated.
+
 ## 3.1.0 (2024-04-07)
 * (mcm1957) Adapter requires node.js 18 and js-controller >= 5 now
 * (mcm1957) Dependencies have been updated

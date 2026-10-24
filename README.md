@@ -78,7 +78,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0 (2026-10-24)
 - (Voodoo2man) Added remaining free capacity for each storage volume.
 - (Voodoo2man) Corrected Surveillance Station camera status mapping.
 - (GermanBluefox) Fixed crash when polling interval is stored as string (#559)
@@ -103,12 +103,6 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ### 3.2.1 (2026-10-16)
 - (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
-
-### 3.2.0 (2026-10-16)
-- (copilot) Adapter requires node.js >= 22 now
-- (copilot) Adapter requires admin >= 7.7.22 now
-- (copilot) Adapter requires js-controller >= 6.0.11 now
-* (McM1957) Dependencies have been updated.
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

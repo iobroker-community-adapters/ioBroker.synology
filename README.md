@@ -79,6 +79,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 ### **WORK IN PROGRESS**
+- (Voodoo2man) Added remaining free capacity for each storage volume.
+- (Voodoo2man) Corrected Surveillance Station camera status mapping.
 - (GermanBluefox) Fixed crash when polling interval is stored as string (#559)
 - (Voodoo2man) Corrected adapter state defaults and polling interval handling.
 - (Voodoo2man) Migrated Synology API access to the published syno library, retained automatic 2FA and adapter APIs, and required Node.js 24; DSM 5 support was removed.

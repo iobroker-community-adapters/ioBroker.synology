@@ -2,12 +2,12 @@
 // @ts-check
 
 import * as adapterCore from "@iobroker/adapter-core";
-import Syno from "syno";
 import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 import moment from "moment";
 import * as path from "node:path";
 import SimpleSSH from "simple-ssh";
+import type { Syno } from "syno";
 import * as wol from "wol";
 import { createSnapshotLink } from "./lib/snapshotLink.js";
 import {
@@ -18,13 +18,21 @@ import {
 } from "./lib/rtspSnapshot.js";
 import { parseSmartAttributes } from "./lib/smartAttributes.js";
 import { filterSshStderr } from "./lib/sshOutput.js";
+import {
+  callSynology,
+  createSynologyClient,
+  resolveApiVersion,
+  SynologyClientError,
+  toBuffer,
+} from "./lib/synologyClient.js";
 
 const utils = adapterCore as typeof adapterCore & {
   adapter(options: ioBroker.AdapterOptions): ioBroker.Adapter;
 };
 
 let adapter: ioBroker.Adapter;
-let syno: InstanceType<typeof Syno> | null = null;
+let syno: Syno | null = null;
+let closeSynologyClient: (() => Promise<void>) | undefined;
 let smartPollInProgress = false;
 let adapterUnloading = false;
 let timeOutPoll: ioBroker.Timeout | undefined;
@@ -138,9 +146,12 @@ function startAdapter(
         }
         const captures = [...activeH265Captures];
         captures.forEach((capture) => capture.cancel());
-        Promise.all(captures.map((capture) => capture.done)).then(() =>
-          callback(),
-        );
+        const closeClient = closeSynologyClient?.() ?? Promise.resolve();
+        closeSynologyClient = undefined;
+        void Promise.allSettled([
+          ...captures.map((capture) => capture.done),
+          closeClient,
+        ]).then(() => callback());
       },
       stateChange: (
         id: Parameters<NonNullable<ioBroker.AdapterOptions["stateChange"]>>[0],
@@ -271,9 +282,9 @@ function startAdapter(
           const command = ids[ids.length - 1].toString();
           switch (command) {
             case "wake":
-              if (syno) {
-                debug(`Try to wake on LAN with mac ${syno.mac}`);
-                wake(syno.mac);
+              if (adapter.config.mac) {
+                debug(`Try to wake on LAN with mac ${adapter.config.mac}`);
+                wake(adapter.config.mac);
               }
               break;
             default:
@@ -1555,8 +1566,9 @@ function getSnapshotCamera(camid: unknown, cb?: SnapshotCallback): void {
         captureH265Snapshot(camera, cameraId, (result) => cb?.(result));
       });
     }
+    const buf = toBuffer(res);
     if (
-      typeof res !== "string" ||
+      !buf ||
       (responseError && (responseError.code || responseError.message))
     ) {
       adapter.log.warn(
@@ -1566,7 +1578,6 @@ function getSnapshotCamera(camid: unknown, cb?: SnapshotCallback): void {
     }
 
     try {
-      const buf = Buffer.from(res, "binary");
       const filename = `snapshotCam_${cameraId}.jpg`;
       const localPath = path.join(dir, filename);
       await adapter.writeFileAsync(adapter.namespace, filename, buf);
@@ -2152,8 +2163,8 @@ function getSongCover(playerid: string, cb?: () => void): void {
   if (track !== old_states.AudioStation.players[playerid].song_id) {
     old_states.AudioStation.players[playerid].song_id = track;
     send("as", "getSongCover", { id: track }, async (res) => {
-      if (typeof res === "string") {
-        const buf = Buffer.from(res, "binary");
+      const buf = toBuffer(res);
+      if (buf) {
         await adapter.writeFileAsync(adapter.namespace, "cover.jpg", buf);
         states.AudioStation.players[playerid].cover =
           `../${adapter.namespace}/cover.jpg`;
@@ -2891,14 +2902,18 @@ function sendPolling(namePolling: PollName): void {
         iterator(namePolling);
         return;
       }
-      try {
-        syno[api][method](params, (err, res) => {
+      void (async () => {
+        try {
+          const res = await callSynology(syno, api, method, params);
+          if (adapterUnloading) {
+            return;
+          }
           debug(
-            !err && res
+            res
               ? "* The response is received, parse:"
               : "* No response, read next.",
           );
-          if (!err && res) {
+          if (res) {
             if (!connectionEstablished) {
               adapter.log.info("Connection to Synology established");
               connectionEstablished = true;
@@ -2908,47 +2923,55 @@ function sendPolling(namePolling: PollName): void {
             }
             connect = true;
             poll.ParseFunction(res as never, api as never);
-          } else if (err) {
-            if (
-              api === "ss" &&
-              method === "getInfo" &&
-              ~err.toString().indexOf("version does not support")
-            ) {
-              adapter.log.warn(
-                `sendPolling Error -${err} You are using a hacked version of SS?`,
-              );
-            } else if (
-              err.code === 400 &&
-              ~err.toString().indexOf("No such account or incorrect password")
-            ) {
-              authenticationFailed = true;
-              timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
-              timeOutReconnect = null;
-              timeOutPoll && adapter.clearTimeout(timeOutPoll);
-              setInfoConnection(false);
-              connect = false;
-              adapter.log.warn(
-                "Synology authentication failed. Check the username, password, and that the user belongs to the administrators group. Polling stopped; restart the adapter after correcting the credentials.",
-              );
-            } else {
-              error(`*sendPolling syno[${api}][${method}]`, err);
-            }
-            if (method === "getPollingData" || method === "listPackages") {
-              iteration = -1;
-            }
           }
-          if (isTwoFactorEnabled() && firstStart && !timeOutReconnect) {
-            timeOut && adapter.clearTimeout(timeOut);
-            timeOut = adapter.setTimeout(() => {
+        } catch (err) {
+          if (adapterUnloading) {
+            return;
+          }
+          const message = err instanceof Error ? err.message : String(err);
+          const errorCode =
+            err instanceof SynologyClientError ? err.code : undefined;
+          if (
+            api === "ss" &&
+            method === "getInfo" &&
+            message.includes("version does not support")
+          ) {
+            adapter.log.warn(
+              `sendPolling Error -${message} You are using a hacked version of SS?`,
+            );
+          } else if (
+            (errorCode === 400 && message.includes("authentication failed")) ||
+            errorCode === 403 ||
+            (errorCode === 404 && message.includes("two-factor"))
+          ) {
+            authenticationFailed = true;
+            timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
+            timeOutReconnect = null;
+            timeOutPoll && adapter.clearTimeout(timeOutPoll);
+            setInfoConnection(false);
+            connect = false;
+            adapter.log.warn(
+              `${message}. Polling stopped; check the credentials and two-factor secret, then restart the adapter.`,
+            );
+          } else {
+            error(`*sendPolling syno[${api}][${method}]`, err);
+          }
+          if (method === "getPollingData" || method === "listPackages") {
+            iteration = -1;
+          }
+        } finally {
+          if (!adapterUnloading) {
+            if (isTwoFactorEnabled() && firstStart && !timeOutReconnect) {
+              timeOut && adapter.clearTimeout(timeOut);
+              timeOut = adapter.setTimeout(() => {
+                iterator(namePolling);
+              }, 30000);
+            } else if (!timeOutReconnect) {
               iterator(namePolling);
-            }, 30000);
-          } else if (!timeOutReconnect) {
-            iterator(namePolling);
+            }
           }
-        });
-      } catch (e) {
-        error(`sendPolling catch - syno[${api}][${method}]`, e);
-      }
+        }
+      })();
     } else {
       debug(`* Packet ${poll.api.toUpperCase()} non installed, skipped`);
       iterator(namePolling);
@@ -3003,41 +3026,42 @@ function send(
     cb?.(false);
     return;
   }
-  try {
-    syno[api][method](params, (err, data) => {
-      const response =
-        method === "getSnapshotCamera" && typeof data === "string"
-          ? `${data.length} binary characters`
-          : JSON.stringify(data);
+  void callSynology(syno, api, method, params)
+    .then((data) => {
+      const binary = toBuffer(data);
+      const response = binary
+        ? `${binary.byteLength} binary bytes`
+        : JSON.stringify(data);
       debug(
-        `Send [${api.toUpperCase()}] [${method}] Error: [${err || "no error"}] Response: [${response}]`,
+        `Send [${api.toUpperCase()}] [${method}] Error: [no error] Response: [${response}]`,
       );
-      data = data || "";
-      if (!err) {
-        cb && cb(data);
-      } else if (err) {
-        if (
-          (method === "getSnapshotCamera" ||
-            method === "getLiveViewPathCamera") &&
-          err.code === 400
-        ) {
-          cb && cb(err);
-        } else if (method === "getLiveViewPathCamera") {
-          error(`function send: [${api}][${method}]`, err);
+      cb?.(data || "");
+    })
+    .catch((err: unknown) => {
+      if (adapterUnloading) {
+        return;
+      }
+      debug(
+        `Send [${api.toUpperCase()}] [${method}] Error: [${formatUnknown(err)}]`,
+      );
+      if (
+        (method === "getSnapshotCamera" ||
+          method === "getLiveViewPathCamera") &&
+        err instanceof SynologyClientError &&
+        err.code === 400
+      ) {
+        cb && cb(err);
+      } else if (method === "getLiveViewPathCamera") {
+        error(`function send: [${api}][${method}]`, err);
+        cb && cb(false);
+      } else if (method === "getStatusRemotePlayerStatus") {
+        cb && cb(false);
+      } else {
+        error(`function send: [${api}][${method}]`, err, () => {
           cb && cb(false);
-        } else if (method === "getStatusRemotePlayerStatus") {
-          cb && cb(false);
-        } else {
-          error(`function send: [${api}][${method}]`, err, () => {
-            cb && cb(false);
-          });
-        }
+        });
       }
     });
-  } catch (e) {
-    error("--- SEND Error ", JSON.stringify(e));
-    cb && cb(false);
-  }
 }
 
 type SshCallback = (stdout: string, exitCode: number, stderr: unknown) => void;
@@ -3372,6 +3396,10 @@ function error(src: string, e: unknown, cb?: (error: unknown) => void): void {
       : undefined;
   const code = errorValue?.code;
   const message = errorValue?.message ?? e;
+  const authenticationError =
+    (code === 400 && String(message).includes("authentication failed")) ||
+    code === 403 ||
+    (code === 404 && String(message).includes("two-factor"));
   if (!~src.indexOf("getSongCover")) {
     const logLevel =
       src === "SSH Error:" || src === "--- SSH Error " ? "warn" : "debug";
@@ -3379,12 +3407,35 @@ function error(src: string, e: unknown, cb?: (error: unknown) => void): void {
       `*** ERROR : src: ${src || "unknown"} code: ${code} message: ${formatUnknown(message)}`,
     );
   }
+  if (authenticationError) {
+    authenticationFailed = true;
+    timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
+    timeOutReconnect = null;
+    timeOutPoll && adapter.clearTimeout(timeOutPoll);
+    setInfoConnection(false);
+    connect = false;
+    adapter.log.warn(
+      "Synology authentication failed. Check the credentials and two-factor secret; polling stopped until the adapter is restarted.",
+    );
+    cb && cb(e);
+    return;
+  }
   if (
     code === 400 ||
-    /*code === 500 || */ code === "ECONNREFUSED" ||
-    code === "ETIMEDOUT" ||
-    code === "EHOSTUNREACH" ||
-    (code === 404 && String(message).includes("2-step"))
+    code === 106 ||
+    code === 107 ||
+    (typeof code === "number" && code >= 500) ||
+    [
+      "ECONNREFUSED",
+      "ECONNRESET",
+      "ETIMEDOUT",
+      "EHOSTUNREACH",
+      "ENOTFOUND",
+      "EAI_AGAIN",
+      "UND_ERR_CONNECT_TIMEOUT",
+      "UND_ERR_SOCKET",
+    ].includes(String(code)) ||
+    (code === 404 && String(message).includes("two-factor"))
   ) {
     timeOutReconnect && adapter.clearTimeout(timeOutReconnect);
     timeOutPoll && adapter.clearTimeout(timeOutPoll);
@@ -3532,33 +3583,36 @@ function newSyno(): void {
     `Connecting to Synology ${adapter.config.host}:${adapter.config.port}`,
   );
   syno = null;
-  authenticationFailed = false;
-  let apiVersion = adapter.config.version || "6.2.2";
-  if (apiVersion === "7.x.x") {
-    apiVersion = "6.2.3";
+  const previousClose = closeSynologyClient;
+  closeSynologyClient = undefined;
+  if (previousClose) {
+    void previousClose().catch((err: unknown) => {
+      adapter.log.debug(
+        `Could not close previous Synology connection: ${String(err)}`,
+      );
+    });
   }
+  authenticationFailed = false;
   firstStart = true;
   try {
-    syno = new Syno({
-      ignoreCertificateErrors: true /*rejectUnauthorized: false,*/,
+    const client = createSynologyClient({
+      ignoreCertificateErrors: true,
       host: adapter.config.host || "127.0.0.1",
-      port: adapter.config.port || "5000",
-      mac: adapter.config.mac || "00:00:00:00:00:00",
+      port: Number(adapter.config.port) || 5000,
       account: adapter.config.login || "admin",
       passwd: adapter.config.password || "",
       protocol: adapter.config.https ? "https" : "http",
-      apiVersion: apiVersion,
-      otp: isTwoFactorEnabled()
-        ? adapter.config["2fa_code"] ||
-          adapter.config.twofa_code ||
-          "ASE32YJSBKUOIDPB"
-        : false,
-      debug: false,
+      apiVersion: resolveApiVersion(String(adapter.config.version || "6.2.2")),
+      twoFactorEnabled: isTwoFactorEnabled(),
+      twoFactorSecret:
+        adapter.config["2fa_code"] || adapter.config.twofa_code || undefined,
     });
+    syno = client.client;
+    closeSynologyClient = client.close;
     adapter.log.debug("FirstStart polling started");
     queuePolling();
   } catch (e) {
-    error("new Syno Error: ", e);
+    adapter.log.error(`Cannot initialize Synology client: ${formatUnknown(e)}`);
   }
 }
 

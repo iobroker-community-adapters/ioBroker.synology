@@ -155,21 +155,43 @@ export function createSynologyClient(
       sid: string;
     }>
   >();
+  let lastSuccessfulOtpCode: string | undefined;
+  let loginQueue = Promise.resolve();
   auth.login = (sessionName) => {
     const pendingLogin = logins.get(sessionName);
     if (pendingLogin) {
       return pendingLogin;
     }
-    const login = (async () => {
-      sharedHost.otpCode = totp?.generate();
+    /**
+     * Performs a serialized login with a fresh TOTP code.
+     *
+     * @returns The authenticated session ID.
+     */
+    async function performLogin(): Promise<{ sid: string }> {
+      let otpCode: string | undefined;
+      if (totp) {
+        otpCode = await waitForFreshTotpCode(totp, lastSuccessfulOtpCode);
+        sharedHost.otpCode = otpCode;
+      }
       try {
-        return await originalLogin(sessionName);
+        const result = await originalLogin(sessionName);
+        if (otpCode) {
+          lastSuccessfulOtpCode = otpCode;
+        }
+        return result;
       } catch (error) {
         throw normalizeSynologyError(error, true);
       } finally {
         sharedHost.otpCode = undefined;
       }
-    })();
+    }
+    const login = totp ? loginQueue.then(performLogin) : performLogin();
+    if (totp) {
+      loginQueue = login.then(
+        () => undefined,
+        () => undefined,
+      );
+    }
     logins.set(sessionName, login);
     void login
       .finally(() => {
@@ -185,6 +207,65 @@ export function createSynologyClient(
     client,
     close: () => dispatcher.destroy(new Error("Synology adapter stopped")),
   };
+}
+
+/**
+ * Calls a Hyper Backup Core API method using the client's authenticated session.
+ *
+ * @param client Authenticated Synology client.
+ * @param method Read-only Hyper Backup method.
+ * @param params Additional API parameters.
+ */
+export async function callHyperBackup(
+  client: Syno,
+  method: "list" | "status",
+  params: Record<string, string> = {},
+): Promise<unknown> {
+  const auth = client.auth as unknown as AuthInternals;
+  const sid = client.sessions?.Core?._sid ?? (await auth.login("Core")).sid;
+  const body = new URLSearchParams({
+    api: "SYNO.Backup.Task",
+    version: "1",
+    method,
+    ...params,
+    _sid: sid,
+  });
+  const url = `${client.protocol}://${client.host}:${client.port}/webapi/entry.cgi`;
+  const response = await auth.syno.request(url, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) {
+    throw normalizeSynologyError(
+      new Error(`Hyper Backup request failed with HTTP ${response.status}`),
+    );
+  }
+  const payload: unknown = await response.json();
+  if (!isRecord(payload)) {
+    throw new SynologyClientError("Hyper Backup returned an invalid response");
+  }
+  if (payload.success !== true) {
+    const apiError = isRecord(payload.error) ? payload.error : {};
+    const code = typeof apiError.code === "number" ? apiError.code : undefined;
+    if (code === 106 || code === 107) {
+      delete client.sessions?.Core;
+    }
+    throw new SynologyClientError(
+      code === 102 || code === 103 || code === 104
+        ? `Hyper Backup API is unavailable (DSM error ${code})`
+        : `Hyper Backup request failed${code === undefined ? "" : ` (DSM error ${code})`}`,
+      code,
+    );
+  }
+  if (!isRecord(payload.data)) {
+    throw new SynologyClientError("Hyper Backup returned invalid data");
+  }
+  return payload.data;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export async function callSynology(
@@ -247,6 +328,27 @@ export function normalizeSynologyError(
     error,
     authenticationError,
   );
+}
+
+/**
+ * Waits until a TOTP differs from the most recently accepted code.
+ *
+ * @param totp Configured TOTP generator.
+ * @param previousCode Last successfully used code.
+ * @param sleep Delay function, replaceable for tests.
+ */
+export async function waitForFreshTotpCode(
+  totp: OTPAuth.TOTP,
+  previousCode: string | undefined,
+  sleep: (milliseconds: number) => Promise<void> = (milliseconds) =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds)),
+): Promise<string> {
+  let code = totp.generate();
+  while (code === previousCode) {
+    await sleep(totp.remaining() + 25);
+    code = totp.generate();
+  }
+  return code;
 }
 
 function createTotp(

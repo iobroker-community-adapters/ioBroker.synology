@@ -3169,8 +3169,12 @@ function sendPolling(namePolling: PollName): void {
             timeOutPoll && adapter.clearTimeout(timeOutPoll);
             setInfoConnection(false);
             connect = false;
+            const authenticationHint =
+              errorCode === 404
+                ? "Verify that the configured 2FA value is the DSM Base32 setup secret and that the NAS and ioBroker host clocks are synchronized"
+                : "Check the account credentials and two-factor configuration";
             adapter.log.warn(
-              `${message}. Polling stopped; check the credentials and two-factor secret, then restart the adapter.`,
+              `${message}. ${authenticationHint}. Polling stopped; correct the configuration, then restart the adapter.`,
             );
           } else {
             error(`*sendPolling syno[${api}][${method}]`, err);

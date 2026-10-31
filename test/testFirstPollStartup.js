@@ -38,6 +38,14 @@ describe('first poll two-factor session delay', () => {
         );
     });
 
+    it('waits after a failed probe marks the current station unavailable', () => {
+        const tasks = [{ api: 'vs' }, { api: 'dtv' }, { api: 'ss' }];
+        assert.equal(
+            needsFirstPollSessionDelay(tasks, 0, (task) => task.api === 'ss'),
+            true,
+        );
+    });
+
     it('skips inactive tasks when finding sessions', () => {
         const tasks = [{ api: 'dsm' }, { api: 'ss' }, { api: 'fs' }];
         assert.equal(

@@ -21,7 +21,7 @@ const stationNames: Readonly<Record<string, string>> = {
  *
  * @param tasks Ordered first-poll API tasks.
  * @param currentIndex Index of the request that just completed.
- * @param isActive Whether a task is configured and installed.
+ * @param isActive Whether a task is configured and installed. The completed task is counted as visited even if its probe just marked it unavailable.
  */
 export function needsFirstPollSessionDelay(
   tasks: readonly FirstPollTask[],
@@ -29,18 +29,18 @@ export function needsFirstPollSessionDelay(
   isActive: (task: FirstPollTask) => boolean,
 ): boolean {
   const currentTask = tasks[currentIndex];
-  if (
-    !currentTask ||
-    typeof currentTask === "function" ||
-    !isActive(currentTask)
-  ) {
+  if (!currentTask || typeof currentTask === "function") {
     return false;
   }
 
   const visitedSessions = new Set<string>();
   for (let index = 0; index <= currentIndex; index++) {
     const task = tasks[index];
-    if (!task || typeof task === "function" || !isActive(task)) {
+    if (
+      !task ||
+      typeof task === "function" ||
+      (index !== currentIndex && !isActive(task))
+    ) {
       continue;
     }
     const session = stationNames[task.api];

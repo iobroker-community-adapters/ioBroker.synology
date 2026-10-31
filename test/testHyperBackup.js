@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const {
     getHyperBackupTaskList,
+    fetchHyperBackupTaskStatus,
     hasRecognizedHyperBackupStatus,
     HYPER_BACKUP_STATUS_ADDITIONAL,
     hyperBackupTaskChannelId,
@@ -10,6 +11,7 @@ const {
     planStaleHyperBackupChannels,
     planStaleHyperBackupStates,
     projectHyperBackupTaskStates,
+    HYPER_BACKUP_TASK_STATE_NAMES,
 } = require('../build/lib/hyperBackup.js');
 const { callHyperBackup } = require('../build/lib/synologyClient.js');
 
@@ -40,23 +42,41 @@ describe('Hyper Backup task mapping', () => {
             },
         };
 
-        const result = await callHyperBackup(client, 'status', {
+        const requests = [];
+        client.auth.syno.request = async (url, options) => {
+            requestUrl = url;
+            requestOptions = options;
+            requests.push(Object.fromEntries(options.body));
+            return {
+                ok: true,
+                json: async () => ({ success: true, data: { task_id: 12 } }),
+            };
+        };
+
+        const liveResult = await callHyperBackup(client, 'status', { task_id: '12' });
+        const historyResult = await callHyperBackup(client, 'status', {
             task_id: '12',
+            blOnline: 'false',
             additional: HYPER_BACKUP_STATUS_ADDITIONAL,
         });
 
         assert.equal(loginSession, 'Core');
         assert.equal(requestUrl, 'https://nas.local:5001/webapi/entry.cgi');
         assert.equal(requestOptions.method, 'POST');
-        assert.deepEqual(Object.fromEntries(requestOptions.body), {
-            api: 'SYNO.Backup.Task',
-            version: '1',
-            method: 'status',
-            task_id: '12',
-            additional: '["last_bkp_time","next_bkp_time","last_bkp_result","last_bkp_progress"]',
-            _sid: 'session-id',
-        });
-        assert.deepEqual(result, { task_id: 12 });
+        assert.deepEqual(requests, [
+            {
+                api: 'SYNO.Backup.Task', version: '1', method: 'status',
+                task_id: '12', _sid: 'session-id',
+            },
+            {
+                api: 'SYNO.Backup.Task', version: '1', method: 'status',
+                task_id: '12', blOnline: 'false',
+                additional: '["last_bkp_time","next_bkp_time","last_bkp_result","last_bkp_progress"]',
+                _sid: 'session-id',
+            },
+        ]);
+        assert.deepEqual(liveResult, { task_id: 12 });
+        assert.deepEqual(historyResult, { task_id: 12 });
     });
 
     it('accepts object data for both list and status responses', async () => {
@@ -134,22 +154,67 @@ describe('Hyper Backup task mapping', () => {
         assert.equal(hasRecognizedHyperBackupStatus({ unrelated: 'value' }), false);
     });
 
-    it('prefers live values from the status response over stale task-list values', () => {
-        const status = { status: 'running', state: 'backup', progress: 37 };
-        assert.equal(hasRecognizedHyperBackupStatus(status), true);
+    it('fetches live and historical status separately and merges current fields first', async () => {
+        const requests = [];
+        const history = {
+            status: 'finished', state: 'idle', progress: 0,
+            last_bkp_result: 'success', last_bkp_time: '2025/01/15 02:00:00',
+        };
+        const live = { status: 'running', state: 'backup', progress: 37 };
+        const result = await fetchHyperBackupTaskStatus('12', async (params) => {
+            requests.push(params);
+            return requests.length === 1 ? live : history;
+        });
+
+        assert.deepEqual(requests, [
+            { task_id: '12' },
+            {
+                task_id: '12',
+                blOnline: 'false',
+                additional: HYPER_BACKUP_STATUS_ADDITIONAL,
+            },
+        ]);
+        assert.deepEqual(result, {
+            status: {
+                status: 'running',
+                state: 'backup',
+                progress: 37,
+                last_bkp_result: 'success',
+                last_bkp_time: '2025/01/15 02:00:00',
+            },
+            errors: [],
+        });
         assert.deepEqual(mapHyperBackupTasks([{
             task_id: 12,
             task_name: 'Nightly',
             status: 'none',
             state: 'idle',
             progress: 0,
-        }], new Map([['12', status]])), [{
+        }], new Map([['12', result.status]])), [{
             id: '12',
             name: 'Nightly',
             status: 'running',
             state: 'backup',
             progress: 37,
+            last_bkp_result: 'success',
+            last_bkp_time: '2025/01/15 02:00:00',
         }]);
+    });
+
+    it('keeps partial status results and reports which status request failed', async () => {
+        const result = await fetchHyperBackupTaskStatus('12', async (params) => {
+            if (params.blOnline === 'false') {
+                throw new Error('History API unavailable');
+            }
+            return { status: 'running', state: 'backup', progress: 37 };
+        });
+
+        assert.deepEqual(result.status, {
+            status: 'running', state: 'backup', progress: 37,
+        });
+        assert.equal(result.errors.length, 1);
+        assert.equal(result.errors[0].source, 'history');
+        assert.match(result.errors[0].error.message, /History API unavailable/);
     });
 
     it('requests the exact DSM status fields as a JSON array', () => {
@@ -208,7 +273,7 @@ describe('Hyper Backup task mapping', () => {
         assert.notEqual(hyperBackupTaskChannelId('a.b'), hyperBackupTaskChannelId('a_2Eb'));
         assert.notEqual(hyperBackupTaskChannelId('a.b'), hyperBackupTaskChannelId('a_b'));
         assert.deepEqual(projectHyperBackupTaskStates(renamed), [
-            { id: 'name', name: 'name', value: 'Daily', type: 'string', role: 'info.name' },
+            { id: 'name', name: 'Task name', value: 'Daily', type: 'string', role: 'info.name' },
         ]);
     });
 
@@ -228,13 +293,54 @@ describe('Hyper Backup task mapping', () => {
         ), ['HyperBackup.tasks.3']);
     });
 
+    it('uses clear display labels while preserving task state IDs and values', () => {
+        assert.deepEqual(HYPER_BACKUP_TASK_STATE_NAMES, {
+            id: 'Task ID',
+            name: 'Task name',
+            status: 'Backup status',
+            state: 'Task state',
+            progress: 'Current backup progress',
+            last_bkp_time: 'Last backup time',
+            next_bkp_time: 'Next scheduled backup',
+            last_bkp_result: 'Last backup result',
+            last_bkp_error: 'Last backup error',
+            last_bkp_error_code: 'Last backup error code',
+            last_bkp_progress: 'Last backup progress details',
+        });
+        const task = {
+            name: 'Nightly',
+            status: 'running',
+            state: 'backup',
+            progress: 42,
+            last_bkp_time: 1736906400000,
+            next_bkp_time: '2025/01/16 02:00',
+            last_bkp_result: 'success',
+            last_bkp_error: 'none',
+            last_bkp_error_code: 'E123',
+            last_bkp_progress: { files: 3 },
+        };
+        const states = projectHyperBackupTaskStates(task);
+        assert.deepEqual(states.map(({ id, name, value }) => ({ id, name, value })), [
+            { id: 'name', name: 'Task name', value: 'Nightly' },
+            { id: 'status', name: 'Backup status', value: 'running' },
+            { id: 'state', name: 'Task state', value: 'backup' },
+            { id: 'progress', name: 'Current backup progress', value: 42 },
+            { id: 'last_bkp_time', name: 'Last backup time', value: 1736906400000 },
+            { id: 'next_bkp_time', name: 'Next scheduled backup', value: '2025/01/16 02:00' },
+            { id: 'last_bkp_result', name: 'Last backup result', value: 'success' },
+            { id: 'last_bkp_error', name: 'Last backup error', value: 'none' },
+            { id: 'last_bkp_error_code', name: 'Last backup error code', value: 'E123' },
+            { id: 'last_bkp_progress', name: 'Last backup progress details', value: '{"files":3}' },
+        ]);
+    });
+
     it('projects structured values as JSON strings and preserves scalar values', () => {
         assert.deepEqual(projectHyperBackupTaskStates({
             id: '3', name: 'Nightly', progress: { progress: 42 }, last_bkp_error_code: 0,
         }), [
-            { id: 'name', name: 'name', value: 'Nightly', type: 'string', role: 'info.name' },
-            { id: 'progress', name: 'progress', value: '{"progress":42}', type: 'string', role: 'json' },
-            { id: 'last_bkp_error_code', name: 'last bkp error code', value: 0, type: 'number', role: 'value' },
+            { id: 'name', name: 'Task name', value: 'Nightly', type: 'string', role: 'info.name' },
+            { id: 'progress', name: 'Current backup progress', value: '{"progress":42}', type: 'string', role: 'json' },
+            { id: 'last_bkp_error_code', name: 'Last backup error code', value: 0, type: 'number', role: 'value' },
         ]);
     });
 
@@ -250,12 +356,12 @@ describe('Hyper Backup task mapping', () => {
             last_bkp_error: null,
             last_bkp_progress: undefined,
         }), [
-            { id: 'name', name: 'name', value: 'Incremental', type: 'string', role: 'info.name' },
-            { id: 'progress', name: 'progress', value: '42%', type: 'string', role: 'text' },
-            { id: 'last_bkp_time', name: 'last bkp time', value: 1736906400000, type: 'number', role: 'date' },
-            { id: 'next_bkp_time', name: 'next bkp time', value: '2025/01/16 02:00', type: 'string', role: 'text' },
-            { id: 'last_bkp_result', name: 'last bkp result', value: '{"success":true}', type: 'string', role: 'json' },
-            { id: 'last_bkp_error_code', name: 'last bkp error code', value: 'E123', type: 'string', role: 'text' },
+            { id: 'name', name: 'Task name', value: 'Incremental', type: 'string', role: 'info.name' },
+            { id: 'progress', name: 'Current backup progress', value: '42%', type: 'string', role: 'text' },
+            { id: 'last_bkp_time', name: 'Last backup time', value: 1736906400000, type: 'number', role: 'date' },
+            { id: 'next_bkp_time', name: 'Next scheduled backup', value: '2025/01/16 02:00', type: 'string', role: 'text' },
+            { id: 'last_bkp_result', name: 'Last backup result', value: '{"success":true}', type: 'string', role: 'json' },
+            { id: 'last_bkp_error_code', name: 'Last backup error code', value: 'E123', type: 'string', role: 'text' },
         ]);
     });
 

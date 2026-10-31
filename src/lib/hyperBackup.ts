@@ -51,6 +51,64 @@ export function hasRecognizedHyperBackupStatus(value: unknown): boolean {
   );
 }
 
+export interface HyperBackupStatusFetchResult {
+  status?: Record<string, unknown>;
+  errors: Array<{ source: "live" | "history"; error: unknown }>;
+}
+
+export async function fetchHyperBackupTaskStatus(
+  taskId: string,
+  request: (params: Record<string, string>) => Promise<unknown>,
+): Promise<HyperBackupStatusFetchResult> {
+  const merged: Record<string, unknown> = {};
+  let live: Record<string, unknown> = {};
+  const errors: HyperBackupStatusFetchResult["errors"] = [];
+
+  try {
+    const response = await request({ task_id: taskId });
+    if (!isRecord(response) || !hasRecognizedHyperBackupStatus(response)) {
+      throw new Error("Hyper Backup returned no recognized live status fields");
+    }
+    live = response;
+    Object.assign(merged, live);
+  } catch (error) {
+    errors.push({ source: "live", error });
+  }
+
+  try {
+    const response = await request({
+      task_id: taskId,
+      blOnline: "false",
+      additional: HYPER_BACKUP_STATUS_ADDITIONAL,
+    });
+    if (!hasRecognizedHyperBackupStatus(response)) {
+      throw new Error("Hyper Backup returned no recognized result fields");
+    }
+    Object.assign(merged, response, live);
+  } catch (error) {
+    errors.push({ source: "history", error });
+  }
+
+  return {
+    ...(Object.keys(merged).length > 0 ? { status: merged } : {}),
+    errors,
+  };
+}
+
+export const HYPER_BACKUP_TASK_STATE_NAMES: Record<string, string> = {
+  id: "Task ID",
+  name: "Task name",
+  status: "Backup status",
+  state: "Task state",
+  progress: "Current backup progress",
+  last_bkp_time: "Last backup time",
+  next_bkp_time: "Next scheduled backup",
+  last_bkp_result: "Last backup result",
+  last_bkp_error: "Last backup error",
+  last_bkp_error_code: "Last backup error code",
+  last_bkp_progress: "Last backup progress details",
+};
+
 export const HYPER_BACKUP_TASK_FIELDS = [
   "name",
   "status",
@@ -164,7 +222,7 @@ export function projectHyperBackupTaskStates(
     return [
       {
         id: field,
-        name: field.replaceAll("_", " "),
+        name: HYPER_BACKUP_TASK_STATE_NAMES[field],
         value: structured ? JSON.stringify(value) : value,
         type: type === "number" || type === "boolean" ? type : "string",
         role,

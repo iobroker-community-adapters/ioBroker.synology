@@ -21,14 +21,14 @@ import {
 import { parseSmartAttributes } from "./lib/smartAttributes.js";
 import {
   parseHyperBackupTaskList,
-  hasRecognizedHyperBackupStatus,
-  HYPER_BACKUP_STATUS_ADDITIONAL,
+  fetchHyperBackupTaskStatus,
   hyperBackupTaskChannelId,
   normalizeHyperBackupObjectId,
   mapHyperBackupTasks,
   planStaleHyperBackupChannels,
   planStaleHyperBackupStates,
   projectHyperBackupTaskStates,
+  HYPER_BACKUP_TASK_STATE_NAMES,
 } from "./lib/hyperBackup.js";
 import { filterSshStderr } from "./lib/sshOutput.js";
 import {
@@ -2133,7 +2133,7 @@ async function syncHyperBackupTaskChannels(
     await adapter.extendObjectAsync(`${channelId}.id`, {
       type: "state",
       common: {
-        name: "Task ID",
+        name: HYPER_BACKUP_TASK_STATE_NAMES.id,
         type: "string",
         role: "text",
         read: true,
@@ -2193,18 +2193,19 @@ async function pollHyperBackup(): Promise<void> {
       if (typeof id !== "string" && typeof id !== "number") {
         continue;
       }
-      try {
-        const status = await callHyperBackup(client, "status", {
-          task_id: String(id),
-          additional: HYPER_BACKUP_STATUS_ADDITIONAL,
-        });
-        if (!hasRecognizedHyperBackupStatus(status)) {
-          throw new Error("Hyper Backup returned no recognized status fields");
-        }
-        statuses.set(String(id), status);
-      } catch (err) {
+      const result = await fetchHyperBackupTaskStatus(String(id), (params) =>
+        callHyperBackup(client, "status", params),
+      );
+      if (result.errors.length > 0) {
         statusFailures.add(String(id));
-        adapter.log.debug(`Hyper Backup status unavailable: ${String(err)}`);
+        for (const failure of result.errors) {
+          adapter.log.debug(
+            `Hyper Backup ${failure.source} status unavailable: ${String(failure.error)}`,
+          );
+        }
+      }
+      if (result.status) {
+        statuses.set(String(id), result.status);
       }
     }
     const mappedTasks = mapHyperBackupTasks(tasks, statuses);

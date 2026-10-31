@@ -187,6 +187,62 @@ export function createSynologyClient(
   };
 }
 
+/**
+ * Calls a Hyper Backup Core API method using the client's authenticated session.
+ *
+ * @param client Authenticated Synology client.
+ * @param method Read-only Hyper Backup method.
+ * @param params Additional API parameters.
+ */
+export async function callHyperBackup(
+  client: Syno,
+  method: "list" | "status",
+  params: Record<string, string> = {},
+): Promise<unknown> {
+  const auth = client.auth as unknown as AuthInternals;
+  const { sid } = await auth.login("Core");
+  const body = new URLSearchParams({
+    api: "SYNO.Backup.Task",
+    version: "1",
+    method,
+    ...params,
+    _sid: sid,
+  });
+  const url = `${client.protocol}://${client.host}:${client.port}/webapi/entry.cgi`;
+  const response = await auth.syno.request(url, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) {
+    throw normalizeSynologyError(
+      new Error(`Hyper Backup request failed with HTTP ${response.status}`),
+    );
+  }
+  const payload: unknown = await response.json();
+  if (!isRecord(payload)) {
+    throw new SynologyClientError("Hyper Backup returned an invalid response");
+  }
+  if (payload.success !== true) {
+    const apiError = isRecord(payload.error) ? payload.error : {};
+    const code = typeof apiError.code === "number" ? apiError.code : undefined;
+    throw new SynologyClientError(
+      code === 102 || code === 103 || code === 104
+        ? `Hyper Backup API is unavailable (DSM error ${code})`
+        : `Hyper Backup request failed${code === undefined ? "" : ` (DSM error ${code})`}`,
+      code,
+    );
+  }
+  if (!isRecord(payload.data)) {
+    throw new SynologyClientError("Hyper Backup returned invalid data");
+  }
+  return payload.data;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export async function callSynology(
   client: Syno,
   api: StationApi,

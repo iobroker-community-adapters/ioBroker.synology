@@ -19,12 +19,26 @@ import {
   isH265,
 } from "./lib/rtspSnapshot.js";
 import { parseSmartAttributes } from "./lib/smartAttributes.js";
+import {
+  parseHyperBackupTaskList,
+  fetchHyperBackupTaskStatus,
+  hyperBackupTaskChannelId,
+  normalizeHyperBackupObjectId,
+  mapHyperBackupTasks,
+  planStaleHyperBackupChannels,
+  planStaleHyperBackupStates,
+  projectHyperBackupTaskStates,
+  HYPER_BACKUP_TASK_STATE_NAMES,
+} from "./lib/hyperBackup.js";
 import { filterSshStderr } from "./lib/sshOutput.js";
+import { needsFirstPollSessionDelay } from "./lib/firstPollStartup.js";
+import { isUnavailableStationProbeError } from "./lib/stationAvailability.js";
 import {
   callSynology,
   createSynologyClient,
   resolveApiVersion,
   SynologyClientError,
+  callHyperBackup,
   toBuffer,
 } from "./lib/synologyClient.js";
 
@@ -36,6 +50,8 @@ let adapter: ioBroker.Adapter;
 let syno: Syno | null = null;
 let closeSynologyClient: (() => Promise<void>) | undefined;
 let smartPollInProgress = false;
+let hyperBackupPollInProgress = false;
+let hyperBackupSupported: boolean | undefined;
 let adapterUnloading = false;
 let timeOutPoll: ioBroker.Timeout | undefined;
 let timeOutReconnect: ioBroker.Timeout | undefined;
@@ -435,6 +451,7 @@ interface AdapterStates {
     sharing: Record<string, unknown>;
   };
   DownloadStation: Record<string, unknown>;
+  HyperBackup: Record<string, unknown>;
   AudioStation: {
     info: Record<string, unknown>;
     players: Record<string, PlayerState>;
@@ -453,6 +470,7 @@ Object.assign(states, {
   DiskStationManager: { info: {}, hdd_info: {}, vol_info: {} },
   FileStation: { info: {}, sharing: {} },
   DownloadStation: { info: {} },
+  HyperBackup: { listTasks: "[]", taskCount: 0 },
   AudioStation: { info: {}, players: {} },
   VideoStation: { info: {} },
   VideoStation_DTV: { info: {} },
@@ -480,6 +498,23 @@ interface StateMetadata {
   read?: boolean;
   write?: boolean;
 }
+
+const scopedObjects: Record<string, StateMetadata> = {
+  "HyperBackup.listTasks": {
+    role: "json",
+    name: "Hyper Backup tasks and status",
+    type: "string",
+    read: true,
+    write: false,
+  },
+  "HyperBackup.taskCount": {
+    role: "value",
+    name: "Number of Hyper Backup tasks",
+    type: "number",
+    read: true,
+    write: false,
+  },
+};
 
 const objects: Record<string, StateMetadata> = {
   album: {
@@ -1422,6 +1457,7 @@ const PollCmd: Record<PollName, PollTask[]> = {
     },
   ],
   slowPoll: [
+    pollHyperBackup,
     {
       api: "as",
       method: "listRemotePlayers",
@@ -2044,6 +2080,155 @@ function parsegetConfigSchedule(res: Record<string, unknown>): void {
   if (res && !res.message) {
     states.DownloadStation.shedule_emule_enabled = res.emule_enabled;
     states.DownloadStation.shedule_enabled = res.enabled;
+  }
+}
+
+async function syncHyperBackupTaskChannels(
+  tasks: ReturnType<typeof mapHyperBackupTasks>,
+  statusFailures: Set<string> = new Set(),
+): Promise<void> {
+  const currentChannelIds = tasks.map((task) =>
+    hyperBackupTaskChannelId(task.id),
+  );
+  const viewPrefix = `${adapter.namespace}.HyperBackup.tasks.`;
+  const existing = await adapter.getObjectViewAsync("system", "channel", {
+    startkey: viewPrefix,
+    endkey: `${viewPrefix}\u9999`,
+  });
+  const existingChannelIds = existing.rows
+    .map((row) => normalizeHyperBackupObjectId(row.id, adapter.namespace))
+    .filter((id): id is string => id !== undefined);
+  const staleChannels = planStaleHyperBackupChannels(
+    existingChannelIds,
+    currentChannelIds,
+  );
+  const existingStates = await adapter.getObjectViewAsync("system", "state", {
+    startkey: viewPrefix,
+    endkey: `${viewPrefix}\u9999`,
+  });
+  const existingStateIds = existingStates.rows
+    .map((row) => normalizeHyperBackupObjectId(row.id, adapter.namespace))
+    .filter((id): id is string => id !== undefined);
+  const expectedStateIds = new Set<string>();
+  for (const id of staleChannels) {
+    await adapter.delObjectAsync(id, { recursive: true });
+  }
+  await adapter.setObjectNotExistsAsync("HyperBackup.tasks", {
+    type: "channel",
+    common: { name: "Tasks" },
+    native: {},
+  });
+  for (const task of tasks) {
+    const channelId = hyperBackupTaskChannelId(task.id);
+    if (statusFailures.has(task.id)) {
+      for (const id of existingStateIds) {
+        if (id.startsWith(`${channelId}.`)) {
+          expectedStateIds.add(id);
+        }
+      }
+    }
+    await adapter.extendObjectAsync(channelId, {
+      type: "channel",
+      common: { name: task.name },
+      native: { taskId: task.id },
+    });
+    await adapter.extendObjectAsync(`${channelId}.id`, {
+      type: "state",
+      common: {
+        name: HYPER_BACKUP_TASK_STATE_NAMES.id,
+        type: "string",
+        role: "text",
+        read: true,
+        write: false,
+      },
+      native: {},
+    });
+    expectedStateIds.add(`${channelId}.id`);
+    await adapter.setStateAsync(`${channelId}.id`, task.id, true);
+    for (const state of projectHyperBackupTaskStates(task)) {
+      const stateId = `${channelId}.${state.id}`;
+      expectedStateIds.add(stateId);
+      await adapter.extendObjectAsync(stateId, {
+        type: "state",
+        common: {
+          name: state.name,
+          type: state.type,
+          role: state.role,
+          read: true,
+          write: false,
+        },
+        native: {},
+      });
+      await adapter.setStateAsync(
+        stateId,
+        state.value as ioBroker.StateValue,
+        true,
+      );
+    }
+  }
+  for (const stateId of planStaleHyperBackupStates(
+    existingStateIds,
+    currentChannelIds,
+    expectedStateIds,
+    statusFailures,
+  )) {
+    await adapter.delObjectAsync(stateId);
+  }
+}
+
+async function pollHyperBackup(): Promise<void> {
+  if (!syno || hyperBackupSupported === false || hyperBackupPollInProgress) {
+    return;
+  }
+  hyperBackupPollInProgress = true;
+  const client = syno;
+  try {
+    const response = await callHyperBackup(client, "list");
+    const tasks = parseHyperBackupTaskList(response);
+    if (!tasks) {
+      throw new Error("Hyper Backup returned an invalid task list");
+    }
+    const statuses = new Map<string, unknown>();
+    const statusFailures = new Set<string>();
+    for (const task of tasks) {
+      const id = task.task_id ?? task.id;
+      if (typeof id !== "string" && typeof id !== "number") {
+        continue;
+      }
+      const result = await fetchHyperBackupTaskStatus(String(id), (params) =>
+        callHyperBackup(client, "status", params),
+      );
+      if (result.errors.length > 0) {
+        statusFailures.add(String(id));
+        for (const failure of result.errors) {
+          adapter.log.debug(
+            `Hyper Backup ${failure.source} status unavailable: ${String(failure.error)}`,
+          );
+        }
+      }
+      if (result.status) {
+        statuses.set(String(id), result.status);
+      }
+    }
+    const mappedTasks = mapHyperBackupTasks(tasks, statuses);
+    await syncHyperBackupTaskChannels(mappedTasks, statusFailures);
+    states.HyperBackup.listTasks = JSON.stringify(mappedTasks);
+    states.HyperBackup.taskCount = mappedTasks.length;
+    hyperBackupSupported = true;
+  } catch (err) {
+    if (
+      err instanceof SynologyClientError &&
+      [102, 103, 104].includes(Number(err.code))
+    ) {
+      hyperBackupSupported = false;
+      adapter.log.info(
+        "Hyper Backup status is not supported by this DSM/API version",
+      );
+    } else {
+      adapter.log.warn(`Could not read Hyper Backup status: ${String(err)}`);
+    }
+  } finally {
+    hyperBackupPollInProgress = false;
   }
 }
 
@@ -2902,8 +3087,23 @@ function sendPolling(namePolling: PollName): void {
       `* sendPolling. namePolling = ${namePolling} | iteration = ${iteration} | typeof poll = ${typeof poll} | poll = ${JSON.stringify(poll)}`,
     );
     if (typeof poll === "function") {
-      poll();
-      iterator(namePolling);
+      const result = poll();
+      if (poll === pollHyperBackup && result instanceof Promise) {
+        void result
+          .then(() => {
+            if (!adapterUnloading) {
+              iterator(namePolling);
+            }
+          })
+          .catch((err: unknown) => {
+            adapter.log.warn(`Polling task failed: ${String(err)}`);
+            if (!adapterUnloading) {
+              iterator(namePolling);
+            }
+          });
+      } else {
+        iterator(namePolling);
+      }
     } else if (states.api[poll.api].installed) {
       const api = poll.api;
       const method = poll.method;
@@ -2954,6 +3154,11 @@ function sendPolling(namePolling: PollName): void {
             adapter.log.warn(
               `sendPolling Error -${message} You are using a hacked version of SS?`,
             );
+          } else if (isUnavailableStationProbeError(api, method, errorCode)) {
+            states.api[api].installed = false;
+            debug(
+              `Synology API ${api.toUpperCase()} is unavailable (DSM error ${errorCode}); future polling skipped`,
+            );
           } else if (
             isAuthenticationError &&
             (errorCode === 400 || errorCode === 403 || errorCode === 404)
@@ -2975,7 +3180,18 @@ function sendPolling(namePolling: PollName): void {
           }
         } finally {
           if (!adapterUnloading) {
-            if (isTwoFactorEnabled() && firstStart && !timeOutReconnect) {
+            if (
+              isTwoFactorEnabled() &&
+              firstStart &&
+              !timeOutReconnect &&
+              needsFirstPollSessionDelay(
+                PollCmd.firstPoll,
+                iteration,
+                (task) =>
+                  typeof task !== "function" &&
+                  states.api[task.api as PollApi]?.installed === true,
+              )
+            ) {
               timeOut && adapter.clearTimeout(timeOut);
               timeOut = adapter.setTimeout(() => {
                 iterator(namePolling);
@@ -3263,25 +3479,26 @@ async function setObject(id: string, val: unknown): Promise<void> {
     };
     let hasScopedMetadata = false;
     const objectId = id.split(".").pop() ?? id;
-    if (objects[objectId] !== undefined) {
-      common.name = objects[objectId].name;
-      common.desc = objects[objectId].name;
-      common.role = objects[objectId].role;
-      common.type = objects[objectId].type;
-      if (objects[objectId].unit !== undefined) {
-        common.unit = objects[objectId].unit;
+    const metadata = scopedObjects[id] ?? objects[objectId];
+    if (metadata !== undefined) {
+      common.name = metadata.name;
+      common.desc = metadata.name;
+      common.role = metadata.role;
+      common.type = metadata.type;
+      if (metadata.unit !== undefined) {
+        common.unit = metadata.unit;
       }
-      if (objects[objectId].min !== undefined) {
-        common.min = objects[objectId].unit;
+      if (metadata.min !== undefined) {
+        common.min = metadata.unit;
       }
-      if (objects[objectId].max !== undefined) {
-        common.max = objects[objectId].unit;
+      if (metadata.max !== undefined) {
+        common.max = metadata.unit;
       }
-      if (objects[objectId].states !== undefined) {
-        common.states = objects[objectId].states;
+      if (metadata.states !== undefined) {
+        common.states = metadata.states;
       }
-      common.read = objects[objectId].read;
-      common.write = objects[objectId].write;
+      common.read = metadata.read;
+      common.write = metadata.write;
       //common.def = objects[_id].val;
     }
     const smartAttribute =
@@ -3350,9 +3567,7 @@ async function setObject(id: string, val: unknown): Promise<void> {
       } else {
         if (
           JSON.stringify(obj.common) !== JSON.stringify(common) &&
-          (objects[objectId] !== undefined ||
-            smartAttribute ||
-            hasScopedMetadata)
+          (metadata !== undefined || smartAttribute || hasScopedMetadata)
         ) {
           await adapter.extendObjectAsync(id, {
             common: common as ioBroker.StateCommon,
@@ -3518,6 +3733,17 @@ function main(): void {
   }
   if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as) {
     let result;
+    PollCmd.firstPoll = PollCmd.firstPoll.filter((item) => {
+      if (typeof item === "function") {
+        return true;
+      }
+      return !(
+        (item.api === "ss" && !adapter.config.ss) ||
+        (item.api === "dl" && !adapter.config.dl) ||
+        (item.api === "as" && !adapter.config.as)
+      );
+    });
+
     result = PollCmd.fastPoll.filter((item) => {
       if (typeof item === "function") {
         return item.name !== "getStatusPlayer" || !!adapter.config.as;
@@ -3607,6 +3833,8 @@ function newSyno(): void {
     });
   }
   authenticationFailed = false;
+  hyperBackupSupported = undefined;
+  hyperBackupPollInProgress = false;
   firstStart = true;
   try {
     const client = createSynologyClient({

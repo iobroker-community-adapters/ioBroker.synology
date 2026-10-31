@@ -85,7 +85,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.1.0 (2026-10-31)
 - (Voodoo2man) Reduced 2FA first-start delays by reusing station sessions and skipping disabled or unavailable optional APIs.
 - (Voodoo2man) Added Hyper Backup
 - (Voodoo2man) Corrected object state defaults and sendMethod input handling.
@@ -112,9 +112,6 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 - (Voodoo2man) Added a guarded FFmpeg fallback for H.265 camera snapshots.
 - (Voodoo2man) Added optional SMART attribute polling over SSH.
 - (Voodoo2man) Changed SSH error logging from debug to warn.
-
-### 3.2.1 (2026-10-16)
-- (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

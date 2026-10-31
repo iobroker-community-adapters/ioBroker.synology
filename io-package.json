@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "news": {
+      "4.1.0": {
+        "en": "Reduced 2FA first-start delays by reusing station sessions and skipping disabled or unavailable optional APIs.\nAdded Hyper Backup\nCorrected object state defaults and sendMethod input handling.",
+        "de": "Weniger Verzögerungen beim 2FA-Start durch Wiederverwendung von Stationssitzungen und Überspringen deaktivierter APIs\nHyper Backup hinzugefügt\nObjektstatuswerte und SendMethod-Eingabe korrigiert.",
+        "ru": "Сокращение задержек первого запуска двухфакторной аутентификации за счет повторного использования сеансов станции и пропуска отключенных или недоступных дополнительных API.\nДобавлено гиперрезервное копирование\nИсправлены значения по умолчанию состояния объекта и обработка ввода SendMethod.",
+        "pt": "Reduziu os atrasos no início do 2FA reutilizando sessões da estação e ignorando APIs opcionais.\nMais Hyper Backup\nCorreção dos padrões do objeto e da entrada SendMethod.",
+        "nl": "Minder vertragingen bij de eerste start van de 2FA door stationssessies opnieuw te gebruiken en uitgeschakelde of niet-beschikbare optionele API's over te slaan.\nHyper Backup toegevoegd\nGecorrigeerde standaardwaarden van de objectstatus en verwerking van SendMethod-invoer.",
+        "fr": "Réduction des délais de démarrage de la 2FA en réutilisant les sessions des stations et en omettant les API optionnelles.\nHyper Backup ajouté\nÉtat des objets par défaut et gestion des entrées SendMethod corrigés.",
+        "it": "Riduzione dei ritardi 2FA riutilizzando le sessioni e saltando le API opzionali disabilitate o non disponibili.\nAggiunto Hyper\nImpostazioni predefinite e input SendMethod corretti.",
+        "es": "Redujo los retrasos de 2FA en el primer inicio al reutilizar las sesiones de estación y omitir las API opcionales\nAñadió Hyper Backup\nSe corrigieron los valores de estado del objeto y el manejo de entradas de SendMethod.",
+        "pl": "Zmniejszono opóźnienia pierwszego uruchomienia 2FA dzięki ponownemu użyciu sesji stacji i pomijaniu wyłączonych lub niedostępnych opcjonalnych interfejsów API.\nDodano Hyper Backup\nPoprawiono ustawienia domyślne stanu obiektu i obsługa danych wejściowych sendMethod.",
+        "uk": "Зменшення затримок першого запуску 2FA шляхом повторного використання сеансів станцій та пропуску відключених або недоступних додаткових API.\nДодано гіперрезервне копіювання\nВиправлені типові значення стану об'єкта та обробка вхідних даних SendMethod.",
+        "zh-cn": "通过重复使用工作站会话和跳过禁用或不可用的可选 API，减少了 2FA 首次启动延迟。\n添加了超级备份\n更正了对象状态默认值和 sendMethod 输入处理。"
+      },
       "4.0.0": {
         "en": "Added remaining free capacity for each storage volume.\nCorrected Surveillance Station camera status mapping.\nFixed crash when polling interval is stored as string (#559)\nCorrected adapter state defaults and polling interval handling.\nMigrated Synology API access to the published syno library, retained automatic 2FA and adapter APIs, and required Node.js 24; DSM 5 support was removed.\nRaised the minimum Admin and js-controller versions.",
         "de": "Mehr freie Kapazität für jedes Speichervolumen.\nDie Kamerastatuszuordnung der SPS wurde korrigiert.\nAbsturz beim Speichern des Abfrageintervalls behoben (#559)\nAdapterstatus und Abfrageintervall wurden korrigiert.\nSynology API-Zugriff auf die Syno-Bibliothek migriert, 2FA und Adapter-APIs beibehalten und Node.js 24 benötigt; DSM 5 wurde entfernt.\nMindestversionen Admin und JS-Controller erhöht.",
@@ -80,19 +93,6 @@
         "pl": "Adapter wymaga node.js 18 i sterownika js- > = 5 teraz\nZaktualizowano zależności",
         "uk": "Адаптер вимагає node.js 18 і js-controller >= 5 тепер\nЗалежність було оновлено",
         "zh-cn": "适配器需要节点.js 18和js控制器 QQ 现在5号\n依赖关系已更新"
-      },
-      "3.0.1": {
-        "en": "A Typo in RegEx for Mac-Address has been corrected.\nDependencies have been updated.",
-        "de": "Ein Typo in RegEx für Mac-Addressen wurde korrigiert.\nAbhängigkeiten wurden aktualisiert.",
-        "ru": "Исправлена Typo в RegEx для Mac-Address.\nОбновлены зависимости.",
-        "pt": "Um Typo em RegEx para Mac-Address foi corrigido.\nAs dependências foram atualizadas.",
-        "nl": "Een Typo in RegEx voor Mac-Address is gecorrigeerd.\nAfhankelijkheid is geüpdateerd.",
-        "fr": "Un Typo de RegEx pour Mac-Address a été corrigé.\nLes dépendances ont été mises à jour.",
-        "it": "Un Typo su RegEx per Mac-Address è stato corretto.\nLe dipendenze sono state aggiornate.",
-        "es": "Se ha corregido un Typo en RegEx para Mac-Address.\nSe han actualizado las dependencias.",
-        "pl": "Typo w RegEx dla Mac-Address zostało poprawione.\nW zależności zostały zaktualizowane.",
-        "uk": "A Typo в RegEx для Mac-Address було виправлено.\nОновлено залежність.",
-        "zh-cn": "已经对麦斯的RegEx的Typo进行了纠正。.\n情况已经更新。."
       }
     },
     "titleLang": {

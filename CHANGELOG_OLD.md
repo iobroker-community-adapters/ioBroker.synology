@@ -1,4 +1,7 @@
 # Older changes
+## 3.2.1 (2026-10-16)
+- (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
+
 ## 3.2.0 (2026-10-16)
 - (copilot) Adapter requires node.js >= 22 now
 - (copilot) Adapter requires admin >= 7.7.22 now

@@ -2846,7 +2846,7 @@ function sendMethod(name: string, val: unknown): void {
   if (api) {
     let param;
     try {
-      const parsed: unknown = JSON.parse(String(val));
+      const parsed: unknown = typeof val === "string" ? JSON.parse(val) : val;
       if (!isRecord(parsed) || typeof parsed.method !== "string") {
         error(
           "sendMethod",

@@ -32,6 +32,7 @@ import {
 } from "./lib/hyperBackup.js";
 import { filterSshStderr } from "./lib/sshOutput.js";
 import { needsFirstPollSessionDelay } from "./lib/firstPollStartup.js";
+import { isUnavailableStationProbeError } from "./lib/stationAvailability.js";
 import {
   callSynology,
   createSynologyClient,
@@ -3152,6 +3153,11 @@ function sendPolling(namePolling: PollName): void {
           ) {
             adapter.log.warn(
               `sendPolling Error -${message} You are using a hacked version of SS?`,
+            );
+          } else if (isUnavailableStationProbeError(api, method, errorCode)) {
+            states.api[api].installed = false;
+            debug(
+              `Synology API ${api.toUpperCase()} is unavailable (DSM error ${errorCode}); future polling skipped`,
             );
           } else if (
             isAuthenticationError &&

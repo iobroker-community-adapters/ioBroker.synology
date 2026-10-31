@@ -33,6 +33,9 @@ export interface HyperBackupTask {
 }
 
 export const HYPER_BACKUP_STATUS_FIELDS = [
+  "status",
+  "state",
+  "progress",
   "last_bkp_time",
   "next_bkp_time",
   "last_bkp_result",

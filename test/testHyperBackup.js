@@ -124,11 +124,32 @@ describe('Hyper Backup task mapping', () => {
             'last_bkp_error',
             'last_bkp_error_code',
             'last_bkp_progress',
+            'status',
+            'state',
+            'progress',
         ]) {
             assert.equal(hasRecognizedHyperBackupStatus({ [field]: null }), true, field);
         }
         assert.equal(hasRecognizedHyperBackupStatus({}), false);
         assert.equal(hasRecognizedHyperBackupStatus({ unrelated: 'value' }), false);
+    });
+
+    it('prefers live values from the status response over stale task-list values', () => {
+        const status = { status: 'running', state: 'backup', progress: 37 };
+        assert.equal(hasRecognizedHyperBackupStatus(status), true);
+        assert.deepEqual(mapHyperBackupTasks([{
+            task_id: 12,
+            task_name: 'Nightly',
+            status: 'none',
+            state: 'idle',
+            progress: 0,
+        }], new Map([['12', status]])), [{
+            id: '12',
+            name: 'Nightly',
+            status: 'running',
+            state: 'backup',
+            progress: 37,
+        }]);
     });
 
     it('requests the exact DSM status fields as a JSON array', () => {

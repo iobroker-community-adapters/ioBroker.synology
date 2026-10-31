@@ -87,7 +87,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## Changelog
 ### **WORK IN PROGRESS**
 - (Voodoo2man) Reduced 2FA first-start delays by reusing station sessions and skipping disabled or unavailable optional APIs.
-- (Voodoo2man) Added read-only Hyper Backup task channels with clear display names, date-aware backup times, collision-free DSM ID paths, and safe handling of incomplete task lists and invalid status responses.
+- (Voodoo2man) Added Hyper Backup
 - (Voodoo2man) Corrected object state defaults and sendMethod input handling.
 
 ### 4.0.0 (2026-10-24)

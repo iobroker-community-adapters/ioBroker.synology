@@ -348,7 +348,7 @@ describe('Hyper Backup task mapping', () => {
         assert.deepEqual(projectHyperBackupTaskStates({
             id: '4',
             name: 'Incremental',
-            last_bkp_time: 1736906400000,
+            last_bkp_time: '2025/01/15 02:00:00',
             next_bkp_time: '2025/01/16 02:00',
             progress: '42%',
             last_bkp_error_code: 'E123',
@@ -358,8 +358,8 @@ describe('Hyper Backup task mapping', () => {
         }), [
             { id: 'name', name: 'Task name', value: 'Incremental', type: 'string', role: 'info.name' },
             { id: 'progress', name: 'Current backup progress', value: '42%', type: 'string', role: 'text' },
-            { id: 'last_bkp_time', name: 'Last backup time', value: 1736906400000, type: 'number', role: 'date' },
-            { id: 'next_bkp_time', name: 'Next scheduled backup', value: '2025/01/16 02:00', type: 'string', role: 'text' },
+            { id: 'last_bkp_time', name: 'Last backup time', value: '2025/01/15 02:00:00', type: 'string', role: 'date' },
+            { id: 'next_bkp_time', name: 'Next scheduled backup', value: '2025/01/16 02:00', type: 'string', role: 'date' },
             { id: 'last_bkp_result', name: 'Last backup result', value: '{"success":true}', type: 'string', role: 'json' },
             { id: 'last_bkp_error_code', name: 'Last backup error code', value: 'E123', type: 'string', role: 'text' },
         ]);

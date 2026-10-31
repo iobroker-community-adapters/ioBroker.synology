@@ -207,9 +207,7 @@ export function projectHyperBackupTaskStates(
         : structured
           ? "json"
           : field.endsWith("_time")
-            ? numericValue
-              ? "date"
-              : "text"
+            ? "date"
             : (field === "progress" || field === "last_bkp_error_code") &&
                 numericValue
               ? "value"

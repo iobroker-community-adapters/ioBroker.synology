@@ -31,6 +31,7 @@ import {
   HYPER_BACKUP_TASK_STATE_NAMES,
 } from "./lib/hyperBackup.js";
 import { filterSshStderr } from "./lib/sshOutput.js";
+import { needsFirstPollSessionDelay } from "./lib/firstPollStartup.js";
 import {
   callSynology,
   createSynologyClient,
@@ -3173,7 +3174,18 @@ function sendPolling(namePolling: PollName): void {
           }
         } finally {
           if (!adapterUnloading) {
-            if (isTwoFactorEnabled() && firstStart && !timeOutReconnect) {
+            if (
+              isTwoFactorEnabled() &&
+              firstStart &&
+              !timeOutReconnect &&
+              needsFirstPollSessionDelay(
+                PollCmd.firstPoll,
+                iteration,
+                (task) =>
+                  typeof task !== "function" &&
+                  states.api[task.api as PollApi]?.installed === true,
+              )
+            ) {
               timeOut && adapter.clearTimeout(timeOut);
               timeOut = adapter.setTimeout(() => {
                 iterator(namePolling);
@@ -3715,6 +3727,17 @@ function main(): void {
   }
   if (!adapter.config.ss || !adapter.config.dl || !adapter.config.as) {
     let result;
+    PollCmd.firstPoll = PollCmd.firstPoll.filter((item) => {
+      if (typeof item === "function") {
+        return true;
+      }
+      return !(
+        (item.api === "ss" && !adapter.config.ss) ||
+        (item.api === "dl" && !adapter.config.dl) ||
+        (item.api === "as" && !adapter.config.as)
+      );
+    });
+
     result = PollCmd.fastPoll.filter((item) => {
       if (typeof item === "function") {
         return item.name !== "getStatusPlayer" || !!adapter.config.as;

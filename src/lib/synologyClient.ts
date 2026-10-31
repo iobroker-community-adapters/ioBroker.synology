@@ -162,7 +162,12 @@ export function createSynologyClient(
     if (pendingLogin) {
       return pendingLogin;
     }
-    const performLogin = async (): Promise<{ sid: string }> => {
+    /**
+     * Performs a serialized login with a fresh TOTP code.
+     *
+     * @returns The authenticated session ID.
+     */
+    async function performLogin(): Promise<{ sid: string }> {
       let otpCode: string | undefined;
       if (totp) {
         otpCode = await waitForFreshTotpCode(totp, lastSuccessfulOtpCode);
@@ -179,7 +184,7 @@ export function createSynologyClient(
       } finally {
         sharedHost.otpCode = undefined;
       }
-    };
+    }
     const login = totp ? loginQueue.then(performLogin) : performLogin();
     if (totp) {
       loginQueue = login.then(

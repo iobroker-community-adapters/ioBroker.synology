@@ -3179,7 +3179,7 @@ function sendPolling(namePolling: PollName): void {
           } else {
             error(`*sendPolling syno[${api}][${method}]`, err);
           }
-          if (method === "getPollingData" || method === "listPackages") {
+          if (method === "getPollingData") {
             iteration = -1;
           }
         } finally {

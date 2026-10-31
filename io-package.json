@@ -308,7 +308,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -321,7 +321,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -334,7 +334,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -347,7 +347,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -360,7 +360,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -373,7 +373,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -386,7 +386,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -529,7 +529,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },
@@ -542,7 +542,7 @@
         "type": "object",
         "read": true,
         "write": true,
-        "def": "{}"
+        "def": {}
       },
       "native": {}
     },

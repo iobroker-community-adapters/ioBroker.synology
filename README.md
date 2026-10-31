@@ -78,6 +78,9 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ```
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (Voodoo2man) Corrected object state defaults and sendMethod input handling.
+
 ### 4.0.0 (2026-10-24)
 - (Voodoo2man) Added remaining free capacity for each storage volume.
 - (Voodoo2man) Corrected Surveillance Station camera status mapping.

@@ -61,6 +61,13 @@ Get the SurveillanceStation info is a getInfo method with no additional paramete
 * play_track - Play track by its id (e.g. ``music_120847``)
 * current_play - Control and status of the current track by its number in the playlist (e.g. ``14``)
 
+***HyperBackup***:
+* taskCount - number of configured Hyper Backup tasks
+* listTasks - JSON array containing each task's ID, name, current status/state and progress, plus last/next backup times, last result, and error details when available
+* tasks.{DSM ID} - read-only channel per task, with its ID and separate states for the available task values; channel names follow the task name while IDs remain stable. Numeric IDs are used directly (for example, `tasks.3`); non-numeric IDs map to safe `id_<hex>` channel segments, while the original ID remains in the `id` state.
+
+Hyper Backup status is read-only. The adapter queries the DSM `SYNO.Backup.Task` API; the summary states are maintained alongside the dynamic task channels. Channels synchronize after each valid task-list response, including an empty list; malformed lists do not trigger cleanup. Temporary per-task status failures preserve existing status values. The last-progress field is decoded from DSM's JSON-encoded value when possible.
+
 ***DownloadStation***:
 * activeTask - number of incomplete downloads
 * listTasks - an array with incomplete downloads
@@ -79,7 +86,8 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 
 ## Changelog
 ### **WORK IN PROGRESS**
-- (Voodoo2man) Corrected object state defaults and sendMethod input handling.
+- (Voodoo2man) Added read-only Hyper Backup task channels with collision-free DSM ID paths and safe handling of incomplete task lists and invalid status responses.
+- (Voodoo2man) Fixed sendMethod input handling and object state defaults to prevent startup errors.
 
 ### 4.0.0 (2026-10-24)
 - (Voodoo2man) Added remaining free capacity for each storage volume.

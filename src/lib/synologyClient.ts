@@ -19,6 +19,7 @@ export interface SynologyClientOptions {
   ignoreCertificateErrors: boolean;
   twoFactorEnabled: boolean;
   twoFactorSecret?: string;
+  sleep: (milliseconds: number) => Promise<void>;
 }
 
 interface SharedHost {
@@ -170,7 +171,11 @@ export function createSynologyClient(
     async function performLogin(): Promise<{ sid: string }> {
       let otpCode: string | undefined;
       if (totp) {
-        otpCode = await waitForFreshTotpCode(totp, lastSuccessfulOtpCode);
+        otpCode = await waitForFreshTotpCode(
+          totp,
+          lastSuccessfulOtpCode,
+          options.sleep,
+        );
         sharedHost.otpCode = otpCode;
       }
       try {
@@ -335,13 +340,12 @@ export function normalizeSynologyError(
  *
  * @param totp Configured TOTP generator.
  * @param previousCode Last successfully used code.
- * @param sleep Delay function, replaceable for tests.
+ * @param sleep Delay function, bound to the adapter lifecycle.
  */
 export async function waitForFreshTotpCode(
   totp: OTPAuth.TOTP,
   previousCode: string | undefined,
-  sleep: (milliseconds: number) => Promise<void> = (milliseconds) =>
-    new Promise((resolve) => setTimeout(resolve, milliseconds)),
+  sleep: (milliseconds: number) => Promise<void>,
 ): Promise<string> {
   let code = totp.generate();
   while (code === previousCode) {

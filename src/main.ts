@@ -3852,6 +3852,8 @@ function newSyno(): void {
       twoFactorEnabled: isTwoFactorEnabled(),
       twoFactorSecret:
         adapter.config["2fa_code"] || adapter.config.twofa_code || undefined,
+      sleep: (milliseconds) =>
+        new Promise((resolve) => adapter.setTimeout(resolve, milliseconds)),
     });
     syno = client.client;
     closeSynologyClient = client.close;

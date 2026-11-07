@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const ioPackage = require('../io-package.json');
 
 describe('object state definitions', () => {
-    it('uses object types and stringified JSON defaults for all affected states', () => {
+    it('uses object types and object defaults for all affected states', () => {
         const expectedIds = [
             'DiskStationManager.sendMethod',
             'FileStation.sendMethod',
@@ -19,7 +19,7 @@ describe('object state definitions', () => {
         for (const id of expectedIds) {
             assert.ok(definitions.has(id), `${id} must be defined`);
             assert.equal(definitions.get(id).type, 'object', `${id} must retain its object type`);
-            assert.equal(definitions.get(id).def, '{}', `${id} must use a stringified JSON default`);
+            assert.deepEqual(definitions.get(id).def, {}, `${id} must use an object default`);
         }
     });
 });

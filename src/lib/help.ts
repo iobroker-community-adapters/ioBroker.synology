@@ -29,7 +29,7 @@ Commands (sendTo synology.0):
   SurveillanceStation.cameras.<name>.id). Answer: the path of the JPEG on the ioBroker host
   (iobroker-data/synology_0/snapshotCam_<camId>.jpg), or false if there is no picture. The same picture is in the
   ioBroker file synology.0/snapshotCam_<camId>.jpg (read it as a file to look at it). H.265 cameras are taken
-  with ffmpeg from the RTSP stream. No answer without camId.
+  with ffmpeg from the RTSP stream. Without camId: {error: "camId is missing"}.
 - help: this text and the list of commands with their write flag.
 
 States (synology.0.*):
@@ -43,8 +43,8 @@ States (synology.0.*):
   session of the adapter), enabled (writable: true / false enables or disables the camera);
   SurveillanceStation.HomeMode.status_on (writable: switches the Home Mode); SurveillanceStation.getSnapshotCamera
   (write a camera number: stores a snapshot like getSnapshot).
-- <Station>.sendMethod for DiskStationManager, FileStation, DownloadStation, AudioStation, VideoStation and
-  SurveillanceStation: write a JSON {"method": "<method>", "params": {...}} (ack false), e.g.
+- <Station>.sendMethod for DiskStationManager, FileStation, DownloadStation, AudioStation, VideoStation,
+  VideoStation_DTV and SurveillanceStation: write a JSON {"method": "<method>", "params": {...}} (ack false), e.g.
   {"method": "getInfo", "params": {}}; the method names are those of the Synology API definitions of the
   library syno (e.g. getInfo, listCameras). The answer is written into the same state as JSON with ack true.
   It can call ANY method, also ones that delete or change something.

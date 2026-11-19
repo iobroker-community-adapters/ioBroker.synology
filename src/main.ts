@@ -326,7 +326,18 @@ function startAdapter(
               );
             return;
           }
-          if (obj.command === "getSnapshot" && obj.message.camId) {
+          if (obj.command === "getSnapshot") {
+            // without a message, obj.message.camId threw a TypeError
+            if (!obj.message?.camId) {
+              obj.callback &&
+                adapter.sendTo(
+                  obj.from,
+                  obj.command,
+                  { error: "camId is missing" },
+                  obj.callback,
+                );
+              return;
+            }
             getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
               obj.callback &&
                 adapter.sendTo(obj.from, obj.command, res, obj.callback);
@@ -492,7 +503,8 @@ Object.assign(states, {
     dl: { name: "DownloadStation", installed: false },
     as: { name: "AudioStation", installed: false },
     vs: { name: "VideoStation", installed: false },
-    dtv: { name: "dtVideoStation_DTV", installed: false },
+    // the name is the channel of the states (VideoStation_DTV.sendMethod finds its api by it)
+    dtv: { name: "VideoStation_DTV", installed: false },
     ss: { name: "SurveillanceStation", installed: false },
   },
 });

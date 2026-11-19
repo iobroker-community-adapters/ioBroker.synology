@@ -10,6 +10,7 @@ import SimpleSSH from "simple-ssh";
 import type { Syno } from "syno";
 import * as wol from "wol";
 import { createSnapshotLink } from "./lib/snapshotLink.js";
+import { COMMANDS, HELP } from "./lib/help.js";
 import { getCameraStatus } from "./lib/cameraStatus.js";
 import { calculateFreeSize } from "./lib/storageCapacity.js";
 import {
@@ -315,6 +316,16 @@ function startAdapter(
       ) => {
         if (typeof obj === "object" && obj.command) {
           debug(`message ******* ${JSON.stringify(obj)}`);
+          if (obj.command === "help") {
+            obj.callback &&
+              adapter.sendTo(
+                obj.from,
+                obj.command,
+                { help: HELP, commands: COMMANDS },
+                obj.callback,
+              );
+            return;
+          }
           if (obj.command === "getSnapshot" && obj.message.camId) {
             getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
               obj.callback &&

@@ -22,14 +22,8 @@ export interface SynologyClientOptions {
   sleep: (milliseconds: number) => Promise<void>;
 }
 
-interface SharedHost {
-  otpCode?: string;
+interface SynoRequestHost {
   request: (url: string, init: RequestInit) => Promise<UndiciResponse>;
-}
-
-interface AuthInternals {
-  syno: SharedHost;
-  login: (sessionName: string) => Promise<{ sid: string }>;
 }
 
 interface Station {
@@ -104,7 +98,7 @@ export function resolveApiVersion(configuredVersion: string): string {
   }
   if (!supportedApiVersions.has(configuredVersion)) {
     throw new Error(
-      `DSM API version ${configuredVersion} is not supported by syno@3.1.0. Choose a listed DSM 6 or DSM 7 version.`,
+      `DSM API version ${configuredVersion} is not supported by syno@3.2.0. Choose a listed DSM 6 or DSM 7 version.`,
     );
   }
   return configuredVersion;
@@ -126,6 +120,10 @@ export function createSynologyClient(
   options: SynologyClientOptions,
 ): SynologyClientHandle {
   const totp = createTotp(options.twoFactorEnabled, options.twoFactorSecret);
+  const logins = new Map<string, Promise<{ sid: string }>>();
+  const otpCodes = new Map<string, string>();
+  let lastSuccessfulOtpCode: string | undefined;
+  let loginQueue = Promise.resolve();
   const config: SynoConfig = {
     account: options.account,
     passwd: options.passwd,
@@ -135,30 +133,32 @@ export function createSynologyClient(
     apiVersion: options.apiVersion,
     ignoreCertificateErrors: false,
     followRedirects: true,
+    otpCode: totp
+      ? async (sessionName) => {
+          const otpCode = await waitForFreshTotpCode(
+            totp,
+            lastSuccessfulOtpCode,
+            options.sleep,
+          );
+          otpCodes.set(sessionName, otpCode);
+          return otpCode;
+        }
+      : undefined,
   };
   const client = new Syno(config);
   const dispatcher = new Agent({
     connect: { rejectUnauthorized: !options.ignoreCertificateErrors },
   });
-  const auth = client.auth as unknown as AuthInternals;
-  const sharedHost = auth.syno;
-  sharedHost.request = (url, init) =>
+  const requestHost = getSynoRequestHost(client);
+  requestHost.request = (url, init) =>
     fetch(url, {
       ...init,
       dispatcher,
       redirect: "follow",
     });
 
-  const originalLogin = auth.login.bind(client.auth);
-  const logins = new Map<
-    string,
-    Promise<{
-      sid: string;
-    }>
-  >();
-  let lastSuccessfulOtpCode: string | undefined;
-  let loginQueue = Promise.resolve();
-  auth.login = (sessionName) => {
+  const originalLogin = client.auth.login.bind(client.auth);
+  client.auth.login = (sessionName) => {
     const pendingLogin = logins.get(sessionName);
     if (pendingLogin) {
       return pendingLogin;
@@ -169,17 +169,9 @@ export function createSynologyClient(
      * @returns The authenticated session ID.
      */
     async function performLogin(): Promise<{ sid: string }> {
-      let otpCode: string | undefined;
-      if (totp) {
-        otpCode = await waitForFreshTotpCode(
-          totp,
-          lastSuccessfulOtpCode,
-          options.sleep,
-        );
-        sharedHost.otpCode = otpCode;
-      }
       try {
         const result = await originalLogin(sessionName);
+        const otpCode = otpCodes.get(sessionName);
         if (otpCode) {
           lastSuccessfulOtpCode = otpCode;
         }
@@ -187,7 +179,7 @@ export function createSynologyClient(
       } catch (error) {
         throw normalizeSynologyError(error, true);
       } finally {
-        sharedHost.otpCode = undefined;
+        otpCodes.delete(sessionName);
       }
     }
     const login = totp ? loginQueue.then(performLogin) : performLogin();
@@ -215,6 +207,15 @@ export function createSynologyClient(
 }
 
 /**
+ * Keeps Syno requests and custom Hyper Backup requests on the same transport.
+ *
+ * @param client Syno client whose shared request host is used.
+ */
+function getSynoRequestHost(client: Syno): SynoRequestHost {
+  return (client.auth as unknown as { syno: SynoRequestHost }).syno;
+}
+
+/**
  * Calls a Hyper Backup Core API method using the client's authenticated session.
  *
  * @param client Authenticated Synology client.
@@ -226,8 +227,9 @@ export async function callHyperBackup(
   method: "list" | "status",
   params: Record<string, string> = {},
 ): Promise<unknown> {
-  const auth = client.auth as unknown as AuthInternals;
-  const sid = client.sessions?.Core?._sid ?? (await auth.login("Core")).sid;
+  const sid =
+    client.sessions?.Core?._sid ?? (await client.auth.login("Core")).sid;
+  const requestHost = getSynoRequestHost(client);
   const body = new URLSearchParams({
     api: "SYNO.Backup.Task",
     version: "1",
@@ -236,7 +238,7 @@ export async function callHyperBackup(
     _sid: sid,
   });
   const url = `${client.protocol}://${client.host}:${client.port}/webapi/entry.cgi`;
-  const response = await auth.syno.request(url, {
+  const response = await requestHost.request(url, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body,

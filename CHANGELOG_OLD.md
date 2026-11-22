@@ -1,4 +1,9 @@
 # Older changes
+## 3.3.0 (2026-10-17)
+- (Voodoo2man) Added a guarded FFmpeg fallback for H.265 camera snapshots.
+- (Voodoo2man) Added optional SMART attribute polling over SSH.
+- (Voodoo2man) Changed SSH error logging from debug to warn.
+
 ## 3.2.1 (2026-10-16)
 - (Voodoo2man) Rebuild the snapshot link immediately when a camera ID changes.
 

@@ -87,12 +87,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 `sendTo('synology.0', 'help', {}, (res) => ...)` answers `{ help, commands }`: a description of all messages and states for AI agents (e.g. ioBroker.pi-agent) and script authors, and the list of all commands, each with `write: true` if it has an effect beyond returning information.
 
 ## Changelog
-### **WORK IN PROGRESS**
-- (Voodoo2man) Stringified object-state defaults and bound the 2FA delay to the adapter lifecycle.
-- (Voodoo2man) Updated syno to 3.2.0 and migrated two-factor authentication to the native per-login OTP callback.
-- (GermanBluefox) Added the message "help": a description of all messages for AI agents (e.g. pi-agent), and `common.supportedMessages.help`
-- (GermanBluefox) Fixed: `VideoStation_DTV.sendMethod` now calls the DTV API instead of logging "VideoStation_DTV Not installed!"
-- (GermanBluefox) Fixed: the message "getSnapshot" without a message or without `camId` now answers `{ error }` instead of throwing or not answering
+### 4.2.0 (2026-11-22)
+- (Voodoo2man) Updated syno to 3.2.0 with native per-login OTP, preserved session-safe 2FA handling, and corrected object defaults and startup delays.
+- (GermanBluefox) Added a help message describing supported adapter messages and commands.
+- (GermanBluefox) Fixed VideoStation DTV routing and invalid getSnapshot request handling.
 
 ### 4.1.0 (2026-10-31)
 - (Voodoo2man) Reduced 2FA first-start delays by reusing station sessions and skipping disabled or unavailable optional APIs.
@@ -116,11 +114,6 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 - (Voodoo2man) Corrected semantic roles for system, volume, download, and surveillance states.
 - (Voodoo2man) Corrected the hard disk capacity state role.
 - (Voodoo2man) Migrated linting to ESLint 9 with the ioBroker standard configuration.
-
-### 3.3.0 (2026-10-17)
-- (Voodoo2man) Added a guarded FFmpeg fallback for H.265 camera snapshots.
-- (Voodoo2man) Added optional SMART attribute polling over SSH.
-- (Voodoo2man) Changed SSH error logging from debug to warn.
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "synology",
-    "version": "4.1.0",
+    "version": "4.2.0",
     "news": {
+      "4.2.0": {
+        "en": "Updated syno to 3.2.0 with native per-login OTP callbacks; preserved session-safe 2FA handling; corrected object defaults and startup delays.\nAdded a help message describing supported adapter messages and commands.\nFixed VideoStation DTV routing and invalid getSnapshot request handling.",
+        "de": "syno auf 3.2.0 aktualisiert und native OTP-Rückrufe pro Anmeldung eingeführt. Sichere 2FA-Sitzungsverwaltung beibehalten sowie Objekt-Standardwerte und Startverzögerungen korrigiert.\nHilfenachricht mit Beschreibung der unterstützten Adapter-Nachrichten und -Befehle hinzugefügt.\nDTV-Routing von VideoStation und Behandlung ungültiger getSnapshot-Anfragen korrigiert.",
+        "ru": "Обновлена библиотека syno до версии 3.2.0: для каждого входа используется встроенный обратный вызов OTP; сохранена безопасная обработка сеансов 2FA; исправлены значения объектов по умолчанию и задержки запуска.\nДобавлено сообщение справки с описанием поддерживаемых сообщений и команд адаптера.\nИсправлена маршрутизация VideoStation DTV и обработка некорректных запросов getSnapshot.",
+        "pt": "Syno atualizado para 3.2.0 com callbacks OTP nativos por login; tratamento seguro das sessões 2FA mantido; valores padrão dos objetos e atrasos de inicialização corrigidos.\nAdicionada uma mensagem de ajuda que descreve as mensagens e os comandos do adaptador.\nCorrigidos o roteamento do VideoStation DTV e o tratamento de solicitações getSnapshot inválidas.",
+        "nl": "syno bijgewerkt naar 3.2.0 met native OTP-callbacks per aanmelding; veilige verwerking van 2FA-sessies behouden; standaardwaarden van objecten en opstartvertragingen gecorrigeerd.\nEen helpbericht toegevoegd met uitleg over de ondersteunde adapterberichten en opdrachten.\nDe VideoStation DTV-routering en afhandeling van ongeldige getSnapshot-aanvragen gecorrigeerd.",
+        "fr": "syno mis à jour vers la version 3.2.0 avec des rappels OTP natifs par connexion ; gestion sécurisée des sessions 2FA conservée ; valeurs par défaut des objets et délais de démarrage corrigés.\nAjout d'un message d'aide décrivant les messages et commandes pris en charge par l'adaptateur.\nRoutage VideoStation DTV et traitement des requêtes getSnapshot invalides corrigés.",
+        "it": "syno aggiornato alla versione 3.2.0 con callback OTP nativi per ogni accesso; mantenuta la gestione sicura delle sessioni 2FA; corretti i valori predefiniti degli oggetti e i ritardi di avvio.\nAggiunto un messaggio di aiuto che descrive i messaggi e i comandi supportati dall'adattatore.\nCorretti il routing VideoStation DTV e la gestione delle richieste getSnapshot non valide.",
+        "es": "syno actualizado a la versión 3.2.0 con callbacks OTP nativos por inicio de sesión; se mantuvo la gestión segura de las sesiones 2FA y se corrigieron los valores predeterminados de los objetos y los retrasos de inicio.\nSe añadió un mensaje de ayuda que describe los mensajes y comandos admitidos por el adaptador.\nSe corrigieron el enrutamiento de VideoStation DTV y el manejo de solicitudes getSnapshot no válidas.",
+        "pl": "Zaktualizowano syno do wersji 3.2.0 z natywnymi wywołaniami zwrotnymi OTP dla każdego logowania; zachowano bezpieczną obsługę sesji 2FA oraz poprawiono wartości domyślne obiektów i opóźnienia uruchamiania.\nDodano komunikat pomocy opisujący obsługiwane komunikaty i polecenia adaptera.\nPoprawiono routing VideoStation DTV i obsługę nieprawidłowych żądań getSnapshot.",
+        "uk": "Оновлено syno до версії 3.2.0 з нативними зворотними викликами OTP для кожного входу; збережено безпечну обробку сеансів 2FA та виправлено типові значення об'єктів і затримки запуску.\nДодано повідомлення довідки з описом підтримуваних повідомлень і команд адаптера.\nВиправлено маршрутизацію VideoStation DTV та обробку некоректних запитів getSnapshot.",
+        "zh-cn": "将 syno 更新到 3.2.0，采用每次登录的原生 OTP 回调，保留安全的 2FA 会话处理，并修正对象默认值和启动延迟。\n添加帮助消息，说明适配器支持的消息和命令。\n修正 VideoStation DTV 路由及对无效 getSnapshot 请求的处理。"
+      },
       "4.1.0": {
         "en": "Reduced 2FA first-start delays by reusing station sessions and skipping disabled or unavailable optional APIs.\nAdded Hyper Backup\nCorrected object state defaults and sendMethod input handling.",
         "de": "Weniger Verzögerungen beim 2FA-Start durch Wiederverwendung von Stationssitzungen und Überspringen deaktivierter APIs\nHyper Backup hinzugefügt\nObjektstatuswerte und SendMethod-Eingabe korrigiert.",
@@ -80,19 +93,6 @@
         "pl": "Odbuduj łącze migawki natychmiast po zmianie identyfikatora aparatu.",
         "uk": "Відновіть посилання на знімок відразу після зміни ідентифікатора камери.",
         "zh-cn": "当摄像机 ID 发生变化时，立即重建快照链接。"
-      },
-      "3.1.0": {
-        "en": "Adapter requires node.js 18 and js-controller >= 5 now\nDependencies have been updated",
-        "de": "Adapter benötigt node.js 18 und js-controller >= 5 jetzt\nAbhängigkeiten wurden aktualisiert",
-        "ru": "Адаптер требует node.js 18 и js-controller >= 5 сейчас\nЗависимость обновлена",
-        "pt": "Adapter requer node.js 18 e js-controller >= 5 agora\nAs dependências foram atualizadas",
-        "nl": "Adapter vereist node.js 18 en js-controller Nu 5\nAfhankelijkheden zijn bijgewerkt",
-        "fr": "Adaptateur nécessite node.js 18 et js-controller >= 5 maintenant\nLes dépendances ont été actualisées",
-        "it": "Adattatore richiede node.js 18 e js-controller >= 5 ora\nLe dipendenze sono state aggiornate",
-        "es": "Adaptador requiere node.js 18 y js-controller √= 5 ahora\nSe han actualizado las dependencias",
-        "pl": "Adapter wymaga node.js 18 i sterownika js- > = 5 teraz\nZaktualizowano zależności",
-        "uk": "Адаптер вимагає node.js 18 і js-controller >= 5 тепер\nЗалежність було оновлено",
-        "zh-cn": "适配器需要节点.js 18和js控制器 QQ 现在5号\n依赖关系已更新"
       }
     },
     "titleLang": {

@@ -10,6 +10,7 @@ import SimpleSSH from "simple-ssh";
 import type { Syno } from "syno";
 import * as wol from "wol";
 import { createSnapshotLink } from "./lib/snapshotLink.js";
+import { COMMANDS, HELP } from "./lib/help.js";
 import { getCameraStatus } from "./lib/cameraStatus.js";
 import { calculateFreeSize } from "./lib/storageCapacity.js";
 import {
@@ -315,7 +316,28 @@ function startAdapter(
       ) => {
         if (typeof obj === "object" && obj.command) {
           debug(`message ******* ${JSON.stringify(obj)}`);
-          if (obj.command === "getSnapshot" && obj.message.camId) {
+          if (obj.command === "help") {
+            obj.callback &&
+              adapter.sendTo(
+                obj.from,
+                obj.command,
+                { help: HELP, commands: COMMANDS },
+                obj.callback,
+              );
+            return;
+          }
+          if (obj.command === "getSnapshot") {
+            // without a message, obj.message.camId threw a TypeError
+            if (!obj.message?.camId) {
+              obj.callback &&
+                adapter.sendTo(
+                  obj.from,
+                  obj.command,
+                  { error: "camId is missing" },
+                  obj.callback,
+                );
+              return;
+            }
             getSnapshotCamera(parseInt(obj.message.camId, 10), (res) => {
               obj.callback &&
                 adapter.sendTo(obj.from, obj.command, res, obj.callback);
@@ -481,7 +503,8 @@ Object.assign(states, {
     dl: { name: "DownloadStation", installed: false },
     as: { name: "AudioStation", installed: false },
     vs: { name: "VideoStation", installed: false },
-    dtv: { name: "dtVideoStation_DTV", installed: false },
+    // the name is the channel of the states (VideoStation_DTV.sendMethod finds its api by it)
+    dtv: { name: "VideoStation_DTV", installed: false },
     ss: { name: "SurveillanceStation", installed: false },
   },
 });

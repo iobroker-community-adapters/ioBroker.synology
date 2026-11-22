@@ -89,7 +89,7 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 ## Changelog
 ### **WORK IN PROGRESS**
 - (Voodoo2man) Stringified object-state defaults and bound the 2FA delay to the adapter lifecycle.
-- (@Voodoo2man) Updated syno to 3.2.0 and migrated two-factor authentication to the native per-login OTP callback.
+- (Voodoo2man) Updated syno to 3.2.0 and migrated two-factor authentication to the native per-login OTP callback.
 - (GermanBluefox) Added the message "help": a description of all messages for AI agents (e.g. pi-agent), and `common.supportedMessages.help`
 - (GermanBluefox) Fixed: `VideoStation_DTV.sendMethod` now calls the DTV API instead of logging "VideoStation_DTV Not installed!"
 - (GermanBluefox) Fixed: the message "getSnapshot" without a message or without `camId` now answers `{ error }` instead of throwing or not answering

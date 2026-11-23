@@ -6,16 +6,22 @@
  * message handler in main.ts and the README.
  */
 
-/** A command of the message handler; `write`: it has an effect */
+/**
+ * A command of the message handler; `write`: it has an effect; `standard`: it follows the shared catalog of
+ * camera commands (HELP.md of ioBroker.assistant)
+ */
 interface HelpCommand {
   command: string;
   write: boolean;
+  standard?: string;
 }
 
 /** The commands the message handler answers */
 const COMMANDS: HelpCommand[] = [
   { command: "help", write: false },
   { command: "getSnapshot", write: false },
+  { command: "getCameras", write: false, standard: "camera.getCameras" },
+  { command: "snapshot", write: false, standard: "camera.snapshot" },
 ];
 
 const HELP = `ioBroker.synology: reads and controls a Synology NAS over the DSM API (DSM 6 and 7): system, CPU, memory,
@@ -23,14 +29,25 @@ disks with SMART, volumes, Hyper Backup, File Station, Download Station, Audio S
 Station with its cameras. Reboot and shutdown go over SSH, wake over Wake on LAN. An agent can read the state of the
 NAS, take a snapshot of a Surveillance Station camera, call any method of the DSM API and control the stations.
 Commands written to states are ignored until the first poll after the start is done.
+getCameras and snapshot are the commands of the shared catalog of camera commands (standard camera.<command>): the
+same names, parameters and answers as in other camera adapters. Their errors: {error, reason}; reason BAD_REQUEST (a
+parameter is missing or wrong), NOT_FOUND or AMBIGUOUS with candidates (the names that fit), NOT_CONNECTED (no
+connection to the NAS or no picture), TIMEOUT. camera = the number or the name of the camera in Surveillance Station,
+compared without case; an exact match wins over a part of a name.
 
 Commands (sendTo synology.0):
+- getCameras: the cameras of Surveillance Station: {cameras: [{id, name, online}]}; id = the number of the camera as
+  a string, name = its name, online = Surveillance Station reports it as "Normal". [] before the first poll.
+- snapshot {camera, fileName?}: a snapshot as the shared catalog gives it: {data, contentType: "image/jpeg"}; data =
+  the JPEG as base64 (no "data:" prefix). With fileName (e.g. "door.jpg") the picture is also written to the ioBroker
+  file synology.0/<fileName> and the answer has file: "synology.0/<fileName>" (also without a callback). width and
+  height of the catalog are not supported. Up to 30 s.
 - getSnapshot {camId}: a snapshot of a Surveillance Station camera (camId = its number, the state
   SurveillanceStation.cameras.<name>.id). Answer: the path of the JPEG on the ioBroker host
   (iobroker-data/synology_0/snapshotCam_<camId>.jpg), or false if there is no picture. The same picture is in the
   ioBroker file synology.0/snapshotCam_<camId>.jpg (read it as a file to look at it). H.265 cameras are taken
   with ffmpeg from the RTSP stream. Without camId: {error: "camId is missing"}.
-- help: this text and the list of commands with their write flag.
+- help: this text and the list of commands with their write flag (and standard for the commands of the catalog).
 
 States (synology.0.*):
 - info.connection: connected to the NAS.

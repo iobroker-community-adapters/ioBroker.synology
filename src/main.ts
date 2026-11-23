@@ -12,6 +12,13 @@ import * as wol from "wol";
 import { createSnapshotLink } from "./lib/snapshotLink.js";
 import { COMMANDS, HELP } from "./lib/help.js";
 import { getCameraStatus } from "./lib/cameraStatus.js";
+import {
+  checkFileName,
+  findCamera,
+  isStandardError,
+  toStandardCameras,
+  type StandardError,
+} from "./lib/standard.js";
 import { calculateFreeSize } from "./lib/storageCapacity.js";
 import {
   createKeyedQueue,
@@ -342,6 +349,10 @@ function startAdapter(
               obj.callback &&
                 adapter.sendTo(obj.from, obj.command, res, obj.callback);
             });
+          }
+          // the commands of the shared catalog of camera commands (family camera)
+          if (obj.command === "getCameras" || obj.command === "snapshot") {
+            void onStandardMessage(obj);
           }
         } else {
           debug(`message x ${obj.command}`);
@@ -1675,6 +1686,99 @@ function getSnapshotCamera(camid: unknown, cb?: SnapshotCallback): void {
       cb?.(false);
     }
   });
+}
+
+/** How long `snapshot` waits for Surveillance Station (or FFmpeg for H.265 cameras) */
+const STANDARD_SNAPSHOT_TIMEOUT_MS = 30000;
+
+/**
+ * The commands of the shared catalog of camera commands (family camera, see HELP.md of ioBroker.assistant):
+ * getCameras and snapshot {camera, fileName?}. A snapshot runs without a callback only to write fileName.
+ *
+ * @param obj the message
+ */
+async function onStandardMessage(obj: ioBroker.Message): Promise<void> {
+  const request: Record<string, unknown> = isRecord(obj.message)
+    ? obj.message
+    : typeof obj.message === "string" || typeof obj.message === "number"
+      ? { camera: obj.message }
+      : {};
+  if (!obj.callback && (obj.command !== "snapshot" || !request.fileName)) {
+    return;
+  }
+  let answer: object;
+  try {
+    answer = await standardAnswer(obj.command, request);
+  } catch (err) {
+    answer = { error: err instanceof Error ? err.message : String(err) };
+  }
+  if (obj.callback) {
+    adapter.sendTo(obj.from, obj.command, answer, obj.callback);
+  }
+}
+
+/**
+ * @param command getCameras or snapshot
+ * @param request the parameters of the message
+ * @returns the answer in the form of the catalog
+ */
+async function standardAnswer(
+  command: string,
+  request: Record<string, unknown>,
+): Promise<object> {
+  const cameras = toStandardCameras(states.SurveillanceStation.cameras);
+  if (command === "getCameras") {
+    return { cameras };
+  }
+  const fileName =
+    request.fileName === undefined
+      ? undefined
+      : checkFileName(request.fileName);
+  if (fileName !== undefined && typeof fileName !== "string") {
+    return fileName;
+  }
+  const camera = findCamera(cameras, request.camera);
+  if (isStandardError(camera)) {
+    return camera;
+  }
+  if (!syno || !connect) {
+    return {
+      error: "Not connected to the Synology",
+      reason: "NOT_CONNECTED",
+    } satisfies StandardError;
+  }
+  const result = await new Promise<SnapshotResult | null>((resolve) => {
+    const timer = adapter.setTimeout(
+      () => resolve(null),
+      STANDARD_SNAPSHOT_TIMEOUT_MS,
+    );
+    getSnapshotCamera(parseInt(camera.id, 10), (res) => {
+      adapter.clearTimeout(timer);
+      resolve(res);
+    });
+  });
+  if (result === null) {
+    return {
+      error: `No picture from camera "${camera.name}" within ${STANDARD_SNAPSHOT_TIMEOUT_MS / 1000} s`,
+      reason: "TIMEOUT",
+    } satisfies StandardError;
+  }
+  if (!result) {
+    return {
+      error: `No picture from camera "${camera.name}"`,
+      reason: "NOT_CONNECTED",
+    } satisfies StandardError;
+  }
+  const data = await fs.promises.readFile(result);
+  const answer: { data: string; contentType: string; file?: string } = {
+    data: data.toString("base64"),
+    contentType: "image/jpeg",
+  };
+  if (fileName) {
+    await adapter.writeFileAsync(adapter.namespace, fileName, data);
+    answer.file = `${adapter.namespace}/${fileName}`;
+  }
+  return answer;
 }
 
 function captureH265Snapshot(

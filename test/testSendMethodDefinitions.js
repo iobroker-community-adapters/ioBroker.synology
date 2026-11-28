@@ -4,7 +4,7 @@ const path = require('node:path');
 const ioPackage = require('../io-package.json');
 
 describe('object state definitions', () => {
-    it('stringifies object defaults for all affected states', () => {
+    it('omits defaults for affected object states', () => {
         const expectedIds = [
             'DiskStationManager.sendMethod',
             'FileStation.sendMethod',
@@ -21,7 +21,7 @@ describe('object state definitions', () => {
         for (const id of expectedIds) {
             assert.ok(definitions.has(id), `${id} must be defined`);
             assert.equal(definitions.get(id).type, 'object', `${id} must retain its object type`);
-            assert.equal(definitions.get(id).def, '{}', `${id} must use a stringified object default`);
+            assert.equal(definitions.get(id).def, undefined, `${id} must not define an object default`);
         }
     });
 

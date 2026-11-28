@@ -17,7 +17,7 @@ The driver allows you to receive data and manage your Synology NAS server.
 
 ### 2FA Settings
 
-If you use 2FA in DSM6/7 see instructions [here](docs/en/template.md)
+If you use 2FA in DSM6/7 see instructions [here](docs/en/template.md). After the first rejected TOTP code, the adapter retries login once with a fresh code; if the retry is also rejected, it reports the authentication error and stops polling.
 
 ### Compatibility
 
@@ -87,6 +87,10 @@ sendTo('synology.0', 'getSnapshot', {camId: 2}, (res) => {
 `sendTo('synology.0', 'help', {}, (res) => ...)` answers `{ help, commands }`: a description of all messages and states for AI agents (e.g. ioBroker.pi-agent) and script authors, and the list of all commands, each with `write: true` if it has an effect beyond returning information.
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (Voodoo2man) Removed invalid defaults from object-valued command states.
+- (Voodoo2man) Automatically requested a fresh TOTP code after the first authentication rejection and reported a subsequent rejection.
+
 ### 4.2.0 (2026-11-22)
 - (Voodoo2man) Updated syno to 3.2.0 with native per-login OTP, preserved session-safe 2FA handling, and corrected object defaults and startup delays.
 - (GermanBluefox) Added a help message describing supported adapter messages and commands.

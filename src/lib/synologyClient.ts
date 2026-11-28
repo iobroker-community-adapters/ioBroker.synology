@@ -122,7 +122,7 @@ export function createSynologyClient(
   const totp = createTotp(options.twoFactorEnabled, options.twoFactorSecret);
   const logins = new Map<string, Promise<{ sid: string }>>();
   const otpCodes = new Map<string, string>();
-  let lastSuccessfulOtpCode: string | undefined;
+  let lastOtpCode: string | undefined;
   let loginQueue = Promise.resolve();
   const config: SynoConfig = {
     account: options.account,
@@ -137,9 +137,10 @@ export function createSynologyClient(
       ? async (sessionName) => {
           const otpCode = await waitForFreshTotpCode(
             totp,
-            lastSuccessfulOtpCode,
+            lastOtpCode,
             options.sleep,
           );
+          lastOtpCode = otpCode;
           otpCodes.set(sessionName, otpCode);
           return otpCode;
         }
@@ -169,15 +170,26 @@ export function createSynologyClient(
      * @returns The authenticated session ID.
      */
     async function performLogin(): Promise<{ sid: string }> {
+      let retriedTwoFactorLogin = false;
       try {
-        const result = await originalLogin(sessionName);
-        const otpCode = otpCodes.get(sessionName);
-        if (otpCode) {
-          lastSuccessfulOtpCode = otpCode;
+        while (true) {
+          try {
+            return await originalLogin(sessionName);
+          } catch (error) {
+            const normalized = normalizeSynologyError(error, true);
+            if (
+              totp &&
+              normalized.authenticationError &&
+              normalized.code === 404 &&
+              otpCodes.has(sessionName) &&
+              !retriedTwoFactorLogin
+            ) {
+              retriedTwoFactorLogin = true;
+              continue;
+            }
+            throw normalized;
+          }
         }
-        return result;
-      } catch (error) {
-        throw normalizeSynologyError(error, true);
       } finally {
         otpCodes.delete(sessionName);
       }

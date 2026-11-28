@@ -311,8 +311,7 @@
         "name": "DiskStationManager",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -324,8 +323,7 @@
         "name": "FileStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -337,8 +335,7 @@
         "name": "DownloadStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -350,8 +347,7 @@
         "name": "AudioStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -363,8 +359,7 @@
         "name": "VideoStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -376,8 +371,7 @@
         "name": "VideoStation_DTV",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -389,8 +383,7 @@
         "name": "SurveillanceStation",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -532,8 +525,7 @@
         "name": "Generate one or more sharing link(s) by file/folder path(s).",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
@@ -545,8 +537,7 @@
         "name": "Delete one or more sharing links.",
         "type": "object",
         "read": true,
-        "write": true,
-        "def": "{}"
+        "write": true
       },
       "native": {}
     },
